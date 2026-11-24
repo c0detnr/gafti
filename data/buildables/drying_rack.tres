@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/buildable_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"drying_rack"
+name_key = "BUILD_DRYING_RACK"
+description_key = "BUILD_DRYING_RACK_DESC"
+price = 220
+scene_path = "res://scenes/stations/drying_rack_station.tscn"
+model_path = ""
+size = Vector3(1.2, 1.8, 0.5)
+color = Color(0.5, 0.36, 0.22, 1)
+footprint = 0.7
+effect = &""
+effect_radius = 0.0
+power_cost_per_day = 0
+min_license = 1

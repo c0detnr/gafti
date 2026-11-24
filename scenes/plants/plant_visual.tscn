@@ -1,0 +1,25 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scenes/plants/plant_visual.gd" id="1"]
+[ext_resource type="PackedScene" path="res://assets/models/hero/plant_germ.glb" id="2"]
+[ext_resource type="PackedScene" path="res://assets/models/hero/plant_seedling.glb" id="3"]
+[ext_resource type="PackedScene" path="res://assets/models/hero/plant_veg.glb" id="4"]
+[ext_resource type="PackedScene" path="res://assets/models/hero/plant_flower.glb" id="5"]
+[ext_resource type="PackedScene" path="res://assets/models/hero/plant_harvest.glb" id="6"]
+
+[node name="PlantVisual" type="Node3D"]
+script = ExtResource("1")
+
+[node name="Germ" parent="." instance=ExtResource("2")]
+
+[node name="Seedling" parent="." instance=ExtResource("3")]
+visible = false
+
+[node name="Veg" parent="." instance=ExtResource("4")]
+visible = false
+
+[node name="Flower" parent="." instance=ExtResource("5")]
+visible = false
+
+[node name="Harvest" parent="." instance=ExtResource("6")]
+visible = false

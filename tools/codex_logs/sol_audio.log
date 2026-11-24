@@ -1,0 +1,1711 @@
+OpenAI Codex v0.172.0
+--------
+workdir: C:\Users\31\Documents\we2
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a20cdd-21f3-7282-9403-e306f492847a
+--------
+user
+Sen GAFTİ adlı Godot 4.7 oyun projesinde çalışan bir alt ajansın. Proje kökü: C:\Users\31\Documents\we2
+ÖNCE AGENTS.md ve GDD.md dosyalarını oku; oradaki sözleşmeye (dosya adları, düğüm adları, ölçek, bütçe, Blender sarmalayıcısı tools\blender\run_blender.ps1) birebir uy.
+Windows 11 + PowerShell kullan. Kullanıcıya soru sorma, onay bekleme, iş bitene kadar çalış. project.godot dosyasını DÜZENLEME. Sana verilmeyen alanlardaki dosyalara dokunma.
+Görsel kaliteyi kontrol et: ürettiğin her modeli Blender ile (Eevee ya da Workbench) 512px önizleme olarak tools\previews\<ad>.png dosyasına render et, görüntüyü kendin incele ve iyi görünmüyorsa düzelt.
+Stil: "detaylı stilize" — Karadeniz yaylası, el boyaması hissi, yumuşak bevel, sıcak ve sevimli, abartılı ama okunaklı oranlar. Doygun yeşiller, ahşap kahvesi, ıslak taş grisi, sıcak turuncu.
+Bitince tools\codex_logs\<GOREV>_report.md dosyasına üretilen dosyaları, düğüm adlarını ve bilinen eksikleri yaz.
+
+GOREV=sol_audio
+İŞ: Ses varlıkları — SADECE CC0 lisanslı. Bu görevde Blender önizlemesi gerekmez.
+1. Kenney.nl CC0 paketlerinden (Interface Sounds, Impact Sounds, RPG Audio, Foley vb.) assets\audio\sfx\ altına şu adlarla .ogg (ffmpeg yoksa .wav, ad aynı): ui_click, ui_open, ui_close, coin, footstep_grass_1..4, footstep_wood_1..4, water_pour, grinder, paper_rustle, lick, lighter_flick, bubble, inhale, cough, door_open, door_close, cash_register, harvest_snip, notify_good, notify_bad, plant_place, thunder.
+2. Ortam sesleri assets\audio\ambience\: rain_loop, birds_loop, creek_loop, wind_loop, night_crickets_loop, cafe_murmur_loop.
+3. Müzik assets\audio\music\: sakin lo-fi/akustik CC0 parçalar: menu, day_1, day_2, evening, night, gafti (yavaş, rüya gibi). OpenGameArt CC0 filtresi kullan.
+4. assets\audio\CREDITS.md: her dosya için kaynak URL ve lisans. CC0 olmayan hiçbir şey koyma; bulunamayanı "EKSİK" işaretle. Döngü dosyalarının (loop) Godot'ta döngüye alınması için raporda not düş.
+
+codex
+Önce AGENTS.md ve GDD.md’yi okuyacağım. Ardından CC0 kaynaklarını doğrulayıp sesleri hazırlayacak ve Godot’ta içe aktarmayı kontrol edeceğim.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem assets/audio -Recurse -ErrorAction SilentlyContinue | Select-Object FullName; Get-Command ffmpeg,ffprobe,python -ErrorAction SilentlyContinue | Select-Object Name,Source; git status --short' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content AGENTS.md; Get-Content GDD.md' in C:\Users\31\Documents\we2
+ exited 1 in 885ms:
+
+fatal: not a git repository (or any of the parent directories): .git
+FullName                                       
+--------                                       
+C:\Users\31\Documents\we2\assets\audio\ambience
+C:\Users\31\Documents\we2\assets\audio\music   
+C:\Users\31\Documents\we2\assets\audio\sfx     
+                                               
+                                               
+                                               
+
+
+
+ succeeded in 1284ms:
+# GAFTÄ° â€” Ajan KurallarÄ± ve Mimari SÃ¶zleÅŸmesi
+
+Bu dosya her ajan (Claude, Codex) iÃ§in baÄŸlayÄ±cÄ±dÄ±r. TasarÄ±m: `GDD.md`.
+
+## 1. Ortam (ZORUNLU)
+- Ä°ÅŸletim sistemi **Windows 11**. KullanÄ±cÄ±ya **asla Linux/bash komutu Ã¶nerme** (`ls`, `cat`, `rm`, `grep`, `sed`...).
+  KullanÄ±cÄ±ya gÃ¶sterilen her komut **PowerShell** olmalÄ± (`Get-ChildItem`, `Get-Content`, `Remove-Item`, `Select-String`).
+- Kendi Ã§alÄ±ÅŸtÄ±rdÄ±ÄŸÄ±n komutlar iÃ§in de PowerShell tercih et. Yollar: `C:\Users\31\Documents\we2\...`
+- Godot: `C:\Users\31\Desktop\Godot_v4.7.2-stable_win64.exe`
+  - Ä°Ã§e aktarma: `& $godot --headless --path C:\Users\31\Documents\we2 --import`
+  - Hata kontrolÃ¼: `& $godot --headless --path C:\Users\31\Documents\we2 --quit-after 120`
+- Blender 5.3 (Store sÃ¼rÃ¼mÃ¼, doÄŸrudan exe Ã§alÄ±ÅŸmaz). Sadece ÅŸu sarmalayÄ±cÄ±yÄ± kullan:
+  `powershell -ExecutionPolicy Bypass -File C:\Users\31\Documents\we2\tools\blender\run_blender.ps1 -Script <script.py> [-ScriptArgs a,b]`
+- KullanÄ±cÄ±dan onay isteme; etkileÅŸimli komut Ã§alÄ±ÅŸtÄ±rma.
+
+## 2. Model/ajan daÄŸÄ±lÄ±mÄ±
+| Ä°ÅŸ | Kim |
+|---|---|
+| Ã–nemli/detaylÄ± gÃ¶rseller (logo, bitki, bong, joint seti, karakter, sera, shader) | Codex `gpt-6.2-astra` medium |
+| Ä°kincil modeller, kasaba props, tekrarlayan kod | Codex `gpt-6.2-sol` medium |
+| Ã‡ekirdek sistemler, mini oyunlar, oyuncu/dÃ¼nya kodu | Claude Opus 5.5 alt ajanlarÄ± |
+| Orkestrasyon, entegrasyon, doÄŸrulama | Ana Claude oturumu |
+
+## 3. Kod kurallarÄ±
+- Godot **4.7**, GDScript, **statik tipler zorunlu** (`var x: int = 0`, `func f(a: float) -> void`).
+- TÃ¼m oyuncu metinleri `tr("ANAHTAR")`. AnahtarlarÄ± `localization/parts/<alan>.csv` dosyasÄ±na ekle
+  (baÅŸlÄ±k satÄ±rÄ±: `keys,tr`). Ana oturum bunlarÄ± `localization/strings.csv` iÃ§inde birleÅŸtirir.
+  Anahtar biÃ§imi: `ALAN_ACIKLAMA` (Ã¶r. `ROLL_STEP_GRIND`).
+- `project.godot` dosyasÄ±nÄ± **sadece ana oturum** dÃ¼zenler. Yeni autoload/input gerekiyorsa raporunda belirt.
+- Bir autoload'u yalnÄ±zca **sahibi** dÃ¼zenler (aÅŸaÄŸÄ±daki tablo). DiÄŸerleri sadece genel API'yi Ã§aÄŸÄ±rÄ±r.
+- Sahneler `.tscn` metin biÃ§iminde. Kodla sahne Ã¼retmek serbest (`tools/` altÄ±nda `@tool` veya headless script).
+- Placeholder kullanacaksan model yolunu sabit tut; gerÃ§ek `.glb` sonra aynÄ± yola gelir.
+- Mobil uyum: dokunmatik = fare (emulate_touch aÃ§Ä±k). Mini oyunlar sadece sÃ¼rÃ¼kle/tÄ±kla/basÄ±lÄ± tut kullanÄ±r.
+
+## 4. Autoload API sÃ¶zleÅŸmesi
+Sahip sÃ¼tunu: dosyayÄ± kim yazar. Ä°mzalar sabittir, deÄŸiÅŸtirme.
+
+### EventBus (`autoload/event_bus.gd`) â€” ana oturum
+Sadece sinyaller:
+```
+signal interaction_prompt(text: String)            # "" = gizle
+signal minigame_requested(id: StringName, context: Dictionary)
+signal minigame_finished(id: StringName, result: Dictionary)
+signal notify(text: String, kind: StringName)      # kind: &"info", &"good", &"bad"
+signal plant_harvested(plant_id: int, item: Dictionary)
+signal sale_completed(amount: int, item: Dictionary, customer_type: StringName)
+signal inspection_finished(score: int, fine: int)
+signal dialogue_requested(dialogue_id: StringName)
+signal dialogue_finished(dialogue_id: StringName)
+signal player_customization_changed(data: Dictionary)
+signal ui_block_input(blocked: bool)               # mini oyun/diyalog aÃ§Ä±kken oyuncu hareketi kilitlenir
+```
+
+### ContentFlags â€” ana oturum
+`var consumption: bool = true` (iÃ§me sahneleri), `var is_mobile: bool`, `var is_demo: bool`, `const DEMO_DAY_LIMIT := 7`.
+
+### Settings â€” ana oturum
+`day_length_minutes: float = 14.0`, `master_volume`, `music_volume`, `sfx_volume`, `graphics_quality: int (0..2)`, `save()`, `load_settings()`.
+
+### InputSetup â€” ana oturum
+Kodla tanÄ±mlanan aksiyonlar: `move_forward, move_back, move_left, move_right, sprint, interact, inventory, build_mode, pause, jump, camera_zoom_in, camera_zoom_out`.
+
+### GameClock â€” Ajan A (sistemler)
+```
+signal minute_passed(total_minutes: int)
+signal hour_passed(hour: int)
+signal phase_changed(phase: StringName)   # &"morning", &"noon", &"evening", &"night"
+signal day_started(day: int)
+signal season_changed(season: StringName) # &"spring", &"summer", &"autumn", &"winter"
+var day: int; var hour: int; var minute: int; var season: StringName; var paused: bool; var time_scale: float
+func get_time_string() -> String
+func get_day_fraction() -> float          # 0..1, 0 = gece yarÄ±sÄ±
+func sleep_until_morning() -> void
+func advance_minutes(m: int) -> void
+```
+
+### Weather â€” Ajan A
+```
+signal weather_changed(weather: StringName)  # &"sunny", &"cloudy", &"foggy", &"rainy", &"storm", &"snow"
+var current: StringName; var tomorrow: StringName
+func get_customer_multiplier() -> float
+func is_power_out() -> bool
+```
+
+### Economy â€” Ajan A
+```
+signal money_changed(money: int)
+var money: int
+func add(amount: int, reason: String) -> void
+func spend(amount: int, reason: String) -> bool   # yetersizse false
+func get_day_report() -> Dictionary
+```
+
+### Reputation â€” Ajan A
+```
+signal reputation_changed(value: float)
+signal license_level_changed(level: int)
+var reputation: float; var license_level: int; var compliance: float
+func add_reputation(v: float) -> void
+func record_id_check(done: bool) -> void
+```
+
+### Inventory â€” Ajan A
+EÅŸya = Dictionary: `{ "id": StringName, "kind": StringName, "strain": StringName, "quality": int, "grams": float, "count": int }`
+kind: `&"seed", &"wet_bud", &"dry_bud", &"jar", &"preroll", &"paper", &"filter", &"nutrient", &"tool"`
+```
+signal changed()
+func add_item(item: Dictionary) -> void
+func remove_item(id: StringName, count: int = 1) -> bool
+func count_of(id: StringName) -> int
+func get_items(kind: StringName = &"") -> Array[Dictionary]
+```
+
+### QuestManager â€” Ajan C
+```
+signal quest_started(id: StringName); signal quest_completed(id: StringName)
+func start(id: StringName) -> void; func complete(id: StringName) -> void
+func is_active(id: StringName) -> bool; func get_active() -> Array[StringName]
+func notify_event(event: StringName, data: Dictionary = {}) -> void   # gÃ¶rev hedefi ilerletme
+```
+
+### SaveSystem â€” Ajan A
+Her autoload `func get_save_data() -> Dictionary` ve `func load_save_data(d: Dictionary) -> void` saÄŸlar.
+Sahnedeki kalÄ±cÄ± dÃ¼ÄŸÃ¼mler `persist` grubunda ve aynÄ± iki fonksiyonu saÄŸlar (`get_save_id() -> String` de).
+```
+func save_game() -> void; func load_game() -> bool; func has_save() -> bool; func new_game() -> void
+```
+KayÄ±t yolu: `user://save_1.json`.
+
+### Effects â€” Ajan B (mini oyunlar)
+```
+signal gafti_mode_changed(active: bool, strength: float)
+var gafti_active: bool; var gafti_strength: float   # 0..1
+func start_gafti(strength: float, duration_game_minutes: int) -> void
+func get_move_multiplier() -> float                 # GaftÃ®'de 0.85
+func get_customer_patience_multiplier() -> float    # GaftÃ®'de 1.3
+func get_rolling_bonus() -> int                     # GaftÃ®'de +10
+func get_water_jitter() -> float                    # GaftÃ®'de Â±0.2
+```
+
+### AudioManager â€” Ajan C
+`func play_sfx(id: StringName, pos: Variant = null) -> void`, `func play_music(id: StringName) -> void`, `func set_ambience(id: StringName) -> void`.
+Eksik ses dosyasÄ±nda sessizce geÃ§ (hata verme).
+
+## 5. EtkileÅŸim sÃ¶zleÅŸmesi
+- EtkileÅŸilebilir her nesne `interactable` grubunda, bir `Area3D` (layer 4) iÃ§erir ve ÅŸu fonksiyonlarÄ± saÄŸlar:
+  `func get_interact_text() -> String` ve `func interact(player: Node) -> void`.
+- Oyuncu: `scenes/player/player.tscn`, kÃ¶k `CharacterBody3D`, `player` grubunda.
+- Mini oyun sahneleri `CanvasLayer` + `SubViewport` ya da kendi `Camera3D` ile yakÄ±n Ã§ekim. Mini oyunu
+  `scenes/minigames/minigame_host.gd` aÃ§ar: `EventBus.minigame_requested` dinler, sahneyi yÃ¼kler, bitince
+  `EventBus.minigame_finished` yayar.
+- Mini oyun id'leri: `&"rolling"`, `&"gravity_bong"`, `&"care"`, `&"id_check"`, `&"customize"`.
+
+## 6. Sahiplik
+| Alan | Sahip |
+|---|---|
+| `autoload/game_clock, weather, economy, reputation, inventory, save_system` + `scripts/systems/` (bitki, genetik, iÅŸleme) + `scenes/plants/` + `data/strains,items` | Ajan A (Opus) |
+| `autoload/effects` + `scenes/minigames/` + `shaders/gafti_post.gdshader` | Ajan B (Opus) |
+| `autoload/quest_manager, audio_manager` + `scenes/player/` + `scenes/npc/` + `scenes/shop/` + `scenes/ui/` + `data/customers,quests,dialogue` | Ajan C (Opus) |
+| `scenes/world/` (vadi montajÄ±) | Ana oturum (+ Codex sol yardÄ±m) |
+| `assets/models/hero/`, `assets/logo/`, `shaders/` (toon, foliage, fog) | Codex astra |
+| `assets/models/props/`, `assets/models/town/`, `assets/models/characters/npc_*` | Codex sol |
+
+## 7. Model dosya sÃ¶zleÅŸmesi (Blender â†’ .glb)
+- Ã–lÃ§ek: 1 birim = 1 metre, +Y yukarÄ± (glTF), orijin tabanÄ±n ortasÄ±nda.
+- Script: `tools/blender/<ad>.py` â†’ Ã§Ä±ktÄ± `assets/models/<klasÃ¶r>/<ad>.glb`. Script tekrar Ã§alÄ±ÅŸtÄ±rÄ±labilir olmalÄ±.
+- Stil: detaylÄ± stilize; yumuÅŸak bevel, abartÄ±lÄ± oranlar, el boyamasÄ± hissi veren vertex color/basit dokular, dÃ¼ÅŸÃ¼k Ã¼Ã§gen sayÄ±sÄ±.
+- BÃ¼tÃ§e: bitki aÅŸamasÄ± â‰¤4k Ã¼Ã§gen, prop â‰¤2k, karakter â‰¤12k, bina â‰¤8k.
+- Animasyonlu modellerde aksiyon isimleri: `idle, walk, run, interact, sit` vb. (kÃ¼Ã§Ã¼k harf).
+
+## 8. Model listesi (dosya adlarÄ± sabit)
+Mesh dÃ¼ÄŸÃ¼m adlarÄ± Ã¶nemli: kod bunlara gÃ¶re materyal/gÃ¶rÃ¼nÃ¼rlÃ¼k ayarlar.
+
+### Codex astra â†’ `assets/models/hero/`
+| Dosya | Ä°Ã§erik / dÃ¼ÄŸÃ¼m adlarÄ± |
+|---|---|
+| `plant_germ.glb`, `plant_seedling.glb`, `plant_veg.glb`, `plant_flower.glb`, `plant_harvest.glb` | SaksÄ±sÄ±z bitki. DÃ¼ÄŸÃ¼mler: `Stem`, `Leaves`, `Buds` (germ/seedling'de Buds yok). Vertex color + yaprak maskesi (UV.y = kÃ¶kten uca 0..1, rÃ¼zgÃ¢r iÃ§in). Boylar: 0.08 / 0.25 / 0.7 / 1.1 / 1.2 m |
+| `bong_bucket.glb` | Kova + su yÃ¼zeyi. DÃ¼ÄŸÃ¼mler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet ÅŸiÅŸe + kapak-kase. DÃ¼ÄŸÃ¼mler: `Bottle`, `Cap`, `Bowl`. Orijin ÅŸiÅŸenin altÄ± |
+| `lighter.glb` | Ã‡akmak. DÃ¼ÄŸÃ¼mler: `Body`, `Wheel` |
+| `grinder.glb` | DÃ¼ÄŸÃ¼mler: `Base`, `Lid` (Lid kendi ekseninde dÃ¶ner, orijini merkezde) |
+| `rolling_paper.glb` | DÃ¼z kaÄŸÄ±t, `Paper` (sarÄ±lma iÃ§in â‰¥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | BitmiÅŸ joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. ArmatÃ¼r `Armature`, gÃ¶vde `Body`. SeÃ§meli parÃ§alar aynÄ± armatÃ¼re baÄŸlÄ±: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boÅŸ), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | AhÅŸap + cam yayla serasÄ±, iÃ§ Ã¶lÃ§Ã¼ ~12Ã—6 m, kapÄ± +Z yÃ¶nÃ¼nde. Ä°Ã§eride saksÄ± tezgahlarÄ±. `Glass` dÃ¼ÄŸÃ¼mÃ¼ ayrÄ± (ÅŸeffaf materyal) |
+| `house.glb` | Dedenin ahÅŸap Karadeniz evi (dÄ±ÅŸ + basit iÃ§: yatak, ayna, kanepe) |
+
+### Codex sol â†’ `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTÄ° dÃ¼kkanÄ±, girilebilir, iÃ§ ~8Ã—6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleÅŸimi (Godot koordinatlarÄ±, metre, Y yukarÄ±)
+Arazi 260Ã—260 m, merkez (0,0,0). DÃ¼z alanlar (pad) arazide bu noktalarda olmalÄ±:
+| BÃ¶lge | Merkez (x, z) | YÃ¼kseklik y | Pad yarÄ±Ã§apÄ± |
+|---|---|---|---|
+| Oyuncu baÅŸlangÄ±cÄ± / ev Ã¶nÃ¼ | (-62, 28) | 2 | â€” |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynÄ± pad) |
+| DÄ±ÅŸ tarla | (-45, 48) | 2 | (aynÄ± pad) |
+| Kurutma ambarÄ± | (-78, 22) | 2 | (aynÄ± pad) |
+| Kasaba meydanÄ± | (60, 0) | 0 | 22 |
+| GAFTÄ° DÃ¼kkanÄ± | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| MuhtarlÄ±k | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| HÄ±rdavatÃ§Ä± | (42, -10) | 0 | (meydan) |
+| MinibÃ¼s duraÄŸÄ± | (72, 48) | 0 | 6 |
+| KÃ¶prÃ¼ & dere | (5, -45) | -1 | dere x yÃ¶nÃ¼nde deÄŸil, (âˆ’130,âˆ’60)â†’(130,âˆ’35) boyunca akar |
+| Ladin ormanÄ± | (-45, -70) Ã§evresi | â€” | aÄŸaÃ§lar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) â†’ (0, 10) â†’ meydan (40, 0); meydandan duraÄŸa (72, 48); meydandan kÃ¶prÃ¼ye (5,-45) â†’ tepeye patika.
+Arazide yol dÃ¼ÄŸÃ¼mÃ¼ `Road` (ayrÄ± materyal), zemin `Ground`, dere yataÄŸÄ± `Creek`. Arazi kenarlarÄ± daÄŸlarla kapalÄ± (oyuncu Ã§Ä±kamaz).
+# GAFTÄ° â€” Oyun TasarÄ±m DokÃ¼manÄ± (GDD) v1.0
+
+> Karadeniz yaylasÄ±nda lisanslÄ± kenevir serasÄ± + dÃ¼kkan iÅŸletme oyunu. Komedi tonlu, cozy ama sonuÃ§lu.
+> Motor: Godot 4.7 Â· Platform: PC (Steam) + Mobil (Play Store) Â· Dil: TÃ¼rkÃ§e (Ã§eviriye hazÄ±r) Â· Derecelendirme: 18+
+
+---
+
+## 1. Ã–zet
+
+Åehirde her iÅŸi batÄ±rmÄ±ÅŸ karakterimiz, kimsenin istemediÄŸi yayla serasÄ±nÄ± devralÄ±r ve **Pusludere**
+yaylasÄ±na taÅŸÄ±nÄ±r. Sisli sabahlarda bitkilerine bakar, Ã¶ÄŸlen hasadÄ±nÄ± kurutup joint sarar, akÅŸam kasaba
+meydanÄ±ndaki dÃ¼kkanÄ±nda kÃ¶ylÃ¼lere ve turistlere satÄ±ÅŸ yapar. Gece serada kova bongla gÃ¼nÃ¼ kapatÄ±r.
+KasabanÄ±n tuhaf insanlarÄ±, absÃ¼rt gÃ¶revleri ve kesintisiz bir yayla mizahÄ± oyunu taÅŸÄ±r.
+
+**ÃœÃ§ sÃ¼tun:**
+1. **Dokunsal ustalÄ±k:** BakÄ±m, sarma ve bong anlarÄ± elle hissedilen mini oyunlardÄ±r.
+2. **Atmosfer:** Sis, yaÄŸmur, mevsimler, ahÅŸap ve yeÅŸil. Oyunun asÄ±l hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeÃ§. Ciddi bir ana hikÃ¢ye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | Ä°Ã§erik |
+|---|---|
+| **HikÃ¢ye (Komedi)** | Ana hikÃ¢ye yok; birbirine baÄŸlÄ± **komik gÃ¶rev zinciri** (NPC skeÃ§leri). Oyunu Ã¶ÄŸretir, lisans seviyelerini aÃ§ar. ~4 mevsim (28 gÃ¼n). |
+| **Serbest** | HikÃ¢ye bittikten sonra ya da baÅŸtan: sonsuz iÅŸletme, tÃ¼m sistemler aÃ§Ä±k. |
+
+**Zorluk:** Cozy ama sonuÃ§lu. Bitki Ã¶lebilir, para eksiye dÃ¼ÅŸebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandÄ±rÄ±cÄ±) borÃ§ alÄ±nÄ±r.
+
+---
+
+## 3. DÃ¼nya: Pusludere YaylasÄ±
+
+### 3.1 Harita (kÃ¼Ã§Ã¼k aÃ§Ä±k vadi, yÃ¼klemesiz)
+```
+                 â›°  KEKLÄ°KTEPE (manzara, hikÃ¢ye finali)
+                      â”‚ patika
+        ğŸŒ² LADÄ°N ORMANI â”€â”€ ğŸŒ‰ KÃ–PRÃœ & DERE (su deposu dolumu)
+              â”‚                      â”‚
+ [DEDENÄ°N SERASI + EV] â”€â”€ Ã§ay bahÃ§eli yol â”€â”€ [KASABA MEYDANI]
+   â”œ Sera (saksÄ±lar)                          â”œ GAFTÄ° DÃ¼kkanÄ±
+   â”œ DÄ±ÅŸ tarla (mevsimsel)                    â”œ Fadime'nin Kahvehanesi
+   â”œ Kurutma ambarÄ±                           â”œ MuhtarlÄ±k
+   â”œ Sarma masasÄ±                             â”œ Lisans & Denetim Ofisi
+   â”” Kova bong kÃ¶ÅŸesi                         â”” HÄ±rdavatÃ§Ä± (ekipman/tohum)
+                                                   â”‚
+                                          ğŸš MÄ°NÄ°BÃœS DURAÄI
+                                       (turistler, toptan sipariÅŸler)
+```
+- Sera â†’ dÃ¼kkan yÃ¼rÃ¼me sÃ¼resi ~40 sn; ilerleyen oyunda **eski motosiklet** (sÃ¼rÃ¼ÅŸ, ~15 sn).
+- Mobil: bÃ¶lgeler `VisibilityRange` + streaming ile parÃ§a parÃ§a yÃ¼klenir; oyuncu yÃ¼kleme ekranÄ± gÃ¶rmez.
+
+### 3.2 Atmosfer
+- **GÃ¶rsel stil:** DetaylÄ± stilize. El boyamasÄ± hissi veren toon shading, yumuÅŸak kenar Ä±ÅŸÄ±ÄŸÄ±, doygun yeÅŸiller,
+  ahÅŸap/taÅŸ dokularÄ±, rÃ¼zgÃ¢rla sallanan bitki shader'Ä±, katmanlÄ± sis.
+- **Renk paleti:** Ladin yeÅŸili, Ã§ay yeÅŸili, Ä±slak taÅŸ grisi, ahÅŸap kahvesi, sÄ±cak lamba turuncusu (sera Ä±ÅŸÄ±klarÄ±).
+- **Ses:** YaÄŸmurun Ã§atÄ±ya vuruÅŸu, dere, kuÅŸlar, uzaktan inek Ã§anÄ±, kahvehanede tavla sesi. MÃ¼zik: lo-fi + kemenÃ§e
+  dokunuÅŸlu sakin parÃ§alar (CC0). Gece daha sakin bir mÃ¼zik Ã§alar, fÄ±rtÄ±nada mÃ¼zik kÄ±sÄ±lÄ±r.
+
+### 3.3 Mevsimler & Hava
+1 yÄ±l = 4 mevsim Ã— 7 gÃ¼n = 28 gÃ¼n.
+
+| Mevsim | Etki |
+|---|---|
+| Ä°lkbahar | Ekim bonusu (+%15 Ã§imlenme), sÄ±k yaÄŸmur (dÄ±ÅŸ tarla kendiliÄŸinden sulanÄ±r) |
+| Yaz | DÄ±ÅŸ tarla en verimli, turist sayÄ±sÄ± Ã—2, sÄ±caklÄ±k stresi |
+| Sonbahar | Hasat bonusu (+kalite), fÄ±rtÄ±na ihtimali |
+| KÄ±ÅŸ | DÄ±ÅŸ tarla kapalÄ±, kar, sera Ä±sÄ±tma gideri; mÃ¼ÅŸteri az ama fiyat yÃ¼ksek |
+
+| Hava | Etki |
+|---|---|
+| GÃ¼neÅŸli | DÄ±ÅŸ Ä±ÅŸÄ±k +, su tÃ¼ketimi + |
+| Bulutlu | NÃ¶tr |
+| Sisli | GÃ¶rÃ¼ÅŸ dÃ¼ÅŸÃ¼k, atmosfer max; mÃ¼ÅŸteri biraz az |
+| YaÄŸmurlu | DÄ±ÅŸ tarla otomatik sulanÄ±r, mÃ¼ÅŸteri âˆ’%20 |
+| FÄ±rtÄ±na | DÄ±ÅŸ bitkilere hasar riski, **elektrik kesintisi** (jeneratÃ¶r yÃ¼kseltmesi Ã§Ã¶zer) |
+| Kar | KÄ±ÅŸa Ã¶zel, sera Ä±sÄ± ihtiyacÄ± + |
+
+Ertesi gÃ¼nÃ¼n hava tahmini akÅŸamlarÄ± kahvehane radyosundan duyulur.
+
+---
+
+## 4. Ã‡ekirdek DÃ¶ngÃ¼
+
+```
+SABAH  (06â€“11)  Sera & tarla: sula, besle, Ä±ÅŸÄ±k ayarla, buda, zararlÄ± temizle, hasat et
+Ã–ÄLE   (11â€“16)  Ä°ÅŸleme: kurut, kÃ¼rle, paketle, joint sar (pre-roll)
+AKÅAM  (16â€“22)  DÃ¼kkan: raflarÄ± diz, fiyat koy, kimlik kontrol et, sat
+GECE   (22â€“02)  Planla: yÃ¼kselt, Ã§aprazla, inÅŸa et Â· Kova bong Â· Uyu (kayÄ±t)
+```
+- 1 oyun gÃ¼nÃ¼ â‰ˆ 14 dk gerÃ§ek zaman (ayarlardan 10â€“20 dk).
+- Fazlar Ã¶neridir; dÃ¼kkan sadece 16â€“22 arasÄ± aÃ§Ä±ktÄ±r.
+- 02:00'da uyumazsan karakter bayÄ±lÄ±r: ertesi sabah geÃ§ uyanÄ±r, âˆ’%10 para (bayÄ±ldÄ±ÄŸÄ± yerden eve "taÅŸÄ±ma Ã¼creti").
+
+---
+
+## 5. Sistemler
+
+### 5.1 Bitki
+| AÅŸama | GÃ¼n | EtkileÅŸim |
+|---|---|---|
+| Ã‡imlenme | 1 | Ekim, nem |
+| Fide | 2 | Sulama, hafif Ä±ÅŸÄ±k |
+| Vejetatif | 3â€“5 | Besin, budama, saksÄ± bÃ¼yÃ¼tme |
+| Ã‡iÃ§eklenme | 4â€“6 | IÅŸÄ±k dÃ¶ngÃ¼sÃ¼, pH, zararlÄ± kontrolÃ¼ |
+| Hasat | â€” | Zamanlama: erken = az verim, geÃ§ = kalite dÃ¼ÅŸer |
+
+- **DeÄŸiÅŸkenler:** Su, IÅŸÄ±k, Besin, pH, SÄ±caklÄ±k, Nem, SaÄŸlÄ±k.
+- TÃ¼rÃ¼n ideal aralÄ±ÄŸÄ±nda geÃ§en sÃ¼re â†’ **Kalite (0â€“100)**. SaÄŸlÄ±k 0 â†’ bitki Ã¶lÃ¼r (kompost olur, gÃ¼bre verir).
+- **ZararlÄ±lar:** Yaprak biti, kÃ¼f (nem yÃ¼ksekse). Elle temizlenir ya da ilaÃ§lanÄ±r.
+- GÃ¶rsel: Her aÅŸamanÄ±n ayrÄ± bir modeli var. Kalite, saÄŸlÄ±k ve susuzluk yaprak rengine ve duruÅŸuna yansÄ±r.
+
+### 5.2 Genetik / Ã‡aprazlama
+- Ã–zellikler: **Verim, HÄ±z, DayanÄ±klÄ±lÄ±k, Aroma, Kalite Potansiyeli**, ayrÄ±ca gÃ¶rsel Ã¶zellikler (yaprak tonu, boy).
+- Ã‡aprazlama: yavru Ã¶zelliÄŸi ebeveyn ortalamasÄ± Â± sapma; %5 mutasyon (nadir Ã¶zellik).
+- BaÅŸlangÄ±Ã§ta 3 tÃ¼r: **Pusu KuÅŸu**, **Ladin Duman**, **Ã‡ay YapraÄŸÄ±**. HikÃ¢ye Ã¶dÃ¼lÃ¼: **GAFTÄ°** tÃ¼rÃ¼.
+- Yeni tÃ¼rlere oyuncu isim verir; **Tohum Defteri** koleksiyonu.
+
+### 5.3 Ä°ÅŸleme
+Kurutma (3â€“7 saat, nem dengesi) â†’ KÃ¼rleme (opsiyonel, 1â€“3 gÃ¼n, +kalite) â†’ ÃœrÃ¼n:
+- **Kavanoz** (gram satÄ±ÅŸ)
+- **Pre-roll** (joint sarma mini oyunu, Ã—1.6 deÄŸer)
+
+### 5.4 Joint Sarma Mini Oyunu (yakÄ±n Ã§ekim, dokunsal)
+| AdÄ±m | EtkileÅŸim (fare / dokunmatik) | Kaliteye etkisi |
+|---|---|---|
+| 1. Ã–ÄŸÃ¼t | Grinder kapaÄŸÄ±nÄ± dairesel Ã§evir | Az Ã§evirirsen iri tane, Ã§ok Ã§evirirsen toz olur |
+| 2. Filtre | Kartonu zikzak katla (3 sÃ¼rÃ¼kleme) | DÃ¼zgÃ¼n filtre olursa Ã§ekiÅŸ iyi olur |
+| 3. DaÄŸÄ±t | KaÄŸÄ±da sÃ¼rÃ¼kleyerek serp | EÅŸit daÄŸÄ±lÄ±m iÃ§in Ä±sÄ± haritasÄ± gÃ¶stergesi |
+| 4. Sar | YukarÄ±-aÅŸaÄŸÄ± ritmik kaydÄ±rma, basÄ±nÃ§ Ã§ubuÄŸu | GevÅŸek sararsan sÃ¶ner, sÄ±kÄ± sararsan Ã§ekmez |
+| 5. YapÄ±ÅŸtÄ±r | Kenar boyunca sÃ¼rÃ¼kle (yala) | Eksik bÄ±rakÄ±rsan aÃ§Ä±lÄ±r |
+| 6. BÃ¼k | Ucu dÃ¶ndÃ¼r | BitiÅŸ |
+
+- SonuÃ§ **Sarma Skoru (0â€“100)**; Ã¼rÃ¼n kalitesiyle Ã§arpÄ±lÄ±r. Beceri arttÄ±kÃ§a yardÄ±m Ã§ubuklarÄ± azalÄ±r.
+- Komedi: Ã‡ok kÃ¶tÃ¼ sarÄ±mlar "Muhtar'Ä±n KaÄŸÄ±dÄ±", "Kibrit Ã‡Ã¶pÃ¼" gibi komik isimler alÄ±r ama yine satÄ±labilir (ucuza).
+
+### 5.5 Kova Bong Mini Oyunu (gravity bong, yakÄ±n Ã§ekim)
+| AdÄ±m | EtkileÅŸim |
+|---|---|
+| 1. HazÄ±rla | Kesik pet ÅŸiÅŸeyi su dolu kovaya batÄ±r |
+| 2. Doldur | Kaseyi doldur (miktar seÃ§imi: az / orta / bol) |
+| 3. Yak | Ã‡akmaÄŸÄ± Ã§ak (basÄ±lÄ± tut) |
+| 4. KaldÄ±r | ÅiÅŸeyi **yavaÅŸÃ§a** yukarÄ± kaldÄ±r; hÄ±zlÄ± kaldÄ±rÄ±rsan duman kaÃ§ar |
+| 5. Ã‡ek | Kaseyi Ã§Ä±kar, nefes Ã§ubuÄŸunu doÄŸru anda bÄ±rak |
+
+- **Etki: "GaftÃ® Modu"** (sÃ¼re miktara baÄŸlÄ±, 1â€“3 oyun saati):
+  - Ekran: renk doygunluÄŸu artar, hafif dalga efekti, yumuÅŸak bulanÄ±klÄ±k, mÃ¼zik yavaÅŸlar ve filtrelenir.
+  - **ArtÄ±:** MÃ¼ÅŸteri sabrÄ± +%30, bakÄ±m mini oyunlarÄ±nda "sakin el" (sarma skoru +10).
+  - **Eksi:** Hareket âˆ’%15, sulama miktarÄ± rastgele Â±%20 kayar, NPC diyaloglarÄ± absÃ¼rtleÅŸir.
+  - "Bol" doz: komik bayÄ±lma ihtimali (kanepede uyanÄ±rsÄ±n, 2 saat kaybedersin).
+- Seradaki bong yÃ¼kseltilebilir (kova â†’ bidon â†’ "Muhtar'Ä±n KazanÄ±" sÃ¼s gÃ¶rÃ¼nÃ¼mleri).
+
+### 5.6 DÃ¼kkan
+- Raf ve vitrin grid yerleÅŸimi, Ã¼rÃ¼n baÅŸÄ±na fiyat, gÃ¼n sonu raporu.
+- **MÃ¼ÅŸteri tipleri:**
+  | Tip | Tercih | BÃ¼tÃ§e |
+  |---|---|---|
+  | Yayla KÃ¶ylÃ¼sÃ¼ | Ucuz, kavanoz | DÃ¼ÅŸÃ¼k |
+  | Turist | Pre-roll, ÅŸÄ±k paket | YÃ¼ksek |
+  | TÄ±bbi Hasta (Hayri Hoca vb.) | YÃ¼ksek kalite, aroma | Orta |
+  | Uzman (ÅŸehirli) | Nadir tÃ¼r, mutasyon | Ã‡ok yÃ¼ksek |
+- **Kimlik kontrolÃ¼:** Her mÃ¼ÅŸteride hÄ±zlÄ± kart kontrolÃ¼ yapÄ±lÄ±r. Atlarsan denetimde ceza gelir. Komik sahte kimlikler de Ã§Ä±kar.
+- Memnuniyet â†’ **Ä°tibar** â†’ mÃ¼ÅŸteri sayÄ±sÄ± ve kalitesi.
+
+### 5.7 Lisans & Denetim
+- Kurgusal "Yayla Kenevir LisansÄ±", 5 seviye. Her seviye yeni saksÄ± sayÄ±sÄ±, ekipman, tÃ¼r ve dÃ¼kkan alanÄ± aÃ§ar.
+- **DenetÃ§i Nevzat Bey** habersiz gelir: kayÄ±t defteri, etiket, kimlik kontrol geÃ§miÅŸi ve hijyen puanlanÄ±r.
+- DÃ¼ÅŸÃ¼k puan â†’ para cezasÄ±; Ã¼st Ã¼ste dÃ¼ÅŸÃ¼k puan â†’ 1 gÃ¼n dÃ¼kkan kapalÄ±.
+
+### 5.8 Ä°nÅŸa & YÃ¼kseltme
+Grid yerleÅŸim: saksÄ±lar, LED lambalar, damla sulama, nemlendirici, Ä±sÄ±tÄ±cÄ±, jeneratÃ¶r, kurutma rafÄ±, dÃ¼kkan raflarÄ±.
+Otomasyon orta seviyede gelir; zevkli iÅŸler (sarma, bong, hasat) hiÃ§ otomatikleÅŸmez.
+
+### 5.9 Ekonomi (baÅŸlangÄ±Ã§ dengesi)
+- BaÅŸlangÄ±Ã§: 2.000 â‚º, 6 saksÄ±, 3 tohum tÃ¼rÃ¼ Ã— 2.
+- Giderler: elektrik (gÃ¼nlÃ¼k, lamba sayÄ±sÄ±na baÄŸlÄ±), su (dere deposu bedava ama taÅŸÄ±ma gerekir), kÄ±ÅŸ Ä±sÄ±tma, tohum, ekipman.
+- Hedef: 3. gÃ¼nde kÃ¢ra geÃ§mek, 7. gÃ¼nde ilk lisans yÃ¼kseltmesi.
+
+### 5.10 Karakter Ã–zelleÅŸtirme
+Ten tonu (6), saÃ§ (6 model Ã— renk), sakal/bÄ±yÄ±k (5), Karadeniz giyimi: yaÄŸmurluk, Ã¶rgÃ¼ kazak, kasket,
+lastik Ã§izme (renkler). Ayna/dolap ile her zaman deÄŸiÅŸtirilebilir.
+
+---
+
+## 6. Karakterler & Komedi GÃ¶revleri
+
+| NPC | Rol | Komedi |
+|---|---|---|
+| **Muhtar RÃ¼stem** | HikÃ¢ye gÃ¶revleri, borÃ§ | Her ÅŸeye "hallederuk" der, hiÃ§bir ÅŸeyi halletmez |
+| **Fadime Abla** | Kahvehane, hava tahmini, dedikodu | Radyo hava tahminleri hep tersi Ã§Ä±kar |
+| **Hayri Hoca** | Emekli Ã¶ÄŸretmen, tÄ±bbi mÃ¼ÅŸteri | Her alÄ±ÅŸveriÅŸte ders verir |
+| **Cemil** | KomÅŸu, absÃ¼rt gÃ¶revler | Ä°neÄŸi iÃ§in "rahatlatÄ±cÄ±" ister (vermezsin) |
+| **Hans** | Alman turist | Yaylaya yerleÅŸmek ister, TÃ¼rkÃ§esi felaket |
+| **Nevzat Bey** | DenetÃ§i | Ciddi; GaftÃ® Modu'nda Ã§ok komik konuÅŸur |
+
+**GÃ¶rev zinciri (Ã¶rnek ilk hafta):** SerayÄ± temizle â†’ Ä°lk hasat â†’ Muhtar'a "numune" â†’ DÃ¼kkanÄ± aÃ§ â†’
+Hans'Ä±n ilk sipariÅŸi â†’ Ä°lk denetim â†’ Lisans 2. Her gÃ¶rev 1â€“3 dk'lÄ±k bir skeÃ§le biter.
+
+---
+
+## 7. Kamera & Kontroller
+
+**Vadide:** 3. ÅŸahÄ±s omuz Ã¼stÃ¼ kamera. **Mini oyunlarda:** sabit yakÄ±n Ã§ekim kameraya yumuÅŸak geÃ§iÅŸ.
+
+| Eylem | PC | Mobil |
+|---|---|---|
+| Hareket | WASD | Sol sanal joystick |
+| Kamera | Fare | SaÄŸ yarÄ± ekran sÃ¼rÃ¼kleme |
+| EtkileÅŸim | E / Sol tÄ±k | BaÄŸlamsal etkileÅŸim butonu |
+| KoÅŸ | Shift | Joystick'i sonuna kadar it |
+| Envanter | Tab | Ã‡anta ikonu |
+| Ä°nÅŸa modu | B | MenÃ¼ butonu |
+| Mini oyun | Fare sÃ¼rÃ¼kle/Ã§evir | Parmakla aynÄ± hareketler |
+
+---
+
+## 8. MaÄŸaza, Gelir & Derecelendirme
+
+- **Gelir:** PC'de Steam Ã¼cretli + ayrÄ± demo. Mobilde Ã¼cretsiz demo (Ä°lkbahar, 7 gÃ¼n) + tek seferlik "Tam SÃ¼rÃ¼m" satÄ±n alÄ±mÄ± (Play Billing).
+- **Derecelendirme:** 18+ (uyuÅŸturucu kullanÄ±mÄ± tasviri). IARC anketi dÃ¼rÃ¼st doldurulacak.
+- **Risk notu:** Ä°Ã§me sahneleri her platformda aÃ§Ä±k; bu Play Store'da red riskini yÃ¼kseltir. Teknik sigorta olarak
+  tÃ¼m iÃ§me iÃ§eriÄŸi tek bir `content_flags.consumption` bayraÄŸÄ±na baÄŸlÄ±dÄ±r (varsayÄ±lan: aÃ§Ä±k). Red gelirse
+  mobil derlemede bu bayrak kapatÄ±lÄ±p joint "satÄ±lÄ±k pre-roll", bong "dekor" moduna dÃ¼ÅŸer, ek iÅŸ gerekmez.
+- Reklam yok. GerÃ§ek marka/dispanser yok.
+
+---
+
+## 9. Teknik Mimari (Godot 4.7)
+
+- **Renderer:** Mobile (PC'de "YÃ¼ksek" grafik ayarÄ±nda ekstra sis/gÃ¶lge kalitesi).
+- **Dil:** GDScript, statik tipli. TÃ¼m metinler `tr()` + `localization/strings.csv`.
+
+**Autoload'lar:**
+| Ad | GÃ¶rev |
+|---|---|
+| `EventBus` | Sistemler arasÄ± sinyaller |
+| `GameClock` | Saat, gÃ¼n, faz, mevsim |
+| `Weather` | GÃ¼nlÃ¼k hava, tahmin, ortam efektleri |
+| `Economy` | Para, iÅŸlemler, gÃ¼n sonu raporu |
+| `Reputation` | Ä°tibar, lisans seviyesi, uyum puanÄ± |
+| `Inventory` | EÅŸyalar, Ã¼rÃ¼nler |
+| `QuestManager` | Komedi gÃ¶rev zinciri, diyalog tetikleri |
+| `SaveSystem` | KayÄ±t/yÃ¼kleme (uyuyunca otomatik) |
+| `Settings` | Grafik, ses, kontrol, gÃ¼n sÃ¼resi |
+| `ContentFlags` | Platform/iÃ§erik bayraklarÄ± |
+| `Effects` | GaftÃ® Modu ekran efektleri, post-process |
+
+**Veri (Resource):** `StrainData`, `PlantState`, `ItemData`, `CustomerProfile`, `QuestData`, `DialogueData`, `BuildableData`.
+
+**KlasÃ¶r yapÄ±sÄ±:**
+```
+res://
+â”œâ”€â”€ autoload/
+â”œâ”€â”€ data/            strains/ items/ customers/ quests/ dialogue/ buildables/
+â”œâ”€â”€ scenes/
+â”‚   â”œâ”€â”€ world/       valley.tscn, greenhouse/, town/, zones/
+â”‚   â”œâ”€â”€ player/      player.tscn, camera_rig.tscn, customization/
+â”‚   â”œâ”€â”€ plants/
+â”‚   â”œâ”€â”€ npc/
+â”‚   â”œâ”€â”€ minigames/   rolling/, gravity_bong/, care/, id_check/
+â”‚   â”œâ”€â”€ shop/
+â”‚   â””â”€â”€ ui/          hud/, menus/, mobile_controls/, dialogue/
+â”œâ”€â”€ scripts/         systems/ components/
+â”œâ”€â”€ shaders/         toon.gdshader, foliage_wind, fog_layer, gafti_post
+â”œâ”€â”€ assets/          models/ textures/ audio/ fonts/ logo/
+â”œâ”€â”€ localization/
+â””â”€â”€ tests/
+```
+
+**Performans bÃ¼tÃ§esi (mobil, orta segment Android):** 60 FPS hedef (min 30), ekranda â‰¤150 draw call,
+â‰¤300k Ã¼Ã§gen, bitki modelleri LOD0 â‰¤4k / LOD1 â‰¤1k Ã¼Ã§gen, doku atlaslarÄ± 2K.
+
+---
+
+## 10. Sanat Listesi (Ã¶ncelik + Ã¼retici)
+
+| VarlÄ±k | Detay | Ãœretici |
+|---|---|---|
+| **GAFTÄ° logosu** | Ã‡izgi film tarzÄ±, kalÄ±n yuvarlak harfler, Ä° noktasÄ± yaprak/duman; yeÅŸil + sÄ±cak turuncu. SVG + PNG + uygulama ikonu | Codex astra |
+| **Bitki** | 5 aÅŸama Ã— saÄŸlÄ±k varyasyonu, rÃ¼zgÃ¢r shader'Ä± | Codex astra |
+| **Kova bong seti** | Kova, kesik ÅŸiÅŸe, kase, su, duman | Codex astra |
+| **Joint seti** | Grinder, kaÄŸÄ±t, filtre, joint (sarÄ±m aÅŸamalarÄ±) | Codex astra |
+| **Oyuncu karakteri** | GÃ¶vde + Ã¶zelleÅŸtirme parÃ§alarÄ± + temel animasyonlar | Codex astra |
+| **Shader'lar** | Toon, foliage wind, sis katmanlarÄ±, GaftÃ® post-process | Codex astra |
+| Sera yapÄ±sÄ±, ev | AhÅŸap/cam yayla serasÄ± | Codex astra |
+| NPC'ler (6) | Karakter tabanÄ±ndan tÃ¼retilmiÅŸ | Codex sol |
+| Kasaba binalarÄ±, props | Kahvehane, muhtarlÄ±k, raflar, saksÄ±, lamba, Ã§it, aÄŸaÃ§ | Codex sol |
+| UI temasÄ± | Ä°konlar, paneller, font seÃ§imi | Codex astra (yÃ¶n) + sol (uygulama) |
+
+---
+
+## 11. MVP KapsamÄ± (bu geliÅŸtirme turunda)
+Vadinin tamamÄ± (blockout + ana modeller), 3. ÅŸahÄ±s kontrol (PC + mobil), sera + dÄ±ÅŸ tarla, bitki sistemi,
+Ã§aprazlama, kurutma, **joint sarma**, **kova bong + GaftÃ® Modu**, dÃ¼kkan + 4 mÃ¼ÅŸteri tipi + kimlik kontrolÃ¼,
+gÃ¼n/gece + mevsim + hava, lisans 1â€“3 + denetim, karakter Ã¶zelleÅŸtirme, ilk hafta komedi gÃ¶revleri (6 NPC),
+kayÄ±t/yÃ¼kleme, ayarlar, logo + ana menÃ¼, CC0 sesler.
+
+**MVP dÄ±ÅŸÄ± (sonra):** Lisans 4â€“5, motosiklet, Ä°ngilizce, Steam/Play entegrasyonu, satÄ±n alma, tam 28 gÃ¼nlÃ¼k gÃ¶rev zinciri.
+
+web search: 
+web search: site:kenney.nl assets interface sounds impact sounds rpg audio foley Kenney CC0 casino audio ...
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$OutputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); Get-Content -Encoding UTF8 AGENTS.md,GDD.md | Out-Null; Get-Command ffmpeg,ffprobe,python,py,node,winget,curl.exe -ErrorAction SilentlyContinue | Format-Table Name,Source; Get-ChildItem "$env:USERPROFILE/Desktop" -Filter '"'*Godot*' | Select-Object Name; Get-ChildItem tools -Name; (Invoke-WebRequest -UseBasicParsing 'https://kenney.nl/assets/interface-sounds').Links | Where-Object href -Match 'zip|creativecommons' | Select-Object href" in C:\Users\31\Documents\we2
+ succeeded in 746ms:
+
+Name        Source                                                        
+----        ------                                                        
+ffmpeg.exe  C:\Users\31\AppData\Local\Microsoft\WinGet\Links\ffmpeg.exe   
+ffprobe.exe C:\Users\31\AppData\Local\Microsoft\WinGet\Links\ffprobe.exe  
+python.exe  C:\Users\31\AppData\Local\Programs\Python\Python311\python.exe
+py.exe      C:\WINDOWS\py.exe                                             
+node.exe    C:\Program Files\nodejs\node.exe                              
+winget.exe  C:\Users\31\AppData\Local\Microsoft\WindowsApps\winget.exe    
+curl.exe    C:\Program Files\Git\mingw64\bin\curl.exe                     
+
+
+
+Name                         
+----                         
+Godot_v4.7.2-stable_win64.exe
+blender
+codex_logs
+codex_prompts
+previews
+                             
+
+
+
+web search: site:kenney.nl/assets Kenney interface sounds impact sounds RPG audio Foley sound CC0 ...
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "python -c \"import urllib.request as u; print(u.urlopen('https://kenney.nl/assets/interface-sounds').read().decode()[-9000:])\" | Select-String -Pattern 'zip|Download|CC0'; (Invoke-WebRequest -UseBasicParsing 'https://opengameart.org/content/forget-me-not').Content | Select-String -Pattern 'https?["'^" ]+'"\\.ogg' -AllMatches | ForEach-Object Matches | ForEach-Object Value | Select-Object -Unique" in C:\Users\31\Documents\we2
+web search: site:freesound.org "Creative Commons 0" "creek" seamless loop stream water ...
+ succeeded in 2898ms:
+
+n-top medium'><a href='#inline-download' class='button button-wide' data-lity>Download</a> <a href='https://kenney.itch
+.io/kenney-game-assets' target='_blank' class='button dark button-wide'>Get All-in-1 bundle</a></p>
+<div id='inline-download' class='lity-pop lity-hide text-center'>
+				<p style='margin-bottom:2em'>The game assets you're about to download are available for free, thanks to the generos
+ity of our amazing community. If you'd like to support and help keep them free for everyone, consider making a small do
+nation!</p>
+				<p class='margin-top bold'><a id='donate-text' href='#' data-download-id='6173736574732f696e746572666163652d736f756
+e6473' onclick='return initiateDownload(this)'>Continue without donating...</a></p>
+				<h1>Thanks for downloading</h1>
+	function initiateDonate(){ document.getElementById("donate-text").innerHTML = "Continue downloading..."; }
+	function initiateDownload(_el){
+		var _id = _el.getAttribute('data-download-id');
+		// Request a fresh signed link and start the download
+		fetch('https://kenney.nl/download-link/' + _id, { credentials: 'same-origin', cache: 'no-store' })
+				}else{ alert('Download unavailable, please reload the page and try again.'); }
+			}).catch(function(){ alert('Download unavailable, please reload the page and try again.'); });
+https://opengameart.org/sites/default/files/styles/audio_with_background/public/audio_preview/forget_me_not_in_f_major.ogg
+https://opengameart.org/sites/default/files/styles/medium/public/audio_preview/forget_me_not_in_f_major.ogg
+https://opengameart.org/sites/default/files/forget_me_not_in_f_major.ogg
+https://opengameart.org/sites/default/files/audio_preview/forget_me_not_in_f_major.ogg
+https://opengameart.org/sites/default/files/forget_me_not_in_f_major_0.ogg
+https://opengameart.org/sites/default/files/forget_me_not_in_f_major_looped.ogg
+
+
+
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$s = @'"'
+import urllib.request as u,re,concurrent.futures
+urls=['https://kenney.nl/assets/'+n for n in ['interface-sounds','impact-sounds','rpg-audio','foley-sounds','casino-audio','ui-audio','music-jingles']] + ['https://freesound.org/people/Vrymaa/sounds/734642/','https://opengameart.org/art-search-advanced']
+def check(url):
+ try:
+  t=u.urlopen(url,timeout=15).read().decode()
+  if 'kenney' in url:
+   ids=re.findall(\"data-download-id='(["'^'"']+)\",t); out=[u.urlopen('https://kenney.nl/download-link/'+i,timeout=15).read().decode() for i in ids]
+   return url, 'creativecommons.org/publicdomain/zero' in t, out
+  return url, re.findall(r'https?["'^"'"\\s<>]+(?:preview|\\.mp3)["'^"'"\\s<>]*',t)[:8],[(v,re.sub('<["'^>]+>'"',' ',v)) for v in t.splitlines() if 'CC0' in v or 'field_art_type_tid' in v][:12]
+ except Exception as e: return url,str(e)
+with concurrent.futures.ThreadPoolExecutor() as e:
+ for result in e.map(check,urls): print(result)
+'@; "'$s | python -' in C:\Users\31\Documents\we2
+web search: site:freesound.org/people "Creative Commons 0" rain roof ambience loop gentle rain ...
+ succeeded in 1475ms:
+('https://kenney.nl/assets/interface-sounds', 'HTTP Error 403: Forbidden')
+('https://kenney.nl/assets/impact-sounds', 'HTTP Error 403: Forbidden')
+('https://kenney.nl/assets/rpg-audio', 'HTTP Error 403: Forbidden')
+('https://kenney.nl/assets/foley-sounds', 'HTTP Error 404: Not Found')
+('https://kenney.nl/assets/casino-audio', 'HTTP Error 403: Forbidden')
+('https://kenney.nl/assets/ui-audio', 'HTTP Error 403: Forbidden')
+('https://kenney.nl/assets/music-jingles', 'HTTP Error 403: Forbidden')
+('https://freesound.org/people/Vrymaa/sounds/734642/', ['https://freesound.orghttps://cdn.freesound.org/previews/734/734642_13973196-lq.mp3', 'https://cdn.freesound.org/previews/734/734642_13973196-lq.mp3', 'https://cdn.freesound.org/previews/734/734642_13973196-lq.mp3', 'https://cdn.freesound.org/previews/734/734642_13973196-lq.ogg', 'https://cdn.freesound.org/previews/734/734642_13973196-hq.mp3'], [])
+('https://opengameart.org/art-search-advanced', ["https://opengameart.org/sites/default/files/styles/thumbnail/public/trev-bb_0.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/trev-ftr.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/trev-ovr.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/swords.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/star-ftr.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/star-sm.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/star-bb.png.preview.jpg'", "https://opengameart.org/sites/default/files/styles/thumbnail/public/star-ovr.png.preview.jpg'"], [('<li class="expanded active-trail menu-mlid-486"><a href="/latest" title="" class="active-trail">Browse</a><ul class="menu"><li class="first leaf active menu-mlid-487"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=9&amp;sort_by=count&amp;sort_order=DESC" title="Browse Popular 2d Art" class="active">2D Art</a></li>', '  Browse    2D Art  '), ('<li class="leaf active menu-mlid-488"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=10&amp;sort_by=count&amp;sort_order=DESC" title="Browse popular 3D art" class="active">3D Art</a></li>', '  3D Art  '), ('<li class="leaf active-trail active menu-mlid-1819"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=7273&amp;sort_by=count&amp;sort_order=DESC" title="Browse popular concept art" class="active-trail active">Concept Art</a></li>', '  Concept Art  '), ('<li class="leaf active menu-mlid-492"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=14&amp;sort_by=count&amp;sort_order=DESC" title="Browse popular textures" class="active">Textures</a></li>', '  Textures  '), ('<li class="leaf active menu-mlid-490"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=12&amp;sort_by=count&amp;sort_order=DESC" title="Browse popular music" class="active">Music</a></li>', '  Music  '), ('<li class="leaf active menu-mlid-491"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=13&amp;sort_by=count&amp;sort_order=DESC" title="Browse popular sound effects" class="active">Sound Effects</a></li>', '  Sound Effects  '), ('<li class="leaf active menu-mlid-489"><a href="/art-search-advanced?keys=&amp;field_art_type_tid%5B%5D=11&amp;sort_by=count&amp;sort_order=DESC" title="Browse popular documents" class="active">Documents</a></li>', '  Documents  '), ('          <div id="edit-field-art-type-tid-wrapper" class="views-exposed-widget views-widget-filter-field_art_type_tid">', '           '), (' <select multiple="multiple" name="field_art_type_tid[]" id="edit-field-art-type-tid" size="7" class="form-select"><option value="9">2D Art</option><option value="10">3D Art</option><option value="7273">Concept Art</option><option value="14">Texture</option><option value="12">Music</option><option value="13">Sound Effect</option><option value="11">Document</option></select>', '   2D Art  3D Art  Concept Art  Texture  Music  Sound Effect  Document  '), (' <select multiple="multiple" name="field_art_licenses_tid[]" id="edit-field-art-licenses-tid" size="9" class="form-select"><option value="2">CC-BY 3.0</option><option value="10310">OGA-BY 3.0</option><option value="31772">OGA-BY 4.0</option><option value="17981">CC-BY 4.0</option><option value="6">GPL 3.0</option><option value="5">GPL 2.0</option><option value="4">CC0</option><option value="17982">CC-BY-SA 4.0</option><option value="3">CC-BY-SA 3.0</option></select>', '   CC-BY 3.0  OGA-BY 3.0  OGA-BY 4.0  CC-BY 4.0  GPL 3.0  GPL 2.0  CC0  CC-BY-SA 4.0  CC-BY-SA 3.0  '), ('  <span class="views-field views-field-title">        <span class="field-content"><a href="/forumtopic/cc0-80s-heavy-metal-concept-soundtrack-m68k-free-the-software-%E2%80%94-35-tracks#comment-113905">[CC0] 80s Heavy Metal Concept Soundtrack (&quot;M68K Free the Software&quot; � 35 Tracks)</a></span>  </span>  ', '             [CC0] 80s Heavy Metal Concept Soundtrack (&quot;M68K Free the Software&quot; � 35 Tracks)       ')])
+
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$s = @'"'
+import urllib.request as u, urllib.error as er, re, concurrent.futures
+base='https://kenney.nl/'
+names=['interface-sounds','impact-sounds','rpg-audio','casino-audio','ui-audio','music-jingles','foley-sounds']
+urls=[base+'download-link/'+('assets/'+n).encode().hex() for n in names] + ['https://kenney.nl/media/pages/assets/rpg-audio/','https://opengameart.org/art-search-advanced?keys=lofi&field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4','https://opengameart.org/art-search-advanced?keys=guitar&field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4','https://opengameart.org/art-search-advanced?keys=ambient&field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4']
+def check(url):
+ try:
+  q=u.Request(url,headers={'User-Agent':'Mozilla/5.0','Referer':base+'assets/interface-sounds','Accept':'application/json, text/html'})
+  with u.urlopen(q,timeout=12) as f:
+   t=f.read().decode()
+  if 'kenney' in url: return url,t[:350]
+  return url,list(dict.fromkeys(re.findall(r'href=\"(/content/["'^"#?]+)"'"',t)))[:40]
+ except er.HTTPError as e: return url,str(e),e.read(320).decode(errors='replace')
+ except Exception as e: return url,str(e)
+with concurrent.futures.ThreadPoolExecutor() as e:
+ for result in e.map(check,urls): print(result)
+'@; "'$s | python -' in C:\Users\31\Documents\we2
+ succeeded in 1501ms:
+('https://kenney.nl/download-link/6173736574732f696e746572666163652d736f756e6473', '{"url":"https:\\/\\/kenney.nl\\/download\\/6173736574732f696e746572666163652d736f756e6473\\/ff94a8f9762a7fd227c6bc208e4d160458150bdc556e62c074e4c74f2b46ab0d?expires=1795512511"}')
+('https://kenney.nl/download-link/6173736574732f696d706163742d736f756e6473', '{"url":"https:\\/\\/kenney.nl\\/download\\/6173736574732f696d706163742d736f756e6473\\/660bdeb59b32d00d5b65ba60429ca6e90a4db01e12ef736706e93149f03244fd?expires=1795512511"}')
+('https://kenney.nl/download-link/6173736574732f7270672d617564696f', '{"url":"https:\\/\\/kenney.nl\\/download\\/6173736574732f7270672d617564696f\\/92acf4227ad677596f4c5389e75e981cd193e43591705fb7fab11be9d93a3f90?expires=1795512511"}')
+('https://kenney.nl/download-link/6173736574732f636173696e6f2d617564696f', '{"url":"https:\\/\\/kenney.nl\\/download\\/6173736574732f636173696e6f2d617564696f\\/472801d07f58725639db8cba644905bd5ff410f2ad14430f38df0148363d5091?expires=1795512511"}')
+('https://kenney.nl/download-link/6173736574732f75692d617564696f', '{"url":"https:\\/\\/kenney.nl\\/download\\/6173736574732f75692d617564696f\\/4560b0f18b5a12834cc481b769b55b35311d32da99d77db9d9b7e78e492457b7?expires=1795512511"}')
+('https://kenney.nl/download-link/6173736574732f6d757369632d6a696e676c6573', '{"url":"https:\\/\\/kenney.nl\\/download\\/6173736574732f6d757369632d6a696e676c6573\\/0ebdb9b89c41cc63bc193ea0950d981b6e19a4e790537910dcb2660c6f22a698?expires=1795512511"}')
+('https://kenney.nl/download-link/6173736574732f666f6c65792d736f756e6473', 'HTTP Error 404: Not Found', '{"error":"not found"}')
+('https://kenney.nl/media/pages/assets/rpg-audio/', 'HTTP Error 403: Forbidden', '<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML 2.0//EN">\n<html><head>\n<title>403 Forbidden</title>\n</head><body>\n<h1>Forbidden</h1>\n<p>You don\'t have permission to access this resource.</p>\n</body></html>\n')
+('https://opengameart.org/art-search-advanced?keys=lofi&field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4', ['/content/faq', '/content/lo-fi-chiptune-glitch-dnb', '/content/lofi-compilation', '/content/lofi-hip-hop', '/content/happy-lo-fi-lofi-collection', '/content/chill-lofi-inspired', '/content/sad-lo-fi-lofi-collectioni', '/content/lofi-again', '/content/lofi-hip-hop-loop', '/content/8-bit-lofi-ice-cave', '/content/funky-hip-hop-lofi-jam', '/content/samurai-champloo-lofi-2', '/content/iced-village-8-bit-lofi-hip-hop', '/content/the-past-8-bit-lofi-hip-hop', '/content/rng-lo-fi', '/content/lo-fi-and-chill-collection', '/content/chill-lofi-inspired-loop-edit', '/content/8-bit-lofi', '/content/happy-lofi-day', '/content/relaxing-lo-fi-songs', '/content/japanese-lofi-hiphop-track', '/content/desert-loop-lo-fi-remaster', '/content/fast-cheerful-punk-rock-lo-fi', '/content/sleepy-little-mouse', '/content/vintage-hawaii'])
+('https://opengameart.org/art-search-advanced?keys=guitar&field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4', ['/content/faq', '/content/ladada-guitar', '/content/gypselectric-guitar', '/content/serenade-guitar', '/content/just-you-and-me-guitar', '/content/jazz-guitar-piece-with-rythym', '/content/1-2-3-4-guitar', '/content/dark-rising-guitar', '/content/guitar-funky-but-on-the-brink-of-war', '/content/the-wyner-electric-guitar', '/content/intensity-buffer-guitar', '/content/the-love-cycle-guitar', '/content/lust-guitar', '/content/reflections-guitar', '/content/guitar-licks', '/content/the-led-light-show-guitar', '/content/the-great-mixing-of-second-dominants-guitar', '/content/boot-guitar', '/content/bebop-guitar', '/content/christmas-special-4-guitar', '/content/ladadaguitar', '/content/heavy-guitar-with-piano', '/content/taking-you-to-the-circus-guitar', '/content/flute-and-guitar', '/content/creepy-guitar-synth-track'])
+('https://opengameart.org/art-search-advanced?keys=ambient&field_art_type_tid%5B%5D=12&field_art_licenses_tid%5B%5D=4', ['/content/faq', '/content/tragic-ambient-main-menu', '/content/underwater-ambient-pad', '/content/calm-ambient-3-lifewave-2k', '/content/calm-ambient-1-synthwave-4k', '/content/ambient-relaxing-loop', '/content/ambient-horror-track-01', '/content/space-graveyard-ambient-track', '/content/bit-forest-ambient', '/content/calm-ambient-2-synthwave-15k', '/content/ambient-sound-creepy', '/content/ambient-the-beach-where-dreams-die', '/content/stranger-synth-retro-ambient-soundtrack', '/content/birds-and-wind-ambient-birds-wind-and-synth', '/content/creepy-ambient-noise-sound-effect', '/content/sunset-walk-ambient-quiet-sweet-loop', '/content/dark-ambient-drone-2', '/content/dark-ambient-drone', '/content/dark-cavern-ambient', '/content/ambientloading-screen-game-music-pack', '/content/first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track', '/content/cathedral-in-the-forest-ambient-loop', '/content/ambient-soundscape', '/content/the-budding-of-consciousness-%E2%80%93-cc0-ambient-minimalist-theme-yoiyami-blue-series-%E2%80%93-no4', '/content/ps2-horror-mystery-ambient-theme'])
+
+web search: "kenney_interface-sounds.zip" "kenney_impact-sounds.zip" download ...
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work = Join-Path $env:TEMP '"'gafti-sol-audio'; New-Item -ItemType Directory -Force -Path "'$work | Out-Null; $env:GAFTI_AUDIO_STAGE = $work
+$s = @'"'
+import urllib.request as u, re, concurrent.futures, json, zipfile, os, html
+from pathlib import Path
+root=Path(os.environ['GAFTI_AUDIO_STAGE'])
+ken='https://kenney.nl/'
+oga='https://opengameart.org/'
+fs='https://freesound.org/people/'
+packs=['interface-sounds','impact-sounds','rpg-audio','casino-audio','ui-audio','music-jingles','voiceover-pack','voiceover-pack-fighter']
+amb={'rain_loop':'Nox_Sound/sounds/535870/','birds_loop':'Magnesus/sounds/723913/','creek_loop':'kentspublicdomain/sounds/325182/','wind_loop':'Nox_Sound/sounds/530907/','night_crickets_loop':'Vrymaa/sounds/734642/','cafe_murmur_loop':'moxobna/sounds/46310/'}
+music=['chill-lofi-inspired-loop-edit','chill-lofi-inspired','in-the-middle-of-nowhere','serenade-guitar','sunset-plains','forget-me-not','first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track','menu-chill-music','relaxing-lo-fi-songs','sunset-walk-ambient-quiet-sweet-loop']
+def request(url): return u.urlopen(u.Request(url,headers={'User-Agent':'Mozilla/5.0','Referer':'https://'+url.split('/')[2]+'/'}),timeout=25)
+def get(url): return request(url).read()
+def save(url,to): to.write_bytes(get(url))
+def check(task):
+ group,n=task
+ try:
+  if group=='ken':
+   url=ken+'assets/'+n
+   token=[REDACTED_SECRET]"data-download-id='(["'^'"']+)\",get(url).decode())[1]
+   dl=json.loads(get(ken+'download-link/'+token))['url']
+   target=root/(n+'.zip')
+   save(dl,target)
+   with zipfile.ZipFile(target) as z:
+    licenses=[z.read(f).decode(errors='replace') for f in z.namelist() if 'license' in f.lower() and f.lower().endswith('.txt')]
+    assert any('CC0' in l for l in licenses),licenses
+    print(n,', '.join(Path(f).name for f in z.namelist() if f.endswith('.ogg')))
+  elif group=='fs':
+   url=fs+amb[n]
+   t=get(url).decode()
+   assert 'creativecommons.org/publicdomain/zero/1.0' in t
+   dl=re.search(r'https://cdn\\.freesound\\.org/previews/["'^"'"\\s<>]+-hq\\.mp3',t)[0]
+   save(dl,root/(n+'.mp3'))
+   return n,url,dl
+  else:
+   url=oga+'content/'+n
+   t=get(url).decode()
+   assert 'creativecommons.org/publicdomain/zero/1.0' in t
+   links=list(dict.fromkeys(html.unescape(l) for l in re.findall(r'href=\"(https://opengameart.org/sites/default/files/["'^"]+'"\\.(?:ogg|mp3|wav|zip|flac))\"',t) if '/styles/' not in l and '/audio_preview/' not in l))
+   return n,url,links
+ except Exception as e: return n,str(e)
+with concurrent.futures.ThreadPoolExecutor() as e:
+ for r in e.map(check,[('ken',n) for n in packs]+[('fs',n) for n in amb]+[('oga',n) for n in music]):
+  if r: print(r)
+'@; "'$file=Join-Path $work '"'acquire.py'; Set-Content -LiteralPath "'$file -Value $s -Encoding UTF8; python $file' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem (Join-Path $env:TEMP '"'gafti-sol-audio') | Select-Object Name,Length; Get-Content autoload/audio_manager.gd -ErrorAction SilentlyContinue | Select-String -Pattern 'ogg|loop|res://assets/audio'" in C:\Users\31\Documents\we2
+ exited 1 in 220ms:
+
+Name                        Length
+----                        ------
+acquire.py                    2510
+birds_loop.mp3              637824
+casino-audio.zip            876839
+creek_loop.mp3              690634
+impact-sounds.zip           800850
+interface-sounds.zip        834536
+music-jingles.zip          1239525
+night_crickets_loop.mp3     788448
+rain_loop.mp3               598560
+rpg-audio.zip               964837
+ui-audio.zip                411949
+voiceover-pack-fighter.zip 1265449
+voiceover-pack.zip         1851632
+wind_loop.mp3               551808
+
+
+
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work = Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE = $work; $s=@'"'
+import os,zipfile
+from pathlib import Path
+for p in Path(os.environ['GAFTI_AUDIO_STAGE']).glob('*.zip'):
+ with zipfile.ZipFile(p) as z:
+  names=[Path(n).name for n in z.namelist() if n.endswith('.ogg')]
+  print(p.stem, ' '.join(names) if p.stem not in ['impact-sounds','interface-sounds'] else sorted({n.split('_')[0] for n in names}))
+'@; "'$s | python -' in C:\Users\31\Documents\we2
+ succeeded in 378ms:
+casino-audio Preview.ogg card-fan-1.ogg card-fan-2.ogg card-place-1.ogg card-place-2.ogg card-place-3.ogg card-place-4.ogg card-shove-1.ogg card-shove-2.ogg card-shove-3.ogg card-shove-4.ogg card-shuffle.ogg card-slide-1.ogg card-slide-2.ogg card-slide-3.ogg card-slide-4.ogg card-slide-5.ogg card-slide-6.ogg card-slide-7.ogg card-slide-8.ogg cards-pack-open-1.ogg cards-pack-open-2.ogg cards-pack-take-out-1.ogg cards-pack-take-out-2.ogg chip-lay-1.ogg chip-lay-2.ogg chip-lay-3.ogg chips-collide-1.ogg chips-collide-2.ogg chips-collide-3.ogg chips-collide-4.ogg chips-handle-1.ogg chips-handle-2.ogg chips-handle-3.ogg chips-handle-4.ogg chips-handle-5.ogg chips-handle-6.ogg chips-stack-1.ogg chips-stack-2.ogg chips-stack-3.ogg chips-stack-4.ogg chips-stack-5.ogg chips-stack-6.ogg dice-grab-1.ogg dice-grab-2.ogg dice-shake-1.ogg dice-shake-2.ogg dice-shake-3.ogg dice-throw-1.ogg dice-throw-2.ogg dice-throw-3.ogg die-throw-1.ogg die-throw-2.ogg die-throw-3.ogg die-throw-4.ogg
+impact-sounds ['footstep', 'impactBell', 'impactGeneric', 'impactGlass', 'impactMetal', 'impactMining', 'impactPlank', 'impactPlate', 'impactPunch', 'impactSoft', 'impactTin', 'impactWood']
+interface-sounds ['back', 'bong', 'click', 'close', 'confirmation', 'drop', 'error', 'glass', 'glitch', 'maximize', 'minimize', 'open', 'pluck', 'question', 'scratch', 'scroll', 'select', 'switch', 'tick', 'toggle']
+music-jingles Preview.ogg jingles_NES00.ogg jingles_NES01.ogg jingles_NES02.ogg jingles_NES03.ogg jingles_NES04.ogg jingles_NES05.ogg jingles_NES06.ogg jingles_NES07.ogg jingles_NES08.ogg jingles_NES09.ogg jingles_NES10.ogg jingles_NES11.ogg jingles_NES12.ogg jingles_NES13.ogg jingles_NES14.ogg jingles_NES15.ogg jingles_NES16.ogg jingles_HIT00.ogg jingles_HIT01.ogg jingles_HIT02.ogg jingles_HIT03.ogg jingles_HIT04.ogg jingles_HIT05.ogg jingles_HIT06.ogg jingles_HIT07.ogg jingles_HIT08.ogg jingles_HIT09.ogg jingles_HIT10.ogg jingles_HIT11.ogg jingles_HIT12.ogg jingles_HIT13.ogg jingles_HIT14.ogg jingles_HIT15.ogg jingles_HIT16.ogg jingles_PIZZI00.ogg jingles_PIZZI01.ogg jingles_PIZZI02.ogg jingles_PIZZI03.ogg jingles_PIZZI04.ogg jingles_PIZZI05.ogg jingles_PIZZI06.ogg jingles_PIZZI07.ogg jingles_PIZZI08.ogg jingles_PIZZI09.ogg jingles_PIZZI10.ogg jingles_PIZZI11.ogg jingles_PIZZI12.ogg jingles_PIZZI13.ogg jingles_PIZZI14.ogg jingles_PIZZI15.ogg jingles_PIZZI16.ogg jingles_SAX00.ogg jingles_SAX01.ogg jingles_SAX02.ogg jingles_SAX03.ogg jingles_SAX04.ogg jingles_SAX05.ogg jingles_SAX06.ogg jingles_SAX07.ogg jingles_SAX08.ogg jingles_SAX09.ogg jingles_SAX10.ogg jingles_SAX11.ogg jingles_SAX12.ogg jingles_SAX13.ogg jingles_SAX14.ogg jingles_SAX15.ogg jingles_SAX16.ogg jingles_STEEL00.ogg jingles_STEEL01.ogg jingles_STEEL02.ogg jingles_STEEL03.ogg jingles_STEEL04.ogg jingles_STEEL05.ogg jingles_STEEL06.ogg jingles_STEEL07.ogg jingles_STEEL08.ogg jingles_STEEL09.ogg jingles_STEEL10.ogg jingles_STEEL11.ogg jingles_STEEL12.ogg jingles_STEEL13.ogg jingles_STEEL14.ogg jingles_STEEL15.ogg jingles_STEEL16.ogg
+rpg-audio Preview.ogg beltHandle1.ogg beltHandle2.ogg bookClose.ogg bookFlip1.ogg bookFlip2.ogg bookFlip3.ogg bookOpen.ogg bookPlace1.ogg bookPlace2.ogg bookPlace3.ogg chop.ogg cloth1.ogg cloth2.ogg cloth3.ogg cloth4.ogg clothBelt.ogg clothBelt2.ogg creak1.ogg creak2.ogg creak3.ogg doorClose_1.ogg doorClose_2.ogg doorClose_3.ogg doorClose_4.ogg doorOpen_1.ogg doorOpen_2.ogg drawKnife1.ogg drawKnife2.ogg drawKnife3.ogg dropLeather.ogg footstep00.ogg footstep01.ogg footstep02.ogg footstep03.ogg footstep04.ogg footstep05.ogg footstep06.ogg footstep07.ogg footstep08.ogg footstep09.ogg handleCoins.ogg handleCoins2.ogg handleSmallLeather.ogg handleSmallLeather2.ogg knifeSlice.ogg knifeSlice2.ogg metalClick.ogg metalLatch.ogg metalPot1.ogg metalPot2.ogg metalPot3.ogg
+ui-audio Preview.ogg click1.ogg click2.ogg click3.ogg click4.ogg click5.ogg mouseclick1.ogg mouserelease1.ogg rollover1.ogg rollover2.ogg rollover3.ogg rollover4.ogg rollover5.ogg rollover6.ogg switch1.ogg switch10.ogg switch11.ogg switch12.ogg switch13.ogg switch14.ogg switch15.ogg switch16.ogg switch17.ogg switch18.ogg switch19.ogg switch2.ogg switch20.ogg switch21.ogg switch22.ogg switch23.ogg switch24.ogg switch25.ogg switch26.ogg switch27.ogg switch28.ogg switch29.ogg switch3.ogg switch30.ogg switch31.ogg switch32.ogg switch33.ogg switch34.ogg switch35.ogg switch36.ogg switch37.ogg switch38.ogg switch4.ogg switch5.ogg switch6.ogg switch7.ogg switch8.ogg switch9.ogg
+voiceover-pack-fighter 1.ogg 10.ogg 2.ogg 3.ogg 4.ogg 5.ogg 6.ogg 7.ogg 8.ogg 9.ogg arcade_mode.ogg battle_mode.ogg begin.ogg championship_mode.ogg choose_your_character.ogg combo.ogg combo_breaker.ogg deathmatch.ogg fight.ogg final_round.ogg flawless_victory.ogg game_over.ogg it's_a_tie.ogg kill_her.ogg kill_him.ogg kill_it.ogg loser.ogg multi_kill.ogg player_1.ogg player_2.ogg prepare_yourself.ogg ready.ogg round_1.ogg round_2.ogg round_3.ogg round_4.ogg round_5.ogg story_mode.ogg sudden_death.ogg survival_mode.ogg tie.ogg tie_breaker.ogg time.ogg winner.ogg you_lose.ogg you_win.ogg Preview.ogg
+voiceover-pack Preview (Female).ogg Preview (Male).ogg Preview.ogg 1.ogg 10.ogg 2.ogg 3.ogg 4.ogg 5.ogg 6.ogg 7.ogg 8.ogg 9.ogg congratulations.ogg correct.ogg final_round.ogg game_over.ogg go.ogg hurry_up.ogg its_a_tie.ogg level.ogg level_up.ogg mission_completed.ogg mission_failed.ogg new_highscore.ogg objective_achieved.ogg power_up.ogg ready.ogg round.ogg set.ogg time_over.ogg war_call_for_backup.ogg war_cover_me.ogg war_fire_in_the_hole.ogg war_get_down.ogg war_go_go_go.ogg war_hold.ogg war_look_out.ogg war_medic.ogg war_reloading.ogg war_rpg.ogg war_sniper.ogg war_supressing_fire.ogg war_target_destroyed.ogg war_target_engaged.ogg war_watch_my_back.ogg wrong.ogg you_lose.ogg you_win.ogg 1.ogg 10.ogg 2.ogg 3.ogg 4.ogg 5.ogg 6.ogg 7.ogg 8.ogg 9.ogg congratulations.ogg correct.ogg final_round.ogg game_over.ogg go.ogg hold.ogg hurry_up.ogg its_a_tie.ogg level.ogg level_up.ogg mission_completed.ogg mission_failed.ogg new_highscore.ogg objective_achieved.ogg power_up.ogg ready.ogg round.ogg set.ogg time_over.ogg war_call_for_backup.ogg war_cover_me.ogg war_fire_in_the_hole.ogg war_get_down.ogg war_go_go_go.ogg war_look_out.ogg war_medic.ogg war_reloading.ogg war_rpg.ogg war_sniper.ogg war_suppressing_fire.ogg war_target_destroyed.ogg war_target_engaged.ogg war_watch_my_back.ogg wrong.ogg you_lose.ogg you_win.ogg
+
+web search: "Foley Sounds" "Kenney" "CC0" footsteps sound download kenney.nl/assets ...
+codex
+Kenney paketlerinde arayüz, ayak sesi ve kapı efektlerini buldum. Ortam kayıtlarının lisanslarını tek tek kontrol ediyorum. Kenney’de uygun karşılığı bulunmayan efektleri raporda EKSİK olarak işaretleyeceğim.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+import concurrent.futures, html, os, re, shutil, urllib.request
+from pathlib import Path
+root=Path(os.environ['GAFTI_AUDIO_STAGE'])
+oga='https://opengameart.org/'
+m={
+'menu':('forget-me-not','forget_me_not_in_f_major_looped.ogg'),
+'day_1':('serenade-guitar',''),
+'day_2':('chill-lofi-inspired-loop-edit',''),
+'evening':('sunset-plains','sunset_plains.wav'),
+'night':('yoiyami-core-theme-%E2%80%93-deep-blue-ambient-piano','yoiyami_core_theme.wav'),
+'gafti':('first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track','first_light_particles.wav'),
+}
+def req(url):
+ return urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0','Referer':'https://'+url.split('/')[2]+'/'}),timeout=20)
+def write(url,to):
+ with req(url) as response, to.open('wb') as out: shutil.copyfileobj(response,out,1024*128)
+def run(n):
+ try:
+  if n=='cafe_murmur_loop':
+   url='https://freesound.org/people/Ultra-Edward/sounds/823831/'
+   t=req(url).read().decode()
+   assert 'creativecommons.org/publicdomain/zero/1.0' in t
+   dl=re.search(r'https://cdn\\.freesound\\.org/previews/["'^"'"\\s<>]+-hq\\.mp3',t)[0]
+   write(dl,root/(n+'.mp3'))
+   print(n,url,dl,flush=True)
+   return
+  slug,file=m[n]
+  url=oga+'content/'+slug
+  t=req(url).read().decode()
+  assert 'creativecommons.org/publicdomain/zero/1.0' in t
+  links=list(dict.fromkeys(html.unescape(l) for l in re.findall(r'href=\"(https://opengameart.org/sites/default/files/["'^"]+'"\\.(?:ogg|mp3|wav|zip|flac))\"',t) if '/styles/' not in l and '/audio_preview/' not in l))
+  print(n,url,links,flush=True)
+  dl=next((l for l in links if l.endswith('/'+file)),None) if file else next((l for l in links if l.endswith(('.ogg','.mp3','.wav'))),None)
+  if not dl: return
+  write(dl,root/(n+'.'+dl.rsplit('.',1)[1]))
+  print('OK',n,flush=True)
+ except Exception as error:
+  print('ERROR',n,repr(error),flush=True)
+with concurrent.futures.ThreadPoolExecutor() as pool: list(pool.map(run,[*m,'cafe_murmur_loop']))
+'@; "'$f=Join-Path $work '"'music.py'; Set-Content -LiteralPath "'$f -Value $s -Encoding UTF8; python -u $f' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$f=Join-Path $work '"'music.py'; "'$s=Get-Content -LiteralPath $f -Raw; $s=$s.Replace("'"'yoiyami_core_theme.wav'\",\"'yoiyami_core_theme_0.wav'\").Replace(\"'first_light_particles.wav'\",\"'first_light_particles_0.wav'\").Replace(\"[*m,'cafe_murmur_loop']\",\"['night','gafti']\"); "'$env:GAFTI_AUDIO_STAGE=$work; $s | python -u -' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem (Join-Path $env:TEMP '"'gafti-sol-audio') | Select-Object Name,Length; ffmpeg -hide_banner -version | Select-Object -First 1" in C:\Users\31\Documents\we2
+ succeeded in 1713ms:
+
+Name                        Length
+----                        ------
+acquire.py                    2510
+birds_loop.mp3              637824
+cafe_murmur_loop.mp3       1138848
+casino-audio.zip            876839
+creek_loop.mp3              690634
+day_1.wav                        0
+day_2.ogg                  2360833
+evening.wav                      0
+gafti.wav                        0
+impact-sounds.zip           800850
+interface-sounds.zip        834536
+menu.ogg                   3341384
+music-jingles.zip          1239525
+music.py                      1962
+night.wav                        0
+night_crickets_loop.mp3     788448
+rain_loop.mp3               598560
+rpg-audio.zip               964837
+ui-audio.zip                411949
+voiceover-pack-fighter.zip 1265449
+voiceover-pack.zip         1851632
+wind_loop.mp3               551808
+ffmpeg version 9.0.1-full_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers
+
+
+
+ succeeded in 110824ms:
+ui-audio Preview.ogg, click1.ogg, click2.ogg, click3.ogg, click4.ogg, click5.ogg, mouseclick1.ogg, mouserelease1.ogg, rollover1.ogg, rollover2.ogg, rollover3.ogg, rollover4.ogg, rollover5.ogg, rollover6.ogg, switch1.ogg, switch10.ogg, switch11.ogg, switch12.ogg, switch13.ogg, switch14.ogg, switch15.ogg, switch16.ogg, switch17.ogg, switch18.ogg, switch19.ogg, switch2.ogg, switch20.ogg, switch21.ogg, switch22.ogg, switch23.ogg, switch24.ogg, switch25.ogg, switch26.ogg, switch27.ogg, switch28.ogg, switch29.ogg, switch3.ogg, switch30.ogg, switch31.ogg, switch32.ogg, switch33.ogg, switch34.ogg, switch35.ogg, switch36.ogg, switch37.ogg, switch38.ogg, switch4.ogg, switch5.ogg, switch6.ogg, switch7.ogg, switch8.ogg, switch9.ogg
+interface-sounds back_001.ogg, back_002.ogg, back_003.ogg, back_004.ogg, bong_001.ogg, click_001.ogg, click_002.ogg, click_003.ogg, click_004.ogg, click_005.ogg, close_001.ogg, close_002.ogg, close_003.ogg, close_004.ogg, confirmation_001.ogg, confirmation_002.ogg, confirmation_003.ogg, confirmation_004.ogg, drop_001.ogg, drop_002.ogg, drop_003.ogg, drop_004.ogg, error_001.ogg, error_002.ogg, error_003.ogg, error_004.ogg, error_005.ogg, error_006.ogg, error_007.ogg, error_008.ogg, glass_001.ogg, glass_002.ogg, glass_003.ogg, glass_004.ogg, glass_005.ogg, glass_006.ogg, glitch_001.ogg, glitch_002.ogg, glitch_003.ogg, glitch_004.ogg, maximize_001.ogg, maximize_002.ogg, maximize_003.ogg, maximize_004.ogg, maximize_005.ogg, maximize_006.ogg, maximize_007.ogg, maximize_008.ogg, maximize_009.ogg, minimize_001.ogg, minimize_002.ogg, minimize_003.ogg, minimize_004.ogg, minimize_005.ogg, minimize_006.ogg, minimize_007.ogg, minimize_008.ogg, minimize_009.ogg, open_001.ogg, open_002.ogg, open_003.ogg, open_004.ogg, pluck_001.ogg, pluck_002.ogg, question_001.ogg, question_002.ogg, question_003.ogg, question_004.ogg, scratch_001.ogg, scratch_002.ogg, scratch_003.ogg, scratch_004.ogg, scratch_005.ogg, scroll_001.ogg, scroll_002.ogg, scroll_003.ogg, scroll_004.ogg, scroll_005.ogg, select_001.ogg, select_002.ogg, select_003.ogg, select_004.ogg, select_005.ogg, select_006.ogg, select_007.ogg, select_008.ogg, switch_001.ogg, switch_002.ogg, switch_003.ogg, switch_004.ogg, switch_005.ogg, switch_006.ogg, switch_007.ogg, tick_001.ogg, tick_002.ogg, tick_004.ogg, toggle_001.ogg, toggle_002.ogg, toggle_003.ogg, toggle_004.ogg
+voiceover-pack-fighter 1.ogg, 10.ogg, 2.ogg, 3.ogg, 4.ogg, 5.ogg, 6.ogg, 7.ogg, 8.ogg, 9.ogg, arcade_mode.ogg, battle_mode.ogg, begin.ogg, championship_mode.ogg, choose_your_character.ogg, combo.ogg, combo_breaker.ogg, deathmatch.ogg, fight.ogg, final_round.ogg, flawless_victory.ogg, game_over.ogg, it's_a_tie.ogg, kill_her.ogg, kill_him.ogg, kill_it.ogg, loser.ogg, multi_kill.ogg, player_1.ogg, player_2.ogg, prepare_yourself.ogg, ready.ogg, round_1.ogg, round_2.ogg, round_3.ogg, round_4.ogg, round_5.ogg, story_mode.ogg, sudden_death.ogg, survival_mode.ogg, tie.ogg, tie_breaker.ogg, time.ogg, winner.ogg, you_lose.ogg, you_win.ogg, Preview.ogg
+casino-audio Preview.ogg, card-fan-1.ogg, card-fan-2.ogg, card-place-1.ogg, card-place-2.ogg, card-place-3.ogg, card-place-4.ogg, card-shove-1.ogg, card-shove-2.ogg, card-shove-3.ogg, card-shove-4.ogg, card-shuffle.ogg, card-slide-1.ogg, card-slide-2.ogg, card-slide-3.ogg, card-slide-4.ogg, card-slide-5.ogg, card-slide-6.ogg, card-slide-7.ogg, card-slide-8.ogg, cards-pack-open-1.ogg, cards-pack-open-2.ogg, cards-pack-take-out-1.ogg, cards-pack-take-out-2.ogg, chip-lay-1.ogg, chip-lay-2.ogg, chip-lay-3.ogg, chips-collide-1.ogg, chips-collide-2.ogg, chips-collide-3.ogg, chips-collide-4.ogg, chips-handle-1.ogg, chips-handle-2.ogg, chips-handle-3.ogg, chips-handle-4.ogg, chips-handle-5.ogg, chips-handle-6.ogg, chips-stack-1.ogg, chips-stack-2.ogg, chips-stack-3.ogg, chips-stack-4.ogg, chips-stack-5.ogg, chips-stack-6.ogg, dice-grab-1.ogg, dice-grab-2.ogg, dice-shake-1.ogg, dice-shake-2.ogg, dice-shake-3.ogg, dice-throw-1.ogg, dice-throw-2.ogg, dice-throw-3.ogg, die-throw-1.ogg, die-throw-2.ogg, die-throw-3.ogg, die-throw-4.ogg
+music-jingles Preview.ogg, jingles_NES00.ogg, jingles_NES01.ogg, jingles_NES02.ogg, jingles_NES03.ogg, jingles_NES04.ogg, jingles_NES05.ogg, jingles_NES06.ogg, jingles_NES07.ogg, jingles_NES08.ogg, jingles_NES09.ogg, jingles_NES10.ogg, jingles_NES11.ogg, jingles_NES12.ogg, jingles_NES13.ogg, jingles_NES14.ogg, jingles_NES15.ogg, jingles_NES16.ogg, jingles_HIT00.ogg, jingles_HIT01.ogg, jingles_HIT02.ogg, jingles_HIT03.ogg, jingles_HIT04.ogg, jingles_HIT05.ogg, jingles_HIT06.ogg, jingles_HIT07.ogg, jingles_HIT08.ogg, jingles_HIT09.ogg, jingles_HIT10.ogg, jingles_HIT11.ogg, jingles_HIT12.ogg, jingles_HIT13.ogg, jingles_HIT14.ogg, jingles_HIT15.ogg, jingles_HIT16.ogg, jingles_PIZZI00.ogg, jingles_PIZZI01.ogg, jingles_PIZZI02.ogg, jingles_PIZZI03.ogg, jingles_PIZZI04.ogg, jingles_PIZZI05.ogg, jingles_PIZZI06.ogg, jingles_PIZZI07.ogg, jingles_PIZZI08.ogg, jingles_PIZZI09.ogg, jingles_PIZZI10.ogg, jingles_PIZZI11.ogg, jingles_PIZZI12.ogg, jingles_PIZZI13.ogg, jingles_PIZZI14.ogg, jingles_PIZZI15.ogg, jingles_PIZZI16.ogg, jingles_SAX00.ogg, jingles_SAX01.ogg, jingles_SAX02.ogg, jingles_SAX03.ogg, jingles_SAX04.ogg, jingles_SAX05.ogg, jingles_SAX06.ogg, jingles_SAX07.ogg, jingles_SAX08.ogg, jingles_SAX09.ogg, jingles_SAX10.ogg, jingles_SAX11.ogg, jingles_SAX12.ogg, jingles_SAX13.ogg, jingles_SAX14.ogg, jingles_SAX15.ogg, jingles_SAX16.ogg, jingles_STEEL00.ogg, jingles_STEEL01.ogg, jingles_STEEL02.ogg, jingles_STEEL03.ogg, jingles_STEEL04.ogg, jingles_STEEL05.ogg, jingles_STEEL06.ogg, jingles_STEEL07.ogg, jingles_STEEL08.ogg, jingles_STEEL09.ogg, jingles_STEEL10.ogg, jingles_STEEL11.ogg, jingles_STEEL12.ogg, jingles_STEEL13.ogg, jingles_STEEL14.ogg, jingles_STEEL15.ogg, jingles_STEEL16.ogg
+impact-sounds footstep_carpet_000.ogg, footstep_carpet_001.ogg, footstep_carpet_002.ogg, footstep_carpet_003.ogg, footstep_carpet_004.ogg, footstep_concrete_000.ogg, footstep_concrete_001.ogg, footstep_concrete_002.ogg, footstep_concrete_003.ogg, footstep_concrete_004.ogg, footstep_grass_000.ogg, footstep_grass_001.ogg, footstep_grass_002.ogg, footstep_grass_003.ogg, footstep_grass_004.ogg, footstep_snow_000.ogg, footstep_snow_001.ogg, footstep_snow_002.ogg, footstep_snow_003.ogg, footstep_snow_004.ogg, footstep_wood_000.ogg, footstep_wood_001.ogg, footstep_wood_002.ogg, footstep_wood_003.ogg, footstep_wood_004.ogg, impactBell_heavy_000.ogg, impactBell_heavy_001.ogg, impactBell_heavy_002.ogg, impactBell_heavy_003.ogg, impactBell_heavy_004.ogg, impactGeneric_light_000.ogg, impactGeneric_light_001.ogg, impactGeneric_light_002.ogg, impactGeneric_light_003.ogg, impactGeneric_light_004.ogg, impactGlass_heavy_000.ogg, impactGlass_heavy_001.ogg, impactGlass_heavy_002.ogg, impactGlass_heavy_003.ogg, impactGlass_heavy_004.ogg, impactGlass_light_000.ogg, impactGlass_light_001.ogg, impactGlass_light_002.ogg, impactGlass_light_003.ogg, impactGlass_light_004.ogg, impactGlass_medium_000.ogg, impactGlass_medium_001.ogg, impactGlass_medium_002.ogg, impactGlass_medium_003.ogg, impactGlass_medium_004.ogg, impactMetal_heavy_000.ogg, impactMetal_heavy_001.ogg, impactMetal_heavy_002.ogg, impactMetal_heavy_003.ogg, impactMetal_heavy_004.ogg, impactMetal_light_000.ogg, impactMetal_light_001.ogg, impactMetal_light_002.ogg, impactMetal_light_003.ogg, impactMetal_light_004.ogg, impactMetal_medium_000.ogg, impactMetal_medium_001.ogg, impactMetal_medium_002.ogg, impactMetal_medium_003.ogg, impactMetal_medium_004.ogg, impactMining_000.ogg, impactMining_001.ogg, impactMining_002.ogg, impactMining_003.ogg, impactMining_004.ogg, impactPlank_medium_000.ogg, impactPlank_medium_001.ogg, impactPlank_medium_002.ogg, impactPlank_medium_003.ogg, impactPlank_medium_004.ogg, impactPlate_heavy_000.ogg, impactPlate_heavy_001.ogg, impactPlate_heavy_002.ogg, impactPlate_heavy_003.ogg, impactPlate_heavy_004.ogg, impactPlate_light_000.ogg, impactPlate_light_001.ogg, impactPlate_light_002.ogg, impactPlate_light_003.ogg, impactPlate_light_004.ogg, impactPlate_medium_000.ogg, impactPlate_medium_001.ogg, impactPlate_medium_002.ogg, impactPlate_medium_003.ogg, impactPlate_medium_004.ogg, impactPunch_heavy_000.ogg, impactPunch_heavy_001.ogg, impactPunch_heavy_002.ogg, impactPunch_heavy_003.ogg, impactPunch_heavy_004.ogg, impactPunch_medium_000.ogg, impactPunch_medium_001.ogg, impactPunch_medium_002.ogg, impactPunch_medium_003.ogg, impactPunch_medium_004.ogg, impactSoft_heavy_000.ogg, impactSoft_heavy_001.ogg, impactSoft_heavy_002.ogg, impactSoft_heavy_003.ogg, impactSoft_heavy_004.ogg, impactSoft_medium_000.ogg, impactSoft_medium_001.ogg, impactSoft_medium_002.ogg, impactSoft_medium_003.ogg, impactSoft_medium_004.ogg, impactTin_medium_000.ogg, impactTin_medium_001.ogg, impactTin_medium_002.ogg, impactTin_medium_003.ogg, impactTin_medium_004.ogg, impactWood_heavy_000.ogg, impactWood_heavy_001.ogg, impactWood_heavy_002.ogg, impactWood_heavy_003.ogg, impactWood_heavy_004.ogg, impactWood_light_000.ogg, impactWood_light_001.ogg, impactWood_light_002.ogg, impactWood_light_003.ogg, impactWood_light_004.ogg, impactWood_medium_000.ogg, impactWood_medium_001.ogg, impactWood_medium_002.ogg, impactWood_medium_003.ogg, impactWood_medium_004.ogg
+rpg-audio Preview.ogg, beltHandle1.ogg, beltHandle2.ogg, bookClose.ogg, bookFlip1.ogg, bookFlip2.ogg, bookFlip3.ogg, bookOpen.ogg, bookPlace1.ogg, bookPlace2.ogg, bookPlace3.ogg, chop.ogg, cloth1.ogg, cloth2.ogg, cloth3.ogg, cloth4.ogg, clothBelt.ogg, clothBelt2.ogg, creak1.ogg, creak2.ogg, creak3.ogg, doorClose_1.ogg, doorClose_2.ogg, doorClose_3.ogg, doorClose_4.ogg, doorOpen_1.ogg, doorOpen_2.ogg, drawKnife1.ogg, drawKnife2.ogg, drawKnife3.ogg, dropLeather.ogg, footstep00.ogg, footstep01.ogg, footstep02.ogg, footstep03.ogg, footstep04.ogg, footstep05.ogg, footstep06.ogg, footstep07.ogg, footstep08.ogg, footstep09.ogg, handleCoins.ogg, handleCoins2.ogg, handleSmallLeather.ogg, handleSmallLeather2.ogg, knifeSlice.ogg, knifeSlice2.ogg, metalClick.ogg, metalLatch.ogg, metalPot1.ogg, metalPot2.ogg, metalPot3.ogg
+voiceover-pack Preview (Female).ogg, Preview (Male).ogg, Preview.ogg, 1.ogg, 10.ogg, 2.ogg, 3.ogg, 4.ogg, 5.ogg, 6.ogg, 7.ogg, 8.ogg, 9.ogg, congratulations.ogg, correct.ogg, final_round.ogg, game_over.ogg, go.ogg, hurry_up.ogg, its_a_tie.ogg, level.ogg, level_up.ogg, mission_completed.ogg, mission_failed.ogg, new_highscore.ogg, objective_achieved.ogg, power_up.ogg, ready.ogg, round.ogg, set.ogg, time_over.ogg, war_call_for_backup.ogg, war_cover_me.ogg, war_fire_in_the_hole.ogg, war_get_down.ogg, war_go_go_go.ogg, war_hold.ogg, war_look_out.ogg, war_medic.ogg, war_reloading.ogg, war_rpg.ogg, war_sniper.ogg, war_supressing_fire.ogg, war_target_destroyed.ogg, war_target_engaged.ogg, war_watch_my_back.ogg, wrong.ogg, you_lose.ogg, you_win.ogg, 1.ogg, 10.ogg, 2.ogg, 3.ogg, 4.ogg, 5.ogg, 6.ogg, 7.ogg, 8.ogg, 9.ogg, congratulations.ogg, correct.ogg, final_round.ogg, game_over.ogg, go.ogg, hold.ogg, hurry_up.ogg, its_a_tie.ogg, level.ogg, level_up.ogg, mission_completed.ogg, mission_failed.ogg, new_highscore.ogg, objective_achieved.ogg, power_up.ogg, ready.ogg, round.ogg, set.ogg, time_over.ogg, war_call_for_backup.ogg, war_cover_me.ogg, war_fire_in_the_hole.ogg, war_get_down.ogg, war_go_go_go.ogg, war_look_out.ogg, war_medic.ogg, war_reloading.ogg, war_rpg.ogg, war_sniper.ogg, war_suppressing_fire.ogg, war_target_destroyed.ogg, war_target_engaged.ogg, war_watch_my_back.ogg, wrong.ogg, you_lose.ogg, you_win.ogg
+('rain_loop', 'https://freesound.org/people/Nox_Sound/sounds/535870/', 'https://cdn.freesound.org/previews/535/535870_9250976-hq.mp3')
+('birds_loop', 'https://freesound.org/people/Magnesus/sounds/723913/', 'https://cdn.freesound.org/previews/723/723913_2008500-hq.mp3')
+('creek_loop', 'https://freesound.org/people/kentspublicdomain/sounds/325182/', 'https://cdn.freesound.org/previews/325/325182_5583936-hq.mp3')
+('wind_loop', 'https://freesound.org/people/Nox_Sound/sounds/530907/', 'https://cdn.freesound.org/previews/530/530907_9250976-hq.mp3')
+('night_crickets_loop', 'https://freesound.org/people/Vrymaa/sounds/734642/', 'https://cdn.freesound.org/previews/734/734642_13973196-hq.mp3')
+('cafe_murmur_loop', 'https://freesound.org/people/moxobna/sounds/46310/', 'https://cdn.freesound.org/previews/46/46310_43834-hq.mp3')
+('chill-lofi-inspired-loop-edit', 'https://opengameart.org/content/chill-lofi-inspired-loop-edit', ['https://opengameart.org/sites/default/files/chilllofir-loop.ogg'])
+('chill-lofi-inspired', 'https://opengameart.org/content/chill-lofi-inspired', ['https://opengameart.org/sites/default/files/ChillLofiR_0.mp3', 'https://opengameart.org/sites/default/files/ChillLofi.ogg'])
+('in-the-middle-of-nowhere', 'https://opengameart.org/content/in-the-middle-of-nowhere', ['https://opengameart.org/sites/default/files/unknown_space_bassed_0.mp3', 'https://opengameart.org/sites/default/files/unknown_space_ambience.mp3'])
+('serenade-guitar', 'https://opengameart.org/content/serenade-guitar', ['https://opengameart.org/sites/default/files/Serenade.wav'])
+('sunset-plains', 'https://opengameart.org/content/sunset-plains', ['https://opengameart.org/sites/default/files/sunset_plains.wav'])
+('forget-me-not', 'https://opengameart.org/content/forget-me-not', ['https://opengameart.org/sites/default/files/forget_me_not_in_f_major_0.ogg', 'https://opengameart.org/sites/default/files/forget_me_not_in_f_major_looped.ogg'])
+('first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track', 'https://opengameart.org/content/first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track', ['https://opengameart.org/sites/default/files/first_light_particles_0.wav'])
+('menu-chill-music', 'https://opengameart.org/content/menu-chill-music', ['https://opengameart.org/sites/default/files/menu_chill.wav'])
+('relaxing-lo-fi-songs', 'https://opengameart.org/content/relaxing-lo-fi-songs', ['https://opengameart.org/sites/default/files/lofi.zip'])
+('sunset-walk-ambient-quiet-sweet-loop', 'https://opengameart.org/content/sunset-walk-ambient-quiet-sweet-loop', ['https://opengameart.org/sites/default/files/SunsetWalk.ogg', 'https://opengameart.org/sites/default/files/SunsetWalk.wav'])
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+import os,zipfile,re,urllib.request as u
+from pathlib import Path
+p=Path(os.environ['GAFTI_AUDIO_STAGE'])
+for pack,patterns in [('impact-sounds',['footstep_grass','footstep_wood','impactSoft','impactPlank','impactTin']),('interface-sounds',['open','close','click','confirmation','error','scratch']),('rpg-audio',['metal','Knife','bookFlip'])]:
+ with zipfile.ZipFile(p/(pack+'.zip')) as z: print(pack,[n for n in z.namelist() if n.endswith('.ogg') and any(w in n for w in patterns)])
+url='https://assets.moulinette.cloud/marketplace/product/6993/kenney/foley-sounds'
+try:
+ t=u.urlopen(url,timeout=5).read().decode()
+ for x in ['CC0','footstep','mp3','License','ogg','api']: print(x,[t[max(0,m.start()-60):m.end()+80] for m in list(re.finditer(x,t,re.I))[:3]])
+except Exception as e: print(e)
+'@; "'$s | python -' in C:\Users\31\Documents\we2
+ succeeded in 1523ms:
+impact-sounds ['Audio/footstep_grass_000.ogg', 'Audio/footstep_grass_001.ogg', 'Audio/footstep_grass_002.ogg', 'Audio/footstep_grass_003.ogg', 'Audio/footstep_grass_004.ogg', 'Audio/footstep_wood_000.ogg', 'Audio/footstep_wood_001.ogg', 'Audio/footstep_wood_002.ogg', 'Audio/footstep_wood_003.ogg', 'Audio/footstep_wood_004.ogg', 'Audio/impactPlank_medium_000.ogg', 'Audio/impactPlank_medium_001.ogg', 'Audio/impactPlank_medium_002.ogg', 'Audio/impactPlank_medium_003.ogg', 'Audio/impactPlank_medium_004.ogg', 'Audio/impactSoft_heavy_000.ogg', 'Audio/impactSoft_heavy_001.ogg', 'Audio/impactSoft_heavy_002.ogg', 'Audio/impactSoft_heavy_003.ogg', 'Audio/impactSoft_heavy_004.ogg', 'Audio/impactSoft_medium_000.ogg', 'Audio/impactSoft_medium_001.ogg', 'Audio/impactSoft_medium_002.ogg', 'Audio/impactSoft_medium_003.ogg', 'Audio/impactSoft_medium_004.ogg', 'Audio/impactTin_medium_000.ogg', 'Audio/impactTin_medium_001.ogg', 'Audio/impactTin_medium_002.ogg', 'Audio/impactTin_medium_003.ogg', 'Audio/impactTin_medium_004.ogg']
+interface-sounds ['Audio/click_001.ogg', 'Audio/click_002.ogg', 'Audio/click_003.ogg', 'Audio/click_004.ogg', 'Audio/click_005.ogg', 'Audio/close_001.ogg', 'Audio/close_002.ogg', 'Audio/close_003.ogg', 'Audio/close_004.ogg', 'Audio/confirmation_001.ogg', 'Audio/confirmation_002.ogg', 'Audio/confirmation_003.ogg', 'Audio/confirmation_004.ogg', 'Audio/error_001.ogg', 'Audio/error_002.ogg', 'Audio/error_003.ogg', 'Audio/error_004.ogg', 'Audio/error_005.ogg', 'Audio/error_006.ogg', 'Audio/error_007.ogg', 'Audio/error_008.ogg', 'Audio/open_001.ogg', 'Audio/open_002.ogg', 'Audio/open_003.ogg', 'Audio/open_004.ogg', 'Audio/scratch_001.ogg', 'Audio/scratch_002.ogg', 'Audio/scratch_003.ogg', 'Audio/scratch_004.ogg', 'Audio/scratch_005.ogg']
+rpg-audio ['Audio/bookFlip1.ogg', 'Audio/bookFlip2.ogg', 'Audio/bookFlip3.ogg', 'Audio/drawKnife1.ogg', 'Audio/drawKnife2.ogg', 'Audio/drawKnife3.ogg', 'Audio/metalClick.ogg', 'Audio/metalLatch.ogg', 'Audio/metalPot1.ogg', 'Audio/metalPot2.ogg', 'Audio/metalPot3.ogg']
+CC0 []
+footstep []
+mp3 []
+License []
+ogg ['dropdownSection"><button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownUser" data-toggle="dropdown" aria-haspopup="true" ', 'dary dropdown-toggle" type="button" id="dropdownUser" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fas fa-sign-i', '></thead><tbody><tr><td class="sound" title="Helmet/pickup1.ogg"><i class="fas fa-music"></i><a href="/marketplace/product/6993/kenney/foley-so']
+api []
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem (Join-Path $env:TEMP '"'gafti-sol-audio') | Select-Object Name,Length; Get-Item project.godot | Select-Object LastWriteTime" in C:\Users\31\Documents\we2
+ succeeded in 180ms:
+
+Name                        Length
+----                        ------
+acquire.py                    2510
+birds_loop.mp3              637824
+cafe_murmur_loop.mp3       8312731
+casino-audio.zip            876839
+creek_loop.mp3              690634
+day_1.wav                        0
+day_2.ogg                  2360833
+evening.wav                      0
+gafti.wav                        0
+impact-sounds.zip           800850
+interface-sounds.zip        834536
+menu.ogg                   3341384
+music-jingles.zip          1239525
+music.py                      1962
+night.wav                        0
+night_crickets_loop.mp3     788448
+rain_loop.mp3               598560
+rpg-audio.zip               964837
+ui-audio.zip                411949
+voiceover-pack-fighter.zip 1265449
+voiceover-pack.zip         1851632
+wind_loop.mp3               551808
+                                  
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "curl.exe -sS -I --max-time 12 'https://opengameart.org/sites/default/files/first_light_particles_0.wav'; curl.exe -sS -I --max-time 12 'https://opengameart.org/sites/default/files/Serenade.wav'" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$s=@'"'
+import urllib.request as u,re,concurrent.futures
+urls=['https://opengameart.org/content/'+n for n in ['serenade-guitar','sunset-plains','yoiyami-core-theme-%E2%80%93-deep-blue-ambient-piano','first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track','in-the-middle-of-nowhere','sunset-walk-ambient-quiet-sweet-loop','calm-ambient-3-lifewave-2k','ambient-relaxing-loop','reflections-guitar']]+['https://assets.moulinette.cloud/marketplace/product/6993/kenney/foley-sounds']
+def check(url):
+ t=u.urlopen(url,timeout=8).read().decode()
+ if 'moulinette' in url: return sorted(set(re.findall(r'title=\"(["'^"]+'"\\.ogg)\"',t)))
+ return url, [(x) for x in dict.fromkeys(re.findall(r'https?://opengameart.org/sites/default/files/["'^"'"\\s<>]+\\.(?:ogg|mp3|wav|zip|flac)',t)) if '/styles/' not in x][:25], 'creativecommons.org/publicdomain/zero/1.0' in t
+with concurrent.futures.ThreadPoolExecutor() as ex:
+ for a in ex.map(check,urls): print(a)
+'@; "'$s | python -' in C:\Users\31\Documents\we2
+ succeeded in 1865ms:
+HTTP/1.1 200 OK
+Server: nginx/1.30.6
+Date: Tue, 24 Nov 2026 09:26:18 GMT
+Content-Type: application/octet-stream
+Content-Length: 25290280
+Last-Modified: Thu, 27 Nov 2025 07:04:07 GMT
+Connection: keep-alive
+ETag: "6927f7e7-181e628"
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Accept-Ranges: bytes
+
+HTTP/1.1 200 OK
+Server: nginx/1.30.6
+Date: Tue, 24 Nov 2026 09:26:18 GMT
+Content-Type: application/octet-stream
+Content-Length: 22814532
+Last-Modified: Sat, 30 Sep 2017 07:08:46 GMT
+Connection: keep-alive
+ETag: "59cf42fe-15c1f44"
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Accept-Ranges: bytes
+
+
+ succeeded in 1979ms:
+('https://opengameart.org/content/serenade-guitar', ['https://opengameart.org/sites/default/files/audio_preview/Serenade_0.mp3.ogg', 'https://opengameart.org/sites/default/files/Serenade_0.mp3', 'https://opengameart.org/sites/default/files/Serenade.wav'], True)
+('https://opengameart.org/content/sunset-plains', ['https://opengameart.org/sites/default/files/audio_preview/sunset_plains_0.mp3.ogg', 'https://opengameart.org/sites/default/files/sunset_plains_0.mp3', 'https://opengameart.org/sites/default/files/sunset_plains.wav'], True)
+('https://opengameart.org/content/yoiyami-core-theme-%E2%80%93-deep-blue-ambient-piano', ['https://opengameart.org/sites/default/files/audio_preview/yoiyami_core_theme_1.mp3.ogg', 'https://opengameart.org/sites/default/files/yoiyami_core_theme_1.mp3', 'https://opengameart.org/sites/default/files/yoiyami_core_theme_0.wav'], True)
+('https://opengameart.org/content/first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track', ['https://opengameart.org/sites/default/files/audio_preview/first_light_particles_1.mp3.ogg', 'https://opengameart.org/sites/default/files/first_light_particles_1.mp3', 'https://opengameart.org/sites/default/files/first_light_particles_0.wav'], True)
+('https://opengameart.org/content/in-the-middle-of-nowhere', ['https://opengameart.org/sites/default/files/audio_preview/unknown_space_bassed.mp3.ogg', 'https://opengameart.org/sites/default/files/unknown_space_bassed.mp3', 'https://opengameart.org/sites/default/files/audio_preview/unknown_space_ambience_0.mp3.ogg', 'https://opengameart.org/sites/default/files/unknown_space_ambience_0.mp3', 'https://opengameart.org/sites/default/files/unknown_space_bassed_0.mp3', 'https://opengameart.org/sites/default/files/unknown_space_ambience.mp3'], True)
+('https://opengameart.org/content/sunset-walk-ambient-quiet-sweet-loop', ['https://opengameart.org/sites/default/files/SunsetWalkshort.ogg', 'https://opengameart.org/sites/default/files/audio_preview/SunsetWalkshort.ogg.mp3', 'https://opengameart.org/sites/default/files/SunsetWalk.ogg', 'https://opengameart.org/sites/default/files/SunsetWalk.wav'], True)
+('https://opengameart.org/content/calm-ambient-3-lifewave-2k', ['https://opengameart.org/sites/default/files/audio_preview/006_lifeWave2k.mp3.ogg', 'https://opengameart.org/sites/default/files/006_lifeWave2k.mp3', 'https://opengameart.org/sites/default/files/006_lifeWave2k_0.mp3'], True)
+('https://opengameart.org/content/ambient-relaxing-loop', ['https://opengameart.org/sites/default/files/Ambient-Loop-isaiah658.ogg', 'https://opengameart.org/sites/default/files/audio_preview/Ambient-Loop-isaiah658.ogg.mp3', 'https://opengameart.org/sites/default/files/Ambient-Loop-isaiah658_0.ogg', 'https://opengameart.org/sites/default/files/Ambient-Loop-isaiah658.wav', 'https://opengameart.org/sites/default/files/Spyro-2-Style-Preset.zip'], True)
+('https://opengameart.org/content/reflections-guitar', ['https://opengameart.org/sites/default/files/audio_preview/Reflections%20.mp3.ogg', 'https://opengameart.org/sites/default/files/Reflections%20.mp3', 'https://opengameart.org/sites/default/files/Reflections%20_0.mp3'], True)
+['Helmet/pickup1.ogg', 'Helmet/pickup2.ogg', 'Helmet/pickup3.ogg', 'Helmet/pickup4.ogg', 'Helmet/setDown1.ogg', 'Helmet/setDown2.ogg', 'Plating/platesHit1.ogg', 'Plating/platesHit10.ogg', 'Plating/platesHit2.ogg', 'Plating/platesHit3.ogg', 'Plating/platesHit4.ogg', 'Plating/platesHit5.ogg', 'Plating/platesHit6.ogg', 'Plating/platesHit7.ogg', 'Plating/platesHit8.ogg', 'Plating/platesHit9.ogg', 'Plating/platesSlide2.ogg', 'Plating/platesSlide3.ogg', 'Plating/platesSlide4.ogg', 'Plating/platesslide1.ogg', 'Rocks/rockHit1.ogg', 'Rocks/rockHit2.ogg', 'Rocks/stoneDrag1.ogg', 'Rocks/stoneDrag2.ogg', 'Rocks/stoneDrag3.ogg', 'Rocks/stoneDrag4.ogg', 'Rocks/stoneDragHit1.ogg', 'Rocks/stoneDragHit2.ogg', 'Rocks/stoneDragHit3.ogg', 'Rocks/stoneHit1.ogg', 'Rocks/stoneHit2.ogg', 'Rocks/stoneHit3.ogg', 'Rocks/stoneHit4.ogg', 'Rocks/stoneHit5.ogg', 'Rocks/stonesHit1.ogg', 'Rocks/stonesHit2.ogg', 'Swords/hitHelmet1.ogg', 'Swords/hitHelmet2.ogg', 'Swords/hitHelmet3.ogg', 'Swords/hitHelmet4.ogg', 'Swords/hitHelmet5.ogg', 'Swords/sword1.ogg', 'Swords/sword10.ogg', 'Swords/sword11.ogg', 'Swords/sword2.ogg', 'Swords/sword3.ogg', 'Swords/sword4.ogg', 'Swords/sword5.ogg', 'Swords/sword6.ogg', 'Swords/sword7.ogg', 'Swords/sword8.ogg', 'Swords/sword9.ogg', 'Swords/swordMetal1.ogg', 'Swords/swordMetal2.ogg', 'Swords/swordMetal3.ogg', 'Swords/swordMetal4.ogg', 'Swords/swordMetal5.ogg', 'Swords/swordMetal6.ogg', 'Swords/swordMetal7.ogg', 'Swords/swordSlide1.ogg', 'Swords/swordSlide2.ogg', 'Swords/swordSlide3.ogg', 'Swords/swordStone1.ogg', 'Swords/swordStone2.ogg', 'Swords/swordStone3.ogg', 'Swords/swordStone4.ogg', 'Water/drip1.ogg', 'Water/drip2.ogg', 'Water/drip3.ogg', 'Water/drip4.ogg', 'Water/sinkDrain1.ogg', 'Water/sinkDrain2.ogg', 'Water/sinkWater1.ogg', 'Water/sinkWater2.ogg', 'Water/sinkWater3.ogg', 'Water/sinkWater4.ogg', 'Water/toiletFlush.ogg', 'Woosh/woosh1.ogg', 'Woosh/woosh2.ogg', 'Woosh/woosh3.ogg', 'Woosh/woosh4.ogg', 'Woosh/woosh5.ogg', 'Woosh/woosh6.ogg', 'Woosh/woosh7.ogg', 'Woosh/woosh8.ogg']
+
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$map=@{day_1='"'Serenade_0.mp3'; evening='sunset_plains_0.mp3'; night='yoiyami_core_theme_1.mp3'; gafti='first_light_particles_1.mp3'}; "'$map.GetEnumerator() | ForEach-Object { Start-Process -FilePath (Get-Command curl.exe).Source -ArgumentList @('"'-f','-sS','--retry','2','--max-time','35','-o',\""'`"$(Join-Path $work ($_.Key+'"'.mp3'))"'`"", ('"'https://opengameart.org/sites/default/files/'+"'$_.Value)) -WindowStyle Hidden -PassThru } | Wait-Process; curl.exe -f -sS --max-time 20 -o (Join-Path $work '"'cafe_ultra.mp3') 'https://cdn.freesound.org/previews/823/823831_16786392-hq.mp3'; Get-ChildItem "'$work -Filter '"'*.mp3' | Select-Object Name,Length" in C:\Users\31\Documents\we2
+web search: "foley" "sinkWater1.ogg" "kenney" Creative Commons download ...
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem assets -Filter '*.import' -Recurse | Select-Object -First 5 -ExpandProperty FullName; Get-ChildItem (Join-Path "'$env:TEMP '"'gafti-sol-audio') | Select-Object Name,Length; Test-Path project.godot; Get-ChildItem -Name | Select-Object -First 25" in C:\Users\31\Documents\we2
+ succeeded in 360ms:
+
+Name                        Length
+----                        ------
+acquire.py                    2510
+birds_loop.mp3              637824
+cafe_murmur_loop.mp3       8312731
+casino-audio.zip            876839
+creek_loop.mp3              690634
+day_1.mp3                        0
+day_1.wav                        0
+day_2.ogg                  2360833
+evening.mp3                      0
+evening.wav                      0
+gafti.mp3                        0
+gafti.wav                        0
+impact-sounds.zip           800850
+interface-sounds.zip        834536
+menu.ogg                   3341384
+music-jingles.zip          1239525
+music.py                      1962
+night.mp3                        0
+night.wav                        0
+night_crickets_loop.mp3     788448
+rain_loop.mp3               598560
+rpg-audio.zip               964837
+ui-audio.zip                411949
+voiceover-pack-fighter.zip 1265449
+voiceover-pack.zip         1851632
+wind_loop.mp3               551808
+True
+assets
+autoload
+data
+localization
+scenes
+scripts
+shaders
+tests
+tools
+AGENTS.md
+CLAUDE.md
+default_bus_layout.tres
+GDD.md
+project.godot
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+from pathlib import Path
+import concurrent.futures, os, subprocess
+p=Path(os.environ['GAFTI_AUDIO_STAGE'])
+files={
+'day_1_preview.ogg':'audio_preview/Serenade_0.mp3.ogg',
+'day_1_alt.mp3':'unknown_space_bassed_0.mp3',
+'evening_preview.ogg':'audio_preview/sunset_plains_0.mp3.ogg',
+'evening_alt.ogg':'SunsetWalk.ogg',
+'night_preview.ogg':'audio_preview/yoiyami_core_theme_1.mp3.ogg',
+'night_alt.ogg':'Ambient-Loop-isaiah658_0.ogg',
+'gafti_preview.ogg':'audio_preview/first_light_particles_1.mp3.ogg',
+'gafti_alt.mp3':'006_lifeWave2k_0.mp3',
+}
+def download(x):
+ n,f=x
+ result=subprocess.run(['curl.exe','-fsSL','--max-time','15','-o',str(p/n),'https://opengameart.org/sites/default/files/'+f],capture_output=True,text=True)
+ print(n,result.returncode,(p/n).stat().st_size if (p/n).exists() else 0,result.stderr,flush=True)
+with concurrent.futures.ThreadPoolExecutor() as pool: list(pool.map(download,files.items()))
+'@; "'$s | python -u -' in C:\Users\31\Documents\we2
+ succeeded in 15769ms:
+gafti_preview.ogg 0 1682573 
+night_alt.ogg 0 1284993 
+evening_alt.ogg 28 1523394 curl: (28) Operation timed out after 15001 milliseconds with 1523394 out of 1828550 bytes received
+
+evening_preview.ogg 28 1048258 curl: (28) Operation timed out after 15002 milliseconds with 1048258 out of 4103951 bytes received
+
+gafti_alt.mp3day_1_alt.mp3  28 1654465 curl: (28) Operation timed out after 15002 milliseconds with 1654465 out of 7500268 bytes received
+
+28 night_preview.oggday_1_preview.ogg1277633  28curl: (28) Operation timed out after 15011 milliseconds with 1277633 out of 2689533 bytes received
+  28
+1605314 curl: (28) Operation timed out after 15013 milliseconds with 1605314 out of 3062396 bytes received
+
+ 1195714 curl: (28) Operation timed out after 15004 milliseconds with 1195714 out of 1883417 bytes received
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+from pathlib import Path
+from zipfile import ZipFile
+from concurrent.futures import ThreadPoolExecutor
+import os, re, subprocess, json, shutil
+
+stage = Path(os.environ['GAFTI_AUDIO_STAGE'])
+asset_root = Path('assets/audio')
+kenney = 'https://kenney.nl/assets/'
+freesound = 'https://freesound.org/people/'
+oga = 'https://opengameart.org/content/'
+registry = {}
+
+def run(*args):
+    return subprocess.run(['ffmpeg', '-nostdin', '-hide_banner', '-loglevel', 'error', '-y', *map(str, args)], check=True)
+
+def source(pack, name):
+    path = stage / name
+    with ZipFile(stage / (pack + '.zip')) as archive:
+        path.write_bytes(archive.read('Audio/' + name))
+    return path
+
+def install(group, name, path, info, url):
+    out = asset_root / group / (name + '.ogg')
+    shutil.copyfile(path, out)
+    registry[f'{group}/{name}.ogg'] = [info, url]
+
+def ken(name, pack, original, note=''):
+    install('sfx', name, source(pack, original), f'Kenney · "'`{original}`'"' + (f' ({note})' if note else ''), kenney + pack)
+
+for name, original in {
+    'ui_click':'click_001', 'ui_open':'open_001', 'ui_close':'close_001',
+    'notify_good':'confirmation_002', 'notify_bad':'error_004',
+}.items():
+    ken(name, 'interface-sounds', original + '.ogg')
+
+for surface in ('grass', 'wood'):
+    for variant in range(4):
+        ken(f'footstep_{surface}_{variant + 1}', 'impact-sounds', f'footstep_{surface}_{variant:03}.ogg')
+
+for name, original, note in [
+    ('coin', 'handleCoins', ''),
+    ('door_open', 'doorOpen_1', ''),
+    ('door_close', 'doorClose_1', ''),
+    ('paper_rustle', 'bookFlip2', 'sayfa hışırtısı'),
+    ('lighter_flick', 'metalClick', 'metal çakma tıkı'),
+    ('harvest_snip', 'knifeSlice2', 'kısa kesme sesi'),
+    ('plant_place', 'metalPot2', 'kap yerleştirme sesi'),
+]:
+    ken(name, 'rpg-audio', original + '.ogg', note)
+
+rpg, impacts = 'rpg-audio', 'impact-sounds'
+grind = stage / 'edit-grinder.ogg'
+run('-i', source(rpg, 'drawKnife1.ogg'), '-i', source(rpg, 'drawKnife2.ogg'),
+    '-filter_complex', '[0:a]atempo=1.2,volume=0.65[a];[1:a]atempo=1.25,volume=0.55,adelay=155:all=1[b];[a][b]amix=inputs=2:normalize=0,alimiter=limit=0.75:level=0:latency=1',
+    '-c:a', 'libvorbis', '-q:a', 5, grind)
+install('sfx', 'grinder', grind, 'Kenney · "'`drawKnife1.ogg` + `drawKnife2.ogg` (metal sürtünme kurgusu)'"', kenney + rpg)
+
+register = stage / 'edit-cash.ogg'
+run('-i', source(rpg, 'metalLatch.ogg'), '-i', source(impacts, 'impactBell_medium_001.ogg'),
+    '-filter_complex', '[0:a]volume=0.65[a];[1:a]volume=0.4,adelay=95:all=1[b];[a][b]amix=inputs=2:normalize=0,alimiter=limit=0.75:level=0:latency=1',
+    '-c:a', 'libvorbis', '-q:a', 5, register)
+install('sfx', 'cash_register', register, 'Kenney · "'`metalLatch.ogg` + `impactBell_medium_001.ogg` (mandal ve zil kurgusu)'"', kenney + rpg)
+registry['sfx/cash_register.ogg'].append(kenney + impacts)
+
+ambience = {
+    'rain_loop': ('Nox_Sound/sounds/535870/', 'Nox_Sound · Ambiance_Rain_Inside_Car_Close_Roof_Loop_Stereo.wav', 'rain_loop.mp3', 0.4, 22),
+    'birds_loop': ('Magnesus/sounds/723913/', 'Magnesus · Forest birds – ambient seamless loop', 'birds_loop.mp3', 0.3, 26.4),
+    'creek_loop': ('kentspublicdomain/sounds/325182/', 'kentspublicdomain · River, stream, creek, sound of waves, moving water', 'creek_loop.mp3', 0.5, 29.5),
+    'wind_loop': ('Nox_Sound/sounds/530907/', 'Nox_Sound · Ambiance_Wind_Forest_Trees_Loop_02.wav', 'wind_loop.mp3', 0.4, 23),
+    'night_crickets_loop': ('Vrymaa/sounds/734642/', 'Vrymaa · Night crickets', 'night_crickets_loop.mp3', 0.5, 32.5),
+    'cafe_murmur_loop': ('Ultra-Edward/sounds/823831/', 'Ultra-Edward · Cafe/Coffee shop', 'cafe_ultra.mp3', 8.0, 41.5),
+}
+
+def process_ambience(entry):
+    name, (slug, credit, file, start, duration) = entry
+    if not (stage / file).is_file():
+        raise FileNotFoundError(stage / file)
+    intermediate = stage / (name + '.wav')
+    output = stage / (name + '.ogg')
+    fade = min(duration / 16, 1.45)
+    graph = (f'[0:a]highpass=f=55,atrim=start={start}:duration={duration},asetpts=PTS-STARTPTS,asplit=3[a][b][c];'
+             f'[a]atrim=start={fade}:end={duration-fade},asetpts=PTS-STARTPTS[body];'
+             f'[b]atrim=start={duration-fade},asetpts=PTS-STARTPTS[tail];'
+             f'[c]atrim=end={fade},asetpts=PTS-STARTPTS[head];'
+             f'[tail][head]acrossfade=d={fade}:c1=qsin:c2=qsin[join];[body][join]concat=n=2:v=0:a=1[out]')
+    run('-i', stage / file, '-filter_complex', graph, '-map', '[out]', '-c:a', 'pcm_f32le', intermediate)
+    levels = subprocess.run(['ffmpeg', '-nostdin', '-hide_banner', '-i', str(intermediate),
+                              '-af', 'volumedetect', '-f', 'null', 'NUL'], capture_output=True, text=True, check=True).stderr
+    mean, peak = (float(re.search(label + r'_volume: ([-0-9.]+)', levels)[1]) for label in ('mean', 'max'))
+    gain = min(-27 - mean, -7 - peak)
+    run('-i', intermediate, '-af', f'volume={gain}dB', '-ar', 44100, '-c:a', 'libvorbis', '-q:a', 4, output)
+    install('ambience', name, output, credit + ' (HQ MP3 kaynak, döngü kurgusu)', freesound + slug)
+
+with ThreadPoolExecutor() as pool:
+    list(pool.map(process_ambience, ambience.items()))
+
+(stage / 'registry.json').write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding='utf-8')
+'@; "'$f=Join-Path $work '"'prepare_audio.py'; Set-Content -LiteralPath "'$f -Value $s -Encoding UTF8; python -X utf8 $f' in C:\Users\31\Documents\we2
+ exited 1 in 2124ms:
+Traceback (most recent call last):
+  File "C:\Users\31\AppData\Local\Temp\gafti-sol-audio\prepare_audio.py", line 59, in <module>
+    run('-i', source(rpg, 'metalLatch.ogg'), '-i', source(impacts, 'impactBell_medium_001.ogg'),
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\AppData\Local\Temp\gafti-sol-audio\prepare_audio.py", line 19, in source
+    path.write_bytes(archive.read('Audio/' + name))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\AppData\Local\Programs\Python\Python311\Lib\zipfile.py", line 1507, in read
+    with self.open(name, "r", pwd) as fp:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\AppData\Local\Programs\Python\Python311\Lib\zipfile.py", line 1544, in open
+    zinfo = self.getinfo(name)
+            ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\AppData\Local\Programs\Python\Python311\Lib\zipfile.py", line 1473, in getinfo
+    raise KeyError(
+KeyError: "There is no item named 'Audio/impactBell_medium_001.ogg' in the archive"
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; python -m zipfile -l (Join-Path "'$work '"'impact-sounds.zip') | Select-String 'impactBell'; Get-ChildItem "'$work -File | Where-Object Name -Match '"'day_1|night\\.|evening\\.|gafti\\.|cafe_ultra' | Select-Object Name,Length" in C:\Users\31\Documents\we2
+ succeeded in 800ms:
+
+Audio/impactBell_heavy_000.ogg                 2019-11-19 16:27:04        13915
+Audio/impactBell_heavy_001.ogg                 2019-11-19 16:27:04        15577
+Audio/impactBell_heavy_002.ogg                 2019-11-19 16:27:06         9252
+Audio/impactBell_heavy_003.ogg                 2019-11-19 16:27:06         9429
+Audio/impactBell_heavy_004.ogg                 2019-11-19 16:27:06         6529
+
+Name   : day_1.mp3
+Length : 3105898
+
+
+Name   : day_1.wav
+Length : 0
+
+
+Name   : day_1_alt.mp3
+Length : 1277633
+
+
+Name   : day_1_preview.ogg
+Length : 1195714
+
+
+Name   : evening.mp3
+Length : 0
+
+
+Name   : evening.wav
+Length : 0
+
+
+Name   : gafti.mp3
+Length : 2755237
+
+
+Name   : gafti.wav
+Length : 0
+
+
+Name   : night.mp3
+Length : 0
+
+
+Name   : night.wav
+Length : 0
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+import subprocess,os
+root=Path(os.environ['GAFTI_AUDIO_STAGE'])
+def dl(item):
+ name,url=item
+ p=subprocess.run(['curl.exe','-fsSL','--retry','1','--max-time','100','-C','-','-o',str(root/name),url],capture_output=True,text=True)
+ print(name,p.returncode,p.stderr,flush=True)
+with ThreadPoolExecutor() as pool:
+ list(pool.map(dl,[
+ ('evening_alt.ogg','https://opengameart.org/sites/default/files/SunsetWalk.ogg'),
+ ('night_preview.ogg','https://opengameart.org/sites/default/files/audio_preview/yoiyami_core_theme_1.mp3.ogg'),
+ ('day_1_preview.ogg','https://opengameart.org/sites/default/files/audio_preview/Serenade_0.mp3.ogg'),
+ ('evening_preview.ogg','https://opengameart.org/sites/default/files/audio_preview/sunset_plains_0.mp3.ogg'),
+ ('cafe_ultra_safe.mp3','https://cdn.freesound.org/previews/823/823831_16786392-hq.mp3'),
+ ]))
+'@; "'$s | python -u -' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$f=Join-Path $work '"'prepare_audio.py'; "'$s=Get-Content -LiteralPath $f -Raw -Encoding UTF8; $s=$s.Replace('"'impactBell_medium_001','impactBell_heavy_002').Replace(\"'cafe_ultra.mp3'\",\"'cafe_ultra_safe.mp3'\"); Set-Content -LiteralPath "'$f -Value $s -Encoding UTF8; $env:GAFTI_AUDIO_STAGE=$work; python -X utf8 $f; Get-ChildItem $work -Filter '"'cafe*' | Select-Object Name,Length" in C:\Users\31\Documents\we2
+ succeeded in 2788ms:
+[mp3float @ 000001d769c29b80] invalid new backstep -1
+
+Name                   Length
+----                   ------
+cafe_murmur_loop.mp3  8312731
+cafe_murmur_loop.ogg   289710
+cafe_murmur_loop.wav 10835412
+cafe_ultra_safe.mp3    688128
+
+
+
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; Get-ChildItem "'$work -File | Where-Object Name -Match '"'"'^(day_1|night'"\\.|night_preview|evening\\.|evening_alt|gafti\\.|cafe_ultra)' | Select-Object Name,Length; Get-Content project.godot -TotalCount 20" in C:\Users\31\Documents\we2
+ succeeded in 417ms:
+
+Name                  Length
+----                  ------
+cafe_ultra.mp3             0
+cafe_ultra_safe.mp3  1138848
+day_1.mp3            3105898
+day_1.wav           22814532
+day_1_alt.mp3        1277633
+day_1_preview.ogg    1883417
+evening.mp3          3194561
+evening.wav                0
+evening_alt.ogg      1828550
+gafti.mp3            2755237
+gafti.wav                  0
+night.mp3            2948801
+night.wav                  0
+night_preview.ogg    3062396
+; Engine configuration file.
+; GAFTÄ° â€” Godot 4.7
+
+config_version=5
+
+[application]
+
+config/name="GAFTÄ°"
+config/description="Karadeniz yaylasÄ±nda kenevir serasÄ± ve dÃ¼kkan iÅŸletme oyunu."
+config/version="0.1.0"
+run/main_scene="res://scenes/ui/menus/main_menu.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://assets/logo/icon.svg"
+
+[autoload]
+
+EventBus="*res://autoload/event_bus.gd"
+ContentFlags="*res://autoload/content_flags.gd"
+Settings="*res://autoload/settings.gd"
+InputSetup="*res://autoload/input_setup.gd"
+
+
+
+web search: site:opengameart.org/content/chill-lofi-inspired-loop-edit CC0 author ...
+ succeeded in 123774ms:
+
+Name                     Length
+----                     ------
+birds_loop.mp3           637824
+cafe_murmur_loop.mp3    8312731
+cafe_ultra.mp3          1138848
+cafe_ultra_safe.mp3     1138848
+creek_loop.mp3           690634
+day_1.mp3               3105898
+day_1_alt.mp3           1277633
+evening.mp3             3194561
+gafti.mp3               2755237
+gafti_alt.mp3           1654465
+night.mp3               2948801
+night_crickets_loop.mp3  788448
+rain_loop.mp3            598560
+wind_loop.mp3            551808
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$files=@{'"'day_1.mp3'='Serenade_0.mp3'; 'evening.mp3'='sunset_plains_0.mp3'; 'night.mp3'='yoiyami_core_theme_1.mp3'; 'gafti.mp3'='first_light_particles_1.mp3'}; foreach ("'$item in $files.GetEnumerator()) { $len=(Get-Item (Join-Path $work $item.Key)).Length; $head=curl.exe -fsSI --max-time 10 ('"'https://opengameart.org/sites/default/files/'+"'$item.Value) | Select-String '"'"'^Content-Length:'"'; \""'$($item.Key) $len $head" }; $env:GAFTI_AUDIO_STAGE=$work; python -X utf8 (Join-Path $work '"'prepare_audio.py')" in C:\Users\31\Documents\we2
+ succeeded in 36997ms:
+evening_alt.ogg 0 
+day_1_preview.ogg 0 
+cafe_ultra_safe.mp3 0 
+night_preview.ogg 0 
+evening_preview.ogg 0 
+
+ succeeded in 4719ms:
+gafti.mp3 2755237 Content-Length: 2755237
+day_1.mp3 3105898 Content-Length: 3105898
+evening.mp3 3194561 Content-Length: 7913696
+night.mp3 2948801 Content-Length: 5296186
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
+import subprocess,os
+root=Path(os.environ['GAFTI_AUDIO_STAGE'])
+def dl(item):
+ name,url=item
+ p=subprocess.run(['curl.exe','-fsSL','--max-time','60','-C','-','-o',str(root/name),'https://opengameart.org/sites/default/files/'+url],capture_output=True,text=True)
+ print(name,p.returncode,p.stderr,flush=True)
+with ThreadPoolExecutor() as pool:
+ list(pool.map(dl,[('evening_full.mp3','sunset_plains_0.mp3'),('night_full.mp3','yoiyami_core_theme_1.mp3')]))
+'@; "'$s | python -u -' in C:\Users\31\Documents\we2
+web search: 
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$f=Join-Path $work '"'prepare_audio.py'; Get-Item (Join-Path "'$work '"'registry.json'); Get-ChildItem assets/audio -Recurse -File | Group-Object DirectoryName | Select-Object Count,Name; "'$godot=Join-Path $env:USERPROFILE '"'Desktop/Godot_v4.7.2-stable_win64.exe'; & "'$godot --version' in C:\Users\31\Documents\we2
+ succeeded in 420ms:
+
+
+    Directory: C:\Users\31\AppData\Local\Temp\gafti-sol-audio
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:28           3983 registry.json                                                        
+
+Count : 6
+Name  : C:\Users\31\Documents\we2\assets\audio\ambience
+
+
+Count : 22
+Name  : C:\Users\31\Documents\we2\assets\audio\sfx
+
+
+
+4.7.2.stable.official.ed1daf0bf
+
+web search: Kenney "Foley Sounds" "Water" download assets "sinkWater" open source files ...
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; Get-ChildItem "'$work -File | Where-Object Name -Match '"'"'^(day_1|night'"\\.|night_full|evening\\.|evening_full|gafti\\.|cafe_ultra_safe)' | Select-Object Name,Length; "'$s=@'"'
+import urllib.request as u,re
+t=u.urlopen('https://opengameart.org/content/serenade-guitar',timeout=8).read().decode()
+for line in t.splitlines():
+ if 'username' in line and 'user/' in line: print(re.sub('<["'^>]*>'"',' ',line).strip()[:160])
+'@; "'$s | python -' in C:\Users\31\Documents\we2
+ succeeded in 1549ms:
+
+Name                  Length
+----                  ------
+cafe_ultra_safe.mp3  1138848
+day_1.mp3            3105898
+day_1.wav           22814532
+day_1_alt.mp3        1277633
+day_1_preview.ogg    1883417
+evening.mp3          3194561
+evening.wav                0
+evening_full.mp3           0
+gafti.mp3            2755237
+gafti.wav                  0
+night.mp3            2948801
+night.wav                  0
+night_full.mp3             0
+
+
+
+codex
+Altı ortam döngüsü hazır. Müzik için OpenGameArt’ın CC0 filtresini kullandım ve her parçanın lisansını kendi sayfasında doğruladım. Şimdi dosyaların tamamını çözüp Godot içe aktarma ayarlarını denetliyorum.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$names='"'night_preview.ogg','evening_alt.ogg','gafti.mp3','day_1.wav'; foreach("'$n in $names){ $n; ffprobe -v error -show_entries format=duration,size -of csv=p=0 (Join-Path $work $n) }; $r=Invoke-WebRequest -UseBasicParsing '"'https://opengameart.org/content/serenade-guitar'; ("'$r.Content -split "`n") | Select-String -Pattern '"'Author|Serenade|Pro Sensory' | Select-Object -First 12" in C:\Users\31\Documents\we2
+ succeeded in 2958ms:
+night_preview.ogg
+234.984000,3062396
+evening_alt.ogg
+76.800000,1828550
+gafti.mp3
+131.719979,2755237
+day_1.wav
+129.333832,22814532
+
+<link rel="canonical" href="https://opengameart.org/content/serenade-guitar" />
+<meta property="og:url" content="https://opengameart.org/content/serenade-guitar" />
+<meta property="og:title" content="Serenade Guitar" />
+<meta property="og:image" content="https://opengameart.org/sites/default/files/styles/audio_with_background/public/audi
+o_preview/Serenade_0.mp3.png" />
+<meta name="dcterms.title" content="Serenade Guitar" />
+<meta name="dcterms.creator" content="Pro Sensory" />
+  <title>Serenade Guitar | OpenGameArt.org</title>
+jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","setHasJsCookie":0,"ajaxPageState":{"theme":"oga_theme_
+no_side_bar","theme_token":"Znd3pkeztyEY-sCjhYQ1a7rcsp1GT5rg9Th1TBjG490","js":{"misc\/jquery.js":1,"misc\/jquery-extend
+-3.4.0.js":1,"misc\/jquery-html-prefilter-3.5.0-backport.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"misc\/jque
+ry.cookie.js":1,"misc\/form-single-submit.js":1,"sites\/all\/modules\/entityreference\/js\/entityreference.js":1,"sites
+\/all\/modules\/authcache\/authcache.js":1,"sites\/all\/modules\/oga\/lightbox\/js\/jquery.lightbox-0.5.js":1,"0":1,"si
+tes\/all\/modules\/compact_forms\/compact_forms.js":1,"sites\/all\/modules\/oga\/ajax_dlcount\/ajax_dlcount.js":1,"site
+s\/all\/themes\/oga\/oga_theme.js":1},"css":{"modules\/system\/system.base.css":1,"modules\/system\/system.menus.css":1
+,"modules\/system\/system.messages.css":1,"modules\/system\/system.theme.css":1,"sites\/all\/modules\/comment_notify\/c
+omment_notify.css":1,"modules\/comment\/comment.css":1,"modules\/field\/theme\/field.css":1,"sites\/all\/modules\/login
+toboggan\/logintoboggan.css":1,"modules\/node\/node.css":1,"modules\/search\/search.css":1,"modules\/user\/user.css":1,
+"modules\/forum\/forum.css":1,"sites\/all\/modules\/views\/css\/views.css":1,"sites\/all\/modules\/ctools\/css\/ctools.
+css":1,"sites\/all\/modules\/oga\/cctag\/cctag.css":1,"sites\/all\/modules\/oga\/lightbox\/css\/jquery.lightbox-0.5.css
+":1,"sites\/all\/modules\/compact_forms\/compact_forms.css":1,"sites\/all\/modules\/ds\/layouts\/ds_3col_stacked_fluid\
+/ds_3col_stacked_fluid.css":1,"sites\/all\/modules\/ds\/layouts\/ds_2col_stacked\/ds_2col_stacked.css":1,"sites\/all\/t
+hemes\/oga\/oga_theme.css":1,"sites\/all\/themes\/oga\/oga_no_side_bar\/oga_theme_no_side_bar.css":1}},"authcache":{"q"
+:"node\/77538","cp":{"path":"\/","domain":".opengameart.org","secure":true},"cl":23.148148148148},"compactForms":{"form
+s":["user-login-form"],"stars":2},"urlIsAjaxTrusted":{"\/art-search":true,"\/content\/serenade-guitar?destination=node\
+/77538":true}});
+node_art_form_group_author_information {
+    <form action="/content/serenade-guitar?destination=node/77538" method="post" id="user-login-form" accept-charset="U
+TF-8"><div><div class="form-item form-type-textfield form-item-name">
+      <div class="field field-name-title field-type-ds field-label-hidden"><div class="field-items"><div class="field-i
+tem even" property="dc:title"><h2>Serenade Guitar</h2></div></div></div>    </div>
+      <div class="field field-name-author-submitter field-type-ds field-label-above"><div class="field-label">Author:&n
+bsp;</div><div class="field-items"><div class="field-item even"><span class='username'><a href="/users/pro-sensory">Pro
+ Sensory</a></span></div></div></div><div class="field field-name-post-date field-type-ds field-label-hidden"><div clas
+s="field-items"><div class="field-item even">Saturday, September 30, 2017 - 00:09</div></div></div><div class="field fi
+eld-name-field-art-type field-type-taxonomy-term-reference field-label-above"><div class="field-label">Art Type:&nbsp;<
+/div><div class="field-items"><div class="field-item even"><a href="/art-search-advanced?field_art_type_tid%5B%5D=12" t
+ypeof="skos:Concept" property="rdfs:label skos:prefLabel" datatype="">Music</a></div></div></div><div class="field fiel
+d-name-field-art-tags field-type-taxonomy-term-reference field-label-above"><div class="field-label">Tags:&nbsp;</div><
+div class="field-items"><div class="field-item even"><a href="/art-search-advanced?field_art_tags_tid=Jazz" typeof="sko
+s:Concept" property="rdfs:label skos:prefLabel" datatype="">Jazz</a></div></div></div><div class="field field-name-fiel
+d-art-licenses field-type-taxonomy-term-reference field-label-above"><div class="field-label">License(s):&nbsp;</div><d
+iv class="field-items"><div class="field-item even"><div class='license-icon'><a href='http://creativecommons.org/publi
+cdomain/zero/1.0/' target='_blank'><img src='https://opengameart.org/sites/default/files/license_images/cc0.png' alt=''
+ title=''><div class='license-name'>CC0</div></a></div></div></div></div><div class="field field-name-collect field-typ
+e-ds field-label-above"><div class="field-label">Collections:&nbsp;</div><div class="field-items"><div class="field-ite
+m even"><div class='collect-container'><ul><li><a href="/content/cc0-calm-relaxing-music">CC0 - Calm / Relaxing Music</
+a></li><li><a href="/content/cc0-audio-uploader-pro-sensory">CC0 Audio - Uploader: Pro Sensory</a></li><li><a href="/co
+ntent/cheezemaze">CheezeMaze</a></li><li><a href="/content/rpgmusic">RPG::Music</a></li><li><a href="/content/top-music
+-by-pro-sensory">Top Music by Pro Sensory</a></li></ul></div></div></div></div><div class="field field-name-favorites f
+ield-type-ds field-label-inline clearfix"><div class="field-label">Favorites:&nbsp;</div><div class="field-items"><div 
+class="field-item even">5</div></div></div>    </div>
+
+
+
+ERROR: Reconnecting... 2/5
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+from pathlib import Path
+import os, subprocess, shutil, json, hashlib, concurrent.futures
+
+stage = Path(os.environ['GAFTI_AUDIO_STAGE'])
+asset_root = Path('assets/audio')
+site = 'https://opengameart.org/content/'
+registry = json.loads((stage / 'registry.json').read_text(encoding='utf-8'))
+music = {
+    'menu': ('menu.ogg', 'Kistol · Forget Me Not (looped)', 'forget-me-not'),
+    'day_1': ('day_1.wav', 'Pro Sensory · Serenade Guitar', 'serenade-guitar'),
+    'day_2': ('day_2.ogg', 'omfgdude / qubodup · Chill lofi inspired [loop edit]', 'chill-lofi-inspired-loop-edit'),
+    'evening': ('evening_alt.ogg', 'KiluaBoy · Sunset Walk', 'sunset-walk-ambient-quiet-sweet-loop'),
+    'night': ('night_preview.ogg', 'Yoiyami · Yoiyami Core Theme – Deep Blue Ambient Piano (OpenGameArt OGG önizlemesi)', 'yoiyami-core-theme-%E2%80%93-deep-blue-ambient-piano'),
+    'gafti': ('gafti.mp3', 'Yoiyami · First Light Particles (OpenGameArt MP3 önizlemesi)', 'first-light-particles-%E2%80%93-cc0-atmospheric-pianoambient-track'),
+}
+for name, (original, title, slug) in music.items():
+    rel = f'music/{name}.ogg'
+    path = asset_root / rel
+    if original.endswith('.ogg'):
+        shutil.copyfile(stage / original, path)
+    else:
+        subprocess.run(['ffmpeg', '-nostdin', '-hide_banner', '-loglevel', 'error', '-y', '-xerror',
+                        '-i', str(stage / original), '-map', '0:a:0', '-map_metadata', '-1',
+                        '-ar', '44100', '-c:a', 'libvorbis', '-q:a', '5', str(path)], check=True)
+    registry[rel] = [title, site + slug]
+
+measures = {}
+def verify(rel):
+    path = asset_root / rel
+    raw = subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries',
+                                   'stream=codec_name,channels,sample_rate:format=duration',
+                                   '-of', 'json', str(path)], text=True)
+    info = json.loads(raw)
+    assert len(info['streams']) == 1 and info['streams'][0]['codec_name'] == 'vorbis', rel
+    assert float(info['format']['duration']) > 0.1, rel
+    subprocess.run(['ffmpeg', '-nostdin', '-hide_banner', '-loglevel', 'error', '-xerror',
+                    '-i', str(path), '-f', 'null', 'NUL'], check=True)
+    return rel, float(info['format']['duration']), hashlib.sha256(path.read_bytes()).hexdigest()
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+    results = list(pool.map(verify, sorted(registry)))
+assert len({sha for _, _, sha in results}) == 34
+assert set(registry) == {p.relative_to(asset_root).as_posix() for p in asset_root.rglob('*.ogg')}
+measures = {name: duration for name, duration, _ in results}
+(stage / 'deliverables.json').write_text(json.dumps(registry, ensure_ascii=False, indent=2), encoding='utf-8')
+(stage / 'durations.json').write_text(json.dumps(measures, indent=2), encoding='utf-8')
+print(f'{len(measures)} dosya çözüldü')
+'@; "'$f=Join-Path $work '"'verify_audio.py'; Set-Content -LiteralPath "'$f -Value $s -Encoding UTF8; python -X utf8 $f' in C:\Users\31\Documents\we2
+ succeeded in 60460ms:
+night_full.mp3 0 
+evening_full.mp3 28 curl: (28) Operation timed out after 60000 milliseconds with 5865153 out of 7913696 bytes received
+
+
+ succeeded in 6207ms:
+34 dosya çözüldü
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$ErrorActionPreference='"'Stop'; "'$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$verify=Join-Path $work '"'godot-verify'; "'$verifyAssets=Join-Path $verify '"'assets'; New-Item -ItemType Directory -Force -Path "'$verifyAssets | Out-Null; Copy-Item -LiteralPath '"'assets/audio' -Destination "'$verifyAssets -Recurse -Force; $godot=Join-Path $env:USERPROFILE '"'Desktop/Godot_v4.7.2-stable_win64.exe'; "'$utf=[System.Text.UTF8Encoding]::new($false); [IO.File]::WriteAllText((Join-Path $verify '"'project.godot'),\"config_version=5"'`n[application]`nconfig/name=`"GAFTI audio verification`"`n[rendering]`nrenderer/rendering_method=`"gl_compatibility`"`n",$utf); $initial=Join-Path $work '"'godot-first.log'; & "'$godot --headless --path $verify --log-file $initial --import | Out-Null; Get-Content $initial -Tail 8; $loops=Get-ChildItem -LiteralPath (Join-Path $verifyAssets '"'audio/ambience') -Filter '*.ogg.import'; "'$loops+=Get-ChildItem -LiteralPath (Join-Path $verifyAssets '"'audio/music') -Filter '*.ogg.import' | Where-Object Name -In 'menu.ogg.import','day_2.ogg.import','evening.ogg.import'; if("'$loops.Count -ne 9){throw "Loop metadata count $($loops.Count)"}; foreach ($file in $loops) { $body=[IO.File]::ReadAllText($file.FullName); if($body -notmatch '"'(?m)"'^loop=false$'"'){throw "'$file.Name}; [IO.File]::WriteAllText($file.FullName,($body -replace '"'(?m)"'^loop=false$'"','loop=true'),"'$utf) }; $loopImport=Join-Path $work '"'godot-loops.log'; & "'$godot --headless --path $verify --log-file $loopImport --import | Out-Null; Get-Content $loopImport -Tail 8; $check=@'"'
+extends SceneTree
+
+func _initialize() -> void:
+	var count: int = 0
+	var loop_count: int = 0
+	for group: String in [\"sfx\", \"ambience\", \"music\"]:
+		var directory: String = \"res://assets/audio/%s/\" % group
+		var files: PackedStringArray = DirAccess.get_files_at(directory)
+		for file_name: String in files:
+			if not file_name.ends_with(\".ogg\"):
+				continue
+			var stream: AudioStreamOggVorbis = load(directory + file_name) as AudioStreamOggVorbis
+			var expect_loop: bool = group == \"ambience\" or (group == \"music\" and file_name in [\"menu.ogg\", \"day_2.ogg\", \"evening.ogg\"])
+			if stream == null or stream.get_length() <= 0.0 or stream.loop "'!= expect_loop:
+				push_error("Invalid audio resource: %s%s" % [directory, file_name])
+				quit(1)
+				return
+			count += 1
+			loop_count += int(stream.loop)
+	print("Verified streams: %s, loops: %s" % [count, loop_count])
+	quit(0 if count == 34 and loop_count == 9 else 1)
+'"'@; [IO.File]::WriteAllText((Join-Path "'$verify '"'verify_audio.gd'),"'$check,$utf); & $godot --headless --path $verify --script res://verify_audio.gd | Out-Host; if($LASTEXITCODE -ne 0){throw '"'Godot resource verification failed'}; foreach("'$file in $loops) { $group=$file.Directory.Name; Copy-Item -LiteralPath $file.FullName -Destination (Join-Path '"'assets/audio' "'$group) }' in C:\Users\31\Documents\we2
+ succeeded in 7357ms:
+[   0% ] reimport | Yeniden iÃ§e aktarma sonrasÄ± iÅŸlemler yÃ¼rÃ¼tÃ¼lÃ¼yor...
+[ DONE ] reimport
+
+[   0% ] loading_editor_layout | Started DÃ¼zenleyici yÃ¼kleniyor (5 steps)
+[   0% ] loading_editor_layout | DÃ¼zenleyici yerleÅŸim dÃ¼zeni yÃ¼kleniyor...
+[  16% ] loading_editor_layout | Yuvalar yÃ¼kleniyor...
+[ DONE ] loading_editor_layout
+
+[   0% ] reimport | Yeniden iÃ§e aktarma sonrasÄ± iÅŸlemler yÃ¼rÃ¼tÃ¼lÃ¼yor...
+[ DONE ] reimport
+
+[   0% ] loading_editor_layout | Started DÃ¼zenleyici yÃ¼kleniyor (5 steps)
+[   0% ] loading_editor_layout | DÃ¼zenleyici yerleÅŸim dÃ¼zeni yÃ¼kleniyor...
+[  16% ] loading_editor_layout | Yuvalar yÃ¼kleniyor...
+[ DONE ] loading_editor_layout
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Verified streams: 34, loops: 9
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$work=Join-Path $env:TEMP '"'gafti-sol-audio'; "'$env:GAFTI_AUDIO_STAGE=$work; $s=@'"'
+from pathlib import Path
+import json, os
+
+stage = Path(os.environ['GAFTI_AUDIO_STAGE'])
+assets = Path('assets/audio')
+registry = json.loads((stage / 'deliverables.json').read_text(encoding='utf-8'))
+durations = json.loads((stage / 'durations.json').read_text(encoding='utf-8'))
+missing = {
+    'water_pour': 'Su dökme',
+    'lick': 'Yalama',
+    'bubble': 'Su kabarcığı',
+    'inhale': 'Nefes çekme',
+    'cough': 'Öksürük',
+    'thunder': 'Gök gürültüsü',
+}
+music_loops = {'music/menu.ogg', 'music/day_2.ogg', 'music/evening.ogg'}
+sections = {'sfx':'Ses efektleri', 'ambience':'Ortam döngüleri', 'music':'Müzik'}
+
+def loops(name):
+    return name.startswith('ambience/') or name in music_loops
+
+credits = [
+    '# GAFTİ ses kaynakları', '',
+    'Aşağıdaki tüm sesler [CC0 1.0 Universal](https://creativecommons.org/publicdomain/zero/1.0/) kapsamındadır. Dosya yolları "'`assets/audio/` dizinine göredir.'"', '',
+]
+for group, header in sections.items():
+    credits.extend([f'## {header}', '', '| Dosya | Orijinal kayıt veya kurgu | Lisans | Kaynak |',
+                    '|---|---|---|---|'])
+    for filename, (original, *urls) in sorted(registry.items()):
+        if filename.startswith(group + '/'):
+            links = ' · '.join(f'[Kaynak {index}]({url})' if len(urls) > 1 else f'[Kaynak]({url})'
+                               for index, url in enumerate(urls, 1))
+            credits.append(f'| "'`{filename}` | {original} | CC0 1.0 | {links} |'"')
+    if group == 'sfx':
+        for name, meaning in missing.items():
+            credits.append(f'| "'`sfx/{name}.ogg` | **EKSİK** · {meaning} | — | Kenney paketlerinde doğrulanmış uygun kayıt bulunamadı. |'"')
+    credits.append('')
+(assets / 'CREDITS.md').write_text('\\n'.join(credits), encoding='utf-8')
+
+report = [
+    '# sol_audio teslim raporu', '',
+    '40 istenen sesin 34’ü üretildi. Teslimde 22 Kenney efekti, 6 ortam döngüsü ve OpenGameArt’tan 6 müzik parçası var. Tüm sesler Ogg Vorbis biçiminde ve kaynak lisansları CC0 1.0. [Dosya bazında kaynaklar](../../assets/audio/CREDITS.md)', '',
+    'Bu görev ses varlıklarını kapsadığı için sahne düğümü veya Blender önizlemesi üretilmedi.', '',
+    '## Üretilen dosyalar', '',
+    'Yollar "'`assets/audio/` dizinine göredir.'"', '',
+    '| Dosya | Süre (sn) | Godot döngüsü |', '|---|---:|---|',
+]
+for group in sections:
+    for filename in sorted(durations):
+        if filename.startswith(group + '/'):
+            seconds = f'{durations[filename]:.2f}'.replace('.', ',')
+            report.append(f'| "'`{filename}` | {seconds} | {"Açık" if loops(filename) else "Kapalı"} |'"')
+report.extend([
+    '',
+    '## Godot içe aktarma', '',
+    'Altı ortam kaydı döngü başlangıcı ile sonu arasında çapraz geçişle kurgulandı. Bu dosyalarda ve döngü sürümü kullanılan "'`menu`, `day_2`, `evening` parçalarında `Loop` açık, `Loop Offset` 0. Bu ayarlar ilgili `.ogg.import` dosyalarında kayıtlıdır.'"',
+    '',
+    'Godot’ta bir ayarı yeniden uygulamak için "'`.ogg` varlığını seç, **Import** sekmesinde **Loop** seçeneğini aç, **Loop Offset** değerini 0 olarak bırak ve **Reimport** düğmesine bas. Efektler tek tetiklemelidir.'"',
+    '',
+    '## Doğrulama', '',
+    '- FFprobe 34 dosyanın tamamında birer Vorbis akışı ve pozitif süre bildirdi. FFmpeg her dosyayı sonuna kadar hatasız çözdü.',
+    '- Godot 4.7.2, ayrı bir geçici projede 34 varlığı "'`AudioStreamOggVorbis` olarak yükledi ve 9 döngü ayarını doğruladı. Oyun içi ses miksajı bu kontrolün kapsamı dışındaydı.'"',
+    '',
+    '## Bilinen eksikler ve kaynak seçimleri', '',
+    '- **EKSİK** ' + ', '.join(f'"'`{name}`'"' for name in missing) + '. İncelenen Kenney paketlerinde bu olaylar için uygun ve erişilebilir CC0 kayıt doğrulanamadı.',
+    '- "'`grinder` metal sürtünme seslerinden, `cash_register` mandal ve zil seslerinden kurgulandı. `paper_rustle`, `lighter_flick`, `harvest_snip` ve `plant_place` sırasıyla sayfa, metal tıkı, kısa kesme ve kap yerleştirme kayıtlarını kullanır.'"',
+    '- Ortam seslerinde Freesound’un HQ önizleme dosyaları kullanıldı. "'`rain_loop` bir araç tavanına vuran yağmur kaydından alındı.'"',
+    '- "'`night` ve `gafti` için OpenGameArt’ın oynatıcı dosyaları kullanıldı. Müzik seçiminde akustik gitar, lo-fi ve yumuşak piyano öne çıkıyor. GDD’deki kemençe dokusu kaynak seçiminde karşılanamadı.'"',
+    '',
+])
+Path('tools/codex_logs/sol_audio_report.md').write_text('\\n'.join(report), encoding='utf-8')
+'@; "'$f=Join-Path $work '"'write_audio_docs.py'; Set-Content -LiteralPath "'$f -Value $s -Encoding UTF8; python -X utf8 $f; Get-ChildItem assets/audio -File -Recurse | Group-Object Extension | Select-Object Count,Name; Get-Item tools/codex_logs/sol_audio_report.md | Select-Object Length; Get-Content -Encoding UTF8 assets/audio/ambience/rain_loop.ogg.import -Tail 9' in C:\Users\31\Documents\we2
+ succeeded in 352ms:
+
+Count Name   
+----- ----   
+    1 .md    
+   34 .ogg   
+    9 .import
+             
+dest_files=["res://.godot/imported/rain_loop.ogg-2135e451339f7c16c32d0be3b443e072.oggvorbisstr"]
+
+[params]
+
+loop=true
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$OutputEncoding = [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new(); $credits=Get-Content -Encoding UTF8 assets/audio/CREDITS.md; $report=Get-Content -Encoding UTF8 tools/codex_logs/sol_audio_report.md; $clips=Get-ChildItem assets/audio -Recurse -Filter '"'*.ogg'; "'$loops=Get-ChildItem assets/audio -Recurse -Filter '"'*.ogg.import'; foreach ("'$file in $clips) { $rel=$file.Directory.Name+'"'/'+"'$file.Name; if(-not ($credits -match [regex]::Escape($rel)) -or -not ($report -match [regex]::Escape($rel))) { throw "Missing inventory entry $rel" } }; if ($clips.Count -ne 34 -or $loops.Count -ne 9 -or @($credits -match '"'EKSİK').Count -ne 6) { throw 'Count mismatch' }; if (@("'$loops | Select-String -SimpleMatch '"'loop=true').Count -ne 9) {throw 'Loop mismatch'}; \"34 assets, 9 loop imports, 6 missing entries, "'$([math]::Round((($clips | Measure-Object Length -Sum).Sum / 1MB),1)) MiB"' in C:\Users\31\Documents\we2
+ succeeded in 466ms:
+34 assets, 9 loop imports, 6 missing entries, 16.9 MiB
+
+codex
+GAFTİ’ye **34 CC0 Ogg Vorbis dosyası** eklendi. Teslimde 22 Kenney efekti, 6 ortam döngüsü ve 6 OpenGameArt müzik parçası var. Godot 4.7.2, ayrı bir test projesinde 34 dosyanın tamamını yükledi ve 9 döngü ayarını doğruladı.
+
+**EKSİK** `water_pour`, `lick`, `bubble`, `inhale`, `cough` ve `thunder` için uygun Kenney kaydı doğrulanamadı. `grinder` ve `cash_register` Kenney seslerinden kurgulandı. Müzik seçkisinde kemençe yer almıyor.
+
+[Kaynaklar ve lisanslar](C:/Users/31/Documents/we2/assets/audio/CREDITS.md) · [Teslim raporu ve Godot döngü ayarları](C:/Users/31/Documents/we2/tools/codex_logs/sol_audio_report.md)
+2026-11-24T09:31:14.590114Z ERROR codex_core::session: failed to record rollout items: thread 01a20cdd-21f3-7282-9403-e306f492847a not found
+2026-11-24T09:31:14.590537Z ERROR codex_core::session: failed to record rollout items: thread 01a20cdd-21f3-7282-9403-e306f492847a not found
+tokens used
+138.664
+GAFTİ’ye **34 CC0 Ogg Vorbis dosyası** eklendi. Teslimde 22 Kenney efekti, 6 ortam döngüsü ve 6 OpenGameArt müzik parçası var. Godot 4.7.2, ayrı bir test projesinde 34 dosyanın tamamını yükledi ve 9 döngü ayarını doğruladı.
+
+**EKSİK** `water_pour`, `lick`, `bubble`, `inhale`, `cough` ve `thunder` için uygun Kenney kaydı doğrulanamadı. `grinder` ve `cash_register` Kenney seslerinden kurgulandı. Müzik seçkisinde kemençe yer almıyor.
+
+[Kaynaklar ve lisanslar](C:/Users/31/Documents/we2/assets/audio/CREDITS.md) · [Teslim raporu ve Godot döngü ayarları](C:/Users/31/Documents/we2/tools/codex_logs/sol_audio_report.md)

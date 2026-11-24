@@ -1,0 +1,57 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="GAFTİ"
+config/description="Karadeniz yaylasında kenevir serası ve dükkan işletme oyunu."
+config/version="0.1.0"
+run/main_scene="res://scenes/ui/menus/main_menu.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://assets/logo/icon.svg"
+
+[autoload]
+
+EventBus="*res://autoload/event_bus.gd"
+ContentFlags="*res://autoload/content_flags.gd"
+Settings="*res://autoload/settings.gd"
+InputSetup="*res://autoload/input_setup.gd"
+GameClock="*res://autoload/game_clock.gd"
+Weather="*res://autoload/weather.gd"
+Economy="*res://autoload/economy.gd"
+Reputation="*res://autoload/reputation.gd"
+Inventory="*res://autoload/inventory.gd"
+QuestManager="*res://autoload/quest_manager.gd"
+SaveSystem="*res://autoload/save_system.gd"
+Effects="*res://autoload/effects.gd"
+AudioManager="*res://autoload/audio_manager.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://localization/strings.tr.translation")
+locale/fallback="tr"
+
+[rendering]
+
+renderer/rendering_method="mobile"
+textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d=1

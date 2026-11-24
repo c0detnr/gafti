@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" stroke-linejoin="round">
+<defs>
+<linearGradient id="tea" x2="0%" y2="100%">
+<stop stop-color="#C8EB76"/>
+<stop offset=".51" stop-color="#9BDB61"/>
+<stop offset="1" stop-color="#67BB63"/>
+</linearGradient>
+</defs>
+<rect width="512" height="512" rx="105" fill="#173629"/>
+<rect x="18" y="18" width="476" height="476" rx="89" fill="none" stroke="#41654A" stroke-width="4"/>
+<g transform="translate(0 10)">
+<path transform="translate(88 110) rotate(-8 155 160) scale(1.91)" fill-rule="evenodd" d="M145 46 C140 17 118 3 88 4 C34 4 6 43 5 95 C3 144 28 173 71 174 Q105 175 134 156 Q146 149 147 133 L152 96 Q154 80 139 80 L89 82 Q78 83 78 95 L77 106 Q76 116 88 115 L108 114 L105 129 Q95 137 80 135 C58 133 53 114 55 93 C57 64 69 45 87 44 Q103 42 111 57 Q115 65 124 61 L139 55 Q146 53 145 46 Z" fill="#FFF0CC" stroke="#FFF0CC" stroke-width="21"/>
+<path transform="translate(362 167) rotate(26) scale(1.55)" fill-rule="evenodd" d="M0 0 Q-20 -2 -33 -17 Q-22 -20 -11 -15 Q-28 -31 -28 -46 Q-12 -44 -4 -30 Q-6 -50 4 -66 Q16 -51 13 -31 Q22 -46 39 -50 Q40 -35 23 -19 Q36 -25 48 -22 Q38 -6 14 -1 Q7 5 0 0 Z" fill="#FFF0CC" stroke="#FFF0CC" stroke-width="21"/>
+</g>
+<g transform="translate(0 0)">
+<path transform="translate(88 110) rotate(-8 155 160) scale(1.91)" fill-rule="evenodd" d="M145 46 C140 17 118 3 88 4 C34 4 6 43 5 95 C3 144 28 173 71 174 Q105 175 134 156 Q146 149 147 133 L152 96 Q154 80 139 80 L89 82 Q78 83 78 95 L77 106 Q76 116 88 115 L108 114 L105 129 Q95 137 80 135 C58 133 53 114 55 93 C57 64 69 45 87 44 Q103 42 111 57 Q115 65 124 61 L139 55 Q146 53 145 46 Z" fill="#FFF0CC" stroke="#FFF0CC" stroke-width="19"/>
+<path transform="translate(362 167) rotate(26) scale(1.55)" fill-rule="evenodd" d="M0 0 Q-20 -2 -33 -17 Q-22 -20 -11 -15 Q-28 -31 -28 -46 Q-12 -44 -4 -30 Q-6 -50 4 -66 Q16 -51 13 -31 Q22 -46 39 -50 Q40 -35 23 -19 Q36 -25 48 -22 Q38 -6 14 -1 Q7 5 0 0 Z" fill="#FFF0CC" stroke="#FFF0CC" stroke-width="19"/>
+</g>
+<g transform="translate(0 10)">
+<path transform="translate(88 110) rotate(-8 155 160) scale(1.91)" fill-rule="evenodd" d="M145 46 C140 17 118 3 88 4 C34 4 6 43 5 95 C3 144 28 173 71 174 Q105 175 134 156 Q146 149 147 133 L152 96 Q154 80 139 80 L89 82 Q78 83 78 95 L77 106 Q76 116 88 115 L108 114 L105 129 Q95 137 80 135 C58 133 53 114 55 93 C57 64 69 45 87 44 Q103 42 111 57 Q115 65 124 61 L139 55 Q146 53 145 46 Z" fill="#173629" stroke="#173629" stroke-width="10"/>
+<path transform="translate(362 167) rotate(26) scale(1.55)" fill-rule="evenodd" d="M0 0 Q-20 -2 -33 -17 Q-22 -20 -11 -15 Q-28 -31 -28 -46 Q-12 -44 -4 -30 Q-6 -50 4 -66 Q16 -51 13 -31 Q22 -46 39 -50 Q40 -35 23 -19 Q36 -25 48 -22 Q38 -6 14 -1 Q7 5 0 0 Z" fill="#173629" stroke="#173629" stroke-width="10"/>
+</g>
+<g transform="translate(0 8)">
+<path transform="translate(88 110) rotate(-8 155 160) scale(1.91)" fill-rule="evenodd" d="M145 46 C140 17 118 3 88 4 C34 4 6 43 5 95 C3 144 28 173 71 174 Q105 175 134 156 Q146 149 147 133 L152 96 Q154 80 139 80 L89 82 Q78 83 78 95 L77 106 Q76 116 88 115 L108 114 L105 129 Q95 137 80 135 C58 133 53 114 55 93 C57 64 69 45 87 44 Q103 42 111 57 Q115 65 124 61 L139 55 Q146 53 145 46 Z" fill="#F49B50" stroke="#F49B50" stroke-width="4"/>
+<path transform="translate(362 167) rotate(26) scale(1.55)" fill-rule="evenodd" d="M0 0 Q-20 -2 -33 -17 Q-22 -20 -11 -15 Q-28 -31 -28 -46 Q-12 -44 -4 -30 Q-6 -50 4 -66 Q16 -51 13 -31 Q22 -46 39 -50 Q40 -35 23 -19 Q36 -25 48 -22 Q38 -6 14 -1 Q7 5 0 0 Z" fill="#F49B50" stroke="#F49B50" stroke-width="4"/>
+</g>
+<g id="G">
+<path transform="translate(88 110) rotate(-8 155 160) scale(1.91)" fill-rule="evenodd" d="M145 46 C140 17 118 3 88 4 C34 4 6 43 5 95 C3 144 28 173 71 174 Q105 175 134 156 Q146 149 147 133 L152 96 Q154 80 139 80 L89 82 Q78 83 78 95 L77 106 Q76 116 88 115 L108 114 L105 129 Q95 137 80 135 C58 133 53 114 55 93 C57 64 69 45 87 44 Q103 42 111 57 Q115 65 124 61 L139 55 Q146 53 145 46 Z" fill="url(#tea)" stroke="#173629" stroke-width="6"/>
+<path transform="translate(88 110) rotate(-8 155 160) scale(1.91)" d="M25 74 Q30 45 53 29" fill="none" stroke="#FFF0CC" stroke-width="4" stroke-linecap="round"/>
+</g>
+<g id="Leaf">
+<path transform="translate(362 167) rotate(26) scale(1.55)" fill-rule="evenodd" d="M0 0 Q-20 -2 -33 -17 Q-22 -20 -11 -15 Q-28 -31 -28 -46 Q-12 -44 -4 -30 Q-6 -50 4 -66 Q16 -51 13 -31 Q22 -46 39 -50 Q40 -35 23 -19 Q36 -25 48 -22 Q38 -6 14 -1 Q7 5 0 0 Z" fill="#F49B50" stroke="#173629" stroke-width="6"/>
+<path transform="translate(362 167) rotate(26) scale(1.55)" d="M4 -9 Q5 -22 6 -36" fill="none" stroke="#FFF0CC" stroke-width="4" stroke-linecap="round"/>
+</g>
+</svg>

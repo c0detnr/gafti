@@ -1,0 +1,261 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/Nunito.ttf" id="Nunito"]
+[ext_resource type="FontFile" path="res://assets/fonts/Baloo2.ttf" id="Baloo2"]
+[ext_resource type="Texture2D" path="res://assets/ui/slider_knob.svg" id="slider_knob"]
+[ext_resource type="Texture2D" path="res://assets/ui/slider_knob_active.svg" id="slider_knob_active"]
+[ext_resource type="Texture2D" path="res://assets/ui/slider_knob_disabled.svg" id="slider_knob_disabled"]
+[ext_resource type="Texture2D" path="res://assets/ui/toggle_on.svg" id="toggle_on"]
+[ext_resource type="Texture2D" path="res://assets/ui/toggle_off.svg" id="toggle_off"]
+
+[sub_resource type="FontVariation" id="Title"]
+base_font = ExtResource("Baloo2")
+variation_opentype = { "wght": 600 }
+
+[sub_resource type="StyleBoxFlat" id="Button"]
+bg_color = Color(0.19216, 0.35294, 0.25098, 1)
+border_color = Color(0.40000, 0.50588, 0.34118, 1)
+content_margin_left = 22.0
+border_width_left = 2
+content_margin_top = 28.0
+border_width_top = 2
+content_margin_right = 22.0
+border_width_right = 2
+content_margin_bottom = 28.0
+border_width_bottom = 2
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+
+[sub_resource type="StyleBoxFlat" id="Hover"]
+bg_color = Color(0.24314, 0.42353, 0.27843, 1)
+border_color = Color(0.60784, 0.85882, 0.38039, 1)
+content_margin_left = 22.0
+border_width_left = 2
+content_margin_top = 28.0
+border_width_top = 2
+content_margin_right = 22.0
+border_width_right = 2
+content_margin_bottom = 28.0
+border_width_bottom = 2
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+
+[sub_resource type="StyleBoxFlat" id="Pressed"]
+bg_color = Color(0.47451, 0.25490, 0.14118, 1)
+border_color = Color(0.95686, 0.60784, 0.31373, 1)
+content_margin_left = 22.0
+border_width_left = 2
+content_margin_top = 28.0
+border_width_top = 2
+content_margin_right = 22.0
+border_width_right = 2
+content_margin_bottom = 28.0
+border_width_bottom = 2
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+
+[sub_resource type="StyleBoxFlat" id="Disabled"]
+bg_color = Color(0.21569, 0.26275, 0.23137, 1)
+border_color = Color(0.32549, 0.38824, 0.35686, 1)
+content_margin_left = 22.0
+border_width_left = 2
+content_margin_top = 28.0
+border_width_top = 2
+content_margin_right = 22.0
+border_width_right = 2
+content_margin_bottom = 28.0
+border_width_bottom = 2
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+
+[sub_resource type="StyleBoxFlat" id="Focus"]
+bg_color = Color(0.09020, 0.21176, 0.16078, 1)
+border_color = Color(0.95686, 0.60784, 0.31373, 1)
+content_margin_left = 0.0
+border_width_left = 3
+content_margin_top = 0.0
+border_width_top = 3
+content_margin_right = 0.0
+border_width_right = 3
+content_margin_bottom = 0.0
+border_width_bottom = 3
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_left = 14
+corner_radius_bottom_right = 14
+draw_center = false
+
+[sub_resource type="StyleBoxFlat" id="Wood"]
+bg_color = Color(0.22353, 0.17647, 0.14902, 1)
+border_color = Color(0.40784, 0.31373, 0.23137, 1)
+content_margin_left = 20.0
+border_width_left = 2
+content_margin_top = 18.0
+border_width_top = 2
+content_margin_right = 20.0
+border_width_right = 2
+content_margin_bottom = 18.0
+border_width_bottom = 2
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_left = 18
+corner_radius_bottom_right = 18
+
+[sub_resource type="StyleBoxFlat" id="Forest"]
+bg_color = Color(0.13725, 0.24314, 0.19216, 1)
+border_color = Color(0.27843, 0.38824, 0.29020, 1)
+content_margin_left = 18.0
+border_width_left = 2
+content_margin_top = 16.0
+border_width_top = 2
+content_margin_right = 18.0
+border_width_right = 2
+content_margin_bottom = 16.0
+border_width_bottom = 2
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_left = 16
+corner_radius_bottom_right = 16
+
+[sub_resource type="StyleBoxFlat" id="Field"]
+bg_color = Color(0.12549, 0.18039, 0.15686, 1)
+border_color = Color(0.43529, 0.50196, 0.42353, 1)
+content_margin_left = 12.0
+border_width_left = 2
+content_margin_top = 10.0
+border_width_top = 2
+content_margin_right = 12.0
+border_width_right = 2
+content_margin_bottom = 10.0
+border_width_bottom = 2
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_left = 10
+corner_radius_bottom_right = 10
+
+[sub_resource type="StyleBoxFlat" id="Selected"]
+bg_color = Color(0.19216, 0.35294, 0.25098, 1)
+border_color = Color(0.60784, 0.85882, 0.38039, 1)
+content_margin_left = 12.0
+border_width_left = 2
+content_margin_top = 8.0
+border_width_top = 2
+content_margin_right = 12.0
+border_width_right = 2
+content_margin_bottom = 8.0
+border_width_bottom = 2
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_left = 10
+corner_radius_bottom_right = 10
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+bg_color = Color(0.09020, 0.21176, 0.16078, 1)
+border_color = Color(0.32549, 0.38824, 0.35686, 1)
+content_margin_left = 6.0
+border_width_left = 2
+content_margin_top = 6.0
+border_width_top = 2
+content_margin_right = 6.0
+border_width_right = 2
+content_margin_bottom = 6.0
+border_width_bottom = 2
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+
+[sub_resource type="StyleBoxFlat" id="Fill"]
+bg_color = Color(0.95686, 0.60784, 0.31373, 1)
+border_color = Color(0.95686, 0.60784, 0.31373, 1)
+content_margin_left = 6.0
+border_width_left = 0
+content_margin_top = 6.0
+border_width_top = 0
+content_margin_right = 6.0
+border_width_right = 0
+content_margin_bottom = 6.0
+border_width_bottom = 0
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_left = 6
+corner_radius_bottom_right = 6
+
+[resource]
+default_font = ExtResource("Nunito")
+default_font_size = 20
+GaftiHeading/base_type = &"Label"
+GaftiHeading/fonts/font = SubResource("Title")
+GaftiHeading/font_sizes/font_size = 36
+Button/styles/normal = SubResource("Button")
+Button/styles/hover = SubResource("Hover")
+Button/styles/pressed = SubResource("Pressed")
+Button/styles/disabled = SubResource("Disabled")
+Button/styles/focus = SubResource("Focus")
+Button/colors/font_color = Color(1.00000, 0.94118, 0.80000, 1)
+Button/colors/font_hover_color = Color(1.00000, 0.94118, 0.80000, 1)
+Button/colors/font_pressed_color = Color(1.00000, 0.94118, 0.80000, 1)
+Button/colors/font_disabled_color = Color(0.81569, 0.78824, 0.68627, 1)
+Button/colors/font_focus_color = Color(1.00000, 0.94118, 0.80000, 1)
+CheckButton/styles/normal = SubResource("Button")
+CheckButton/styles/hover = SubResource("Hover")
+CheckButton/styles/pressed = SubResource("Pressed")
+CheckButton/styles/disabled = SubResource("Disabled")
+CheckButton/styles/focus = SubResource("Focus")
+CheckButton/styles/hover_pressed = SubResource("Pressed")
+CheckButton/colors/font_color = Color(1.00000, 0.94118, 0.80000, 1)
+CheckButton/colors/font_hover_color = Color(1.00000, 0.94118, 0.80000, 1)
+CheckButton/colors/font_pressed_color = Color(1.00000, 0.94118, 0.80000, 1)
+CheckButton/colors/font_disabled_color = Color(0.81569, 0.78824, 0.68627, 1)
+CheckButton/colors/font_focus_color = Color(1.00000, 0.94118, 0.80000, 1)
+Panel/styles/panel = SubResource("Wood")
+PanelContainer/styles/panel = SubResource("Forest")
+Label/colors/font_color = Color(1.00000, 0.94118, 0.80000, 1)
+ProgressBar/styles/background = SubResource("Track")
+ProgressBar/styles/fill = SubResource("Fill")
+ProgressBar/colors/font_color = Color(1.00000, 0.94118, 0.80000, 1)
+ProgressBar/colors/font_outline_color = Color(0.09020, 0.21176, 0.16078, 1)
+ProgressBar/constants/outline_size = 4
+LineEdit/styles/normal = SubResource("Field")
+LineEdit/styles/read_only = SubResource("Forest")
+LineEdit/styles/focus = SubResource("Focus")
+LineEdit/colors/font_color = Color(1.00000, 0.94118, 0.80000, 1)
+LineEdit/colors/font_placeholder_color = Color(0.81569, 0.78824, 0.68627, 1)
+LineEdit/colors/caret_color = Color(0.95686, 0.60784, 0.31373, 1)
+LineEdit/colors/selection_color = Color(0.19216, 0.35294, 0.25098, 1)
+HSlider/styles/slider = SubResource("Track")
+HSlider/styles/grabber_area = SubResource("Fill")
+HSlider/styles/grabber_area_highlight = SubResource("Fill")
+HSlider/icons/grabber = ExtResource("slider_knob")
+HSlider/icons/grabber_highlight = ExtResource("slider_knob_active")
+HSlider/icons/grabber_disabled = ExtResource("slider_knob_disabled")
+CheckButton/icons/checked = ExtResource("toggle_on")
+CheckButton/icons/unchecked = ExtResource("toggle_off")
+CheckButton/icons/checked_disabled = ExtResource("toggle_on")
+CheckButton/icons/unchecked_disabled = ExtResource("toggle_off")
+TabContainer/styles/panel = SubResource("Forest")
+TabContainer/styles/tab_selected = SubResource("Selected")
+TabContainer/styles/tab_hovered = SubResource("Selected")
+TabContainer/styles/tab_unselected = SubResource("Field")
+TabContainer/styles/tab_disabled = SubResource("Field")
+TabContainer/styles/tab_focus = SubResource("Focus")
+TabContainer/colors/font_selected_color = Color(1.00000, 0.94118, 0.80000, 1)
+TabContainer/colors/font_unselected_color = Color(0.81569, 0.78824, 0.68627, 1)
+TabContainer/colors/font_hovered_color = Color(1.00000, 0.94118, 0.80000, 1)
+ItemList/styles/panel = SubResource("Field")
+ItemList/styles/focus = SubResource("Focus")
+ItemList/styles/selected = SubResource("Selected")
+ItemList/styles/selected_focus = SubResource("Selected")
+ItemList/styles/hovered = SubResource("Forest")
+ItemList/styles/cursor = SubResource("Focus")
+ItemList/styles/cursor_unfocused = SubResource("Focus")
+ItemList/colors/font_color = Color(1.00000, 0.94118, 0.80000, 1)
+ItemList/colors/font_selected_color = Color(1.00000, 0.94118, 0.80000, 1)

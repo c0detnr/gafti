@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/stations/breeding_station.gd" id="1"]
+
+[node name="BreedingStation" type="Node3D"]
+script = ExtResource("1")
+body_size = Vector3(1.2, 0.9, 0.7)
+interact_size = Vector3(1.8, 1.8, 1.4)

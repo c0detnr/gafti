@@ -1,0 +1,98 @@
+keys,tr
+UI_BACK,Geri
+UI_BAG,Çanta
+UI_BUILD,İnşa
+UI_CANCEL,Vazgeç
+UI_CLOSE,Kapat
+UI_INTERACT,Etkileş
+UI_JUMP,Zıpla
+UI_MENU,Menü
+UI_SPRINT,Koş
+MENU_CONTINUE,Devam Et
+MENU_NEW_GAME,Yeni Oyun
+MENU_SETTINGS,Ayarlar
+MENU_QUIT,Çıkış
+MENU_TAGLINE,"Pusludere yaylasında sisli sabahlar, tuhaf komşular."
+MENU_CONFIRM_NEW,Yeni oyun başlarsa mevcut kayıt silinecek. Emin misin?
+MENU_CONFIRM_YES,"Evet, baştan başla"
+MENU_NO_GAME_SCENE,Oyun sahnesi henüz hazır değil.
+PAUSE_TITLE,Mola
+PAUSE_RESUME,Devam
+PAUSE_SAVE,Kaydet
+PAUSE_SETTINGS,Ayarlar
+PAUSE_MAIN_MENU,Ana Menü
+PAUSE_SAVED,Oyun kaydedildi.
+PAUSE_SAVE_FAILED,Kayıt sistemi bulunamadı.
+SETTINGS_TITLE,Ayarlar
+SETTINGS_MASTER,Genel ses
+SETTINGS_MUSIC,Müzik
+SETTINGS_SFX,Efektler
+SETTINGS_GRAPHICS,Grafik kalitesi
+SETTINGS_Q_LOW,Düşük
+SETTINGS_Q_MED,Orta
+SETTINGS_Q_HIGH,Yüksek
+SETTINGS_DAY_LENGTH,Gün süresi
+SETTINGS_MINUTES,%d dk
+SETTINGS_TOUCH,Dokunmatik kontroller
+REPORT_TITLE,%d. Gün Raporu
+REPORT_INCOME,Gelir
+REPORT_EXPENSES,Gider
+REPORT_PROFIT,Kâr / Zarar
+REPORT_BILLS,Yarın kesilecek faturalar
+REPORT_MONEY,Kasadaki para
+REPORT_CONTINUE,Yeni güne başla
+HUD_DAY,Gün %d
+HUD_GAFTI_MODE,Gaftî Modu
+HUD_LICENSE,Lisans
+HUD_REPUTATION,İtibar
+HUD_QUEST,GÖREV
+HUD_QUEST_DONE,Görev tamamlandı: %s
+SEASON_SPRING,İlkbahar
+SEASON_SUMMER,Yaz
+SEASON_AUTUMN,Sonbahar
+SEASON_WINTER,Kış
+INV_TITLE,Çanta
+INV_EMPTY,Burada henüz bir şey yok.
+INV_FILTER_ALL,Tümü
+INV_FILTER_SEED,Tohum
+INV_FILTER_BUD,Hasat
+INV_FILTER_JAR,Kavanoz
+INV_FILTER_PREROLL,Sarma
+INV_FILTER_SUPPLY,Malzeme
+INV_FILTER_TOOL,Alet
+KIND_SEED,Tohum
+KIND_WET_BUD,Taze hasat
+KIND_DRY_BUD,Kuru hasat
+KIND_JAR,Kavanoz
+KIND_PREROLL,Hazır sarma
+KIND_PAPER,Sarma kağıdı
+KIND_FILTER,Filtre
+KIND_NUTRIENT,Besin
+KIND_TOOL,Alet
+CUST_TITLE,Ayna Karşısında
+CUST_SKIN,Ten
+CUST_HAIR,Saç
+CUST_HAIR_1,Kısa
+CUST_HAIR_2,Kıvırcık
+CUST_HAIR_3,At kuyruğu
+CUST_HAIR_4,Kel + yanlar
+CUST_HAIR_5,Dalgalı
+CUST_HAIR_6,Topuz
+CUST_BEARD,Sakal / Bıyık
+CUST_BEARD_0,Tıraşlı
+CUST_BEARD_1,Bıyık
+CUST_BEARD_2,Palabıyık
+CUST_BEARD_3,Kirli sakal
+CUST_BEARD_4,Gür sakal
+CUST_HAT,Başlık
+CUST_HAT_KASKET,Kasket
+CUST_TOP,Üst
+CUST_TOP_RAINCOAT,Yağmurluk
+CUST_TOP_SWEATER,Örgü kazak
+CUST_TOP_SHIRT,Gömlek
+CUST_BOOTS,Lastik çizme
+CUST_RANDOM,Rastgele
+CUST_OK,Tamam
+BED_SLEEP,Uyu
+BED_TOO_EARLY,"Daha erken, gözüm. Saat 20:00'den sonra uyuyabilirsin."
+MIRROR_CUSTOMIZE,Aynaya bak

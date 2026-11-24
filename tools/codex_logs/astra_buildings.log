@@ -1,0 +1,1395 @@
+OpenAI Codex v0.172.0
+--------
+workdir: C:\Users\31\Documents\we2
+model: gpt-6.2-astra
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a20cdc-e353-7530-aeb0-8ec9060de62a
+--------
+user
+Sen GAFTİ adlı Godot 4.7 oyun projesinde çalışan bir alt ajansın. Proje kökü: C:\Users\31\Documents\we2
+ÖNCE AGENTS.md ve GDD.md dosyalarını oku; oradaki sözleşmeye (dosya adları, düğüm adları, ölçek, bütçe, Blender sarmalayıcısı tools\blender\run_blender.ps1) birebir uy.
+Windows 11 + PowerShell kullan. Kullanıcıya soru sorma, onay bekleme, iş bitene kadar çalış. project.godot dosyasını DÜZENLEME. Sana verilmeyen alanlardaki dosyalara dokunma.
+Görsel kaliteyi kontrol et: ürettiğin her modeli Blender ile (Eevee ya da Workbench) 512px önizleme olarak tools\previews\<ad>.png dosyasına render et, görüntüyü kendin incele ve iyi görünmüyorsa düzelt.
+Stil: "detaylı stilize" — Karadeniz yaylası, el boyaması hissi, yumuşak bevel, sıcak ve sevimli, abartılı ama okunaklı oranlar. Doygun yeşiller, ahşap kahvesi, ıslak taş grisi, sıcak turuncu.
+Bitince tools\codex_logs\<GOREV>_report.md dosyasına üretilen dosyaları, düğüm adlarını ve bilinen eksikleri yaz.
+
+GOREV=astra_buildings
+İŞ: Oyunun ana mekanları.
+1. tools\blender\buildings_hero.py → assets\models\hero\greenhouse.glb: dededen kalma ahşap + cam Karadeniz yayla serası, iç ölçü ~12×6 m (uzun kenar X ekseninde), kapı +Z yönünde ve ≥1.6 m genişlikte. İçeride X boyunca iki uzun saksı tezgahı (tezgah yüksekliği 0.8 m; her tezgahta 6 saksı yuvası için düz yüzey; tezgah üst yüzey merkezlerini raporda koordinat olarak ver). Yosunlu taş temel, hafif eğik çatı, bazı camlar bantlı/kırık (komik). Glass düğümü ayrı (yarı saydam). Çarpışma: duvar ve tezgahlar için "-col" son ekli basit kutu mesh'leri (Godot import convention).
+2. assets\models\hero\house.glb: dedenin Karadeniz evi (taş zemin kat + ahşap üst kat, geniş saçak, balkon). Girilebilir tek oda, kapı +Z; iç zemin düz. "-col" çarpışma mesh'leri.
+3. Bütçe ≤8k üçgen her biri. Önizleme render et.
+
+codex
+Önce AGENTS.md ve GDD.md dosyalarını okuyacağım. Ardından iki modeli üretip üçgen sayılarını, giriş açıklıklarını ve tezgâh koordinatlarını dışa aktarılan GLB dosyalarından kontrol edeceğim.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw -Encoding UTF8 AGENTS.md' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw -Encoding UTF8 GDD.md' in C:\Users\31\Documents\we2
+ succeeded in 834ms:
+# GAFTİ — Oyun Tasarım Dokümanı (GDD) v1.0
+
+> Karadeniz yaylasında lisanslı kenevir serası + dükkan işletme oyunu. Komedi tonlu, cozy ama sonuçlu.
+> Motor: Godot 4.7 · Platform: PC (Steam) + Mobil (Play Store) · Dil: Türkçe (çeviriye hazır) · Derecelendirme: 18+
+
+---
+
+## 1. Özet
+
+Şehirde her işi batırmış karakterimiz, kimsenin istemediği yayla serasını devralır ve **Pusludere**
+yaylasına taşınır. Sisli sabahlarda bitkilerine bakar, öğlen hasadını kurutup joint sarar, akşam kasaba
+meydanındaki dükkanında köylülere ve turistlere satış yapar. Gece serada kova bongla günü kapatır.
+Kasabanın tuhaf insanları, absürt görevleri ve kesintisiz bir yayla mizahı oyunu taşır.
+
+**Üç sütun:**
+1. **Dokunsal ustalık:** Bakım, sarma ve bong anları elle hissedilen mini oyunlardır.
+2. **Atmosfer:** Sis, yağmur, mevsimler, ahşap ve yeşil. Oyunun asıl hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeç. Ciddi bir ana hikâye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | İçerik |
+|---|---|
+| **Hikâye (Komedi)** | Ana hikâye yok; birbirine bağlı **komik görev zinciri** (NPC skeçleri). Oyunu öğretir, lisans seviyelerini açar. ~4 mevsim (28 gün). |
+| **Serbest** | Hikâye bittikten sonra ya da baştan: sonsuz işletme, tüm sistemler açık. |
+
+**Zorluk:** Cozy ama sonuçlu. Bitki ölebilir, para eksiye düşebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandırıcı) borç alınır.
+
+---
+
+## 3. Dünya: Pusludere Yaylası
+
+### 3.1 Harita (küçük açık vadi, yüklemesiz)
+```
+                 ⛰  KEKLİKTEPE (manzara, hikâye finali)
+                      │ patika
+        🌲 LADİN ORMANI ── 🌉 KÖPRÜ & DERE (su deposu dolumu)
+              │                      │
+ [DEDENİN SERASI + EV] ── çay bahçeli yol ── [KASABA MEYDANI]
+   ├ Sera (saksılar)                          ├ GAFTİ Dükkanı
+   ├ Dış tarla (mevsimsel)                    ├ Fadime'nin Kahvehanesi
+   ├ Kurutma ambarı                           ├ Muhtarlık
+   ├ Sarma masası                             ├ Lisans & Denetim Ofisi
+   └ Kova bong köşesi                         └ Hırdavatçı (ekipman/tohum)
+                                                   │
+                                          🚐 MİNİBÜS DURAĞI
+                                       (turistler, toptan siparişler)
+```
+- Sera → dükkan yürüme süresi ~40 sn; ilerleyen oyunda **eski motosiklet** (sürüş, ~15 sn).
+- Mobil: bölgeler `VisibilityRange` + streaming ile parça parça yüklenir; oyuncu yükleme ekranı görmez.
+
+### 3.2 Atmosfer
+- **Görsel stil:** Detaylı stilize. El boyaması hissi veren toon shading, yumuşak kenar ışığı, doygun yeşiller,
+  ahşap/taş dokuları, rüzgârla sallanan bitki shader'ı, katmanlı sis.
+- **Renk paleti:** Ladin yeşili, çay yeşili, ıslak taş grisi, ahşap kahvesi, sıcak lamba turuncusu (sera ışıkları).
+- **Ses:** Yağmurun çatıya vuruşu, dere, kuşlar, uzaktan inek çanı, kahvehanede tavla sesi. Müzik: lo-fi + kemençe
+  dokunuşlu sakin parçalar (CC0). Gece daha sakin bir müzik çalar, fırtınada müzik kısılır.
+
+### 3.3 Mevsimler & Hava
+1 yıl = 4 mevsim × 7 gün = 28 gün.
+
+| Mevsim | Etki |
+|---|---|
+| İlkbahar | Ekim bonusu (+%15 çimlenme), sık yağmur (dış tarla kendiliğinden sulanır) |
+| Yaz | Dış tarla en verimli, turist sayısı ×2, sıcaklık stresi |
+| Sonbahar | Hasat bonusu (+kalite), fırtına ihtimali |
+| Kış | Dış tarla kapalı, kar, sera ısıtma gideri; müşteri az ama fiyat yüksek |
+
+| Hava | Etki |
+|---|---|
+| Güneşli | Dış ışık +, su tüketimi + |
+| Bulutlu | Nötr |
+| Sisli | Görüş düşük, atmosfer max; müşteri biraz az |
+| Yağmurlu | Dış tarla otomatik sulanır, müşteri −%20 |
+| Fırtına | Dış bitkilere hasar riski, **elektrik kesintisi** (jeneratör yükseltmesi çözer) |
+| Kar | Kışa özel, sera ısı ihtiyacı + |
+
+Ertesi günün hava tahmini akşamları kahvehane radyosundan duyulur.
+
+---
+
+## 4. Çekirdek Döngü
+
+```
+SABAH  (06–11)  Sera & tarla: sula, besle, ışık ayarla, buda, zararlı temizle, hasat et
+ÖĞLE   (11–16)  İşleme: kurut, kürle, paketle, joint sar (pre-roll)
+AKŞAM  (16–22)  Dükkan: rafları diz, fiyat koy, kimlik kontrol et, sat
+GECE   (22–02)  Planla: yükselt, çaprazla, inşa et · Kova bong · Uyu (kayıt)
+```
+- 1 oyun günü ≈ 14 dk gerçek zaman (ayarlardan 10–20 dk).
+- Fazlar öneridir; dükkan sadece 16–22 arası açıktır.
+- 02:00'da uyumazsan karakter bayılır: ertesi sabah geç uyanır, −%10 para (bayıldığı yerden eve "taşıma ücreti").
+
+---
+
+## 5. Sistemler
+
+### 5.1 Bitki
+| Aşama | Gün | Etkileşim |
+|---|---|---|
+| Çimlenme | 1 | Ekim, nem |
+| Fide | 2 | Sulama, hafif ışık |
+| Vejetatif | 3–5 | Besin, budama, saksı büyütme |
+| Çiçeklenme | 4–6 | Işık döngüsü, pH, zararlı kontrolü |
+| Hasat | — | Zamanlama: erken = az verim, geç = kalite düşer |
+
+- **Değişkenler:** Su, Işık, Besin, pH, Sıcaklık, Nem, Sağlık.
+- Türün ideal aralığında geçen süre → **Kalite (0–100)**. Sağlık 0 → bitki ölür (kompost olur, gübre verir).
+- **Zararlılar:** Yaprak biti, küf (nem yüksekse). Elle temizlenir ya da ilaçlanır.
+- Görsel: Her aşamanın ayrı bir modeli var. Kalite, sağlık ve susuzluk yaprak rengine ve duruşuna yansır.
+
+### 5.2 Genetik / Çaprazlama
+- Özellikler: **Verim, Hız, Dayanıklılık, Aroma, Kalite Potansiyeli**, ayrıca görsel özellikler (yaprak tonu, boy).
+- Çaprazlama: yavru özelliği ebeveyn ortalaması ± sapma; %5 mutasyon (nadir özellik).
+- Başlangıçta 3 tür: **Pusu Kuşu**, **Ladin Duman**, **Çay Yaprağı**. Hikâye ödülü: **GAFTİ** türü.
+- Yeni türlere oyuncu isim verir; **Tohum Defteri** koleksiyonu.
+
+### 5.3 İşleme
+Kurutma (3–7 saat, nem dengesi) → Kürleme (opsiyonel, 1–3 gün, +kalite) → Ürün:
+- **Kavanoz** (gram satış)
+- **Pre-roll** (joint sarma mini oyunu, ×1.6 değer)
+
+### 5.4 Joint Sarma Mini Oyunu (yakın çekim, dokunsal)
+| Adım | Etkileşim (fare / dokunmatik) | Kaliteye etkisi |
+|---|---|---|
+| 1. Öğüt | Grinder kapağını dairesel çevir | Az çevirirsen iri tane, çok çevirirsen toz olur |
+| 2. Filtre | Kartonu zikzak katla (3 sürükleme) | Düzgün filtre olursa çekiş iyi olur |
+| 3. Dağıt | Kağıda sürükleyerek serp | Eşit dağılım için ısı haritası göstergesi |
+| 4. Sar | Yukarı-aşağı ritmik kaydırma, basınç çubuğu | Gevşek sararsan söner, sıkı sararsan çekmez |
+| 5. Yapıştır | Kenar boyunca sürükle (yala) | Eksik bırakırsan açılır |
+| 6. Bük | Ucu döndür | Bitiş |
+
+- Sonuç **Sarma Skoru (0–100)**; ürün kalitesiyle çarpılır. Beceri arttıkça yardım çubukları azalır.
+- Komedi: Çok kötü sarımlar "Muhtar'ın Kağıdı", "Kibrit Çöpü" gibi komik isimler alır ama yine satılabilir (ucuza).
+
+### 5.5 Kova Bong Mini Oyunu (gravity bong, yakın çekim)
+| Adım | Etkileşim |
+|---|---|
+| 1. Hazırla | Kesik pet şişeyi su dolu kovaya batır |
+| 2. Doldur | Kaseyi doldur (miktar seçimi: az / orta / bol) |
+| 3. Yak | Çakmağı çak (basılı tut) |
+| 4. Kaldır | Şişeyi **yavaşça** yukarı kaldır; hızlı kaldırırsan duman kaçar |
+| 5. Çek | Kaseyi çıkar, nefes çubuğunu doğru anda bırak |
+
+- **Etki: "Gaftî Modu"** (süre miktara bağlı, 1–3 oyun saati):
+  - Ekran: renk doygunluğu artar, hafif dalga efekti, yumuşak bulanıklık, müzik yavaşlar ve filtrelenir.
+  - **Artı:** Müşteri sabrı +%30, bakım mini oyunlarında "sakin el" (sarma skoru +10).
+  - **Eksi:** Hareket −%15, sulama miktarı rastgele ±%20 kayar, NPC diyalogları absürtleşir.
+  - "Bol" doz: komik bayılma ihtimali (kanepede uyanırsın, 2 saat kaybedersin).
+- Seradaki bong yükseltilebilir (kova → bidon → "Muhtar'ın Kazanı" süs görünümleri).
+
+### 5.6 Dükkan
+- Raf ve vitrin grid yerleşimi, ürün başına fiyat, gün sonu raporu.
+- **Müşteri tipleri:**
+  | Tip | Tercih | Bütçe |
+  |---|---|---|
+  | Yayla Köylüsü | Ucuz, kavanoz | Düşük |
+  | Turist | Pre-roll, şık paket | Yüksek |
+  | Tıbbi Hasta (Hayri Hoca vb.) | Yüksek kalite, aroma | Orta |
+  | Uzman (şehirli) | Nadir tür, mutasyon | Çok yüksek |
+- **Kimlik kontrolü:** Her müşteride hızlı kart kontrolü yapılır. Atlarsan denetimde ceza gelir. Komik sahte kimlikler de çıkar.
+- Memnuniyet → **İtibar** → müşteri sayısı ve kalitesi.
+
+### 5.7 Lisans & Denetim
+- Kurgusal "Yayla Kenevir Lisansı", 5 seviye. Her seviye yeni saksı sayısı, ekipman, tür ve dükkan alanı açar.
+- **Denetçi Nevzat Bey** habersiz gelir: kayıt defteri, etiket, kimlik kontrol geçmişi ve hijyen puanlanır.
+- Düşük puan → para cezası; üst üste düşük puan → 1 gün dükkan kapalı.
+
+### 5.8 İnşa & Yükseltme
+Grid yerleşim: saksılar, LED lambalar, damla sulama, nemlendirici, ısıtıcı, jeneratör, kurutma rafı, dükkan rafları.
+Otomasyon orta seviyede gelir; zevkli işler (sarma, bong, hasat) hiç otomatikleşmez.
+
+### 5.9 Ekonomi (başlangıç dengesi)
+- Başlangıç: 2.000 ₺, 6 saksı, 3 tohum türü × 2.
+- Giderler: elektrik (günlük, lamba sayısına bağlı), su (dere deposu bedava ama taşıma gerekir), kış ısıtma, tohum, ekipman.
+- Hedef: 3. günde kâra geçmek, 7. günde ilk lisans yükseltmesi.
+
+### 5.10 Karakter Özelleştirme
+Ten tonu (6), saç (6 model × renk), sakal/bıyık (5), Karadeniz giyimi: yağmurluk, örgü kazak, kasket,
+lastik çizme (renkler). Ayna/dolap ile her zaman değiştirilebilir.
+
+---
+
+## 6. Karakterler & Komedi Görevleri
+
+| NPC | Rol | Komedi |
+|---|---|---|
+| **Muhtar Rüstem** | Hikâye görevleri, borç | Her şeye "hallederuk" der, hiçbir şeyi halletmez |
+| **Fadime Abla** | Kahvehane, hava tahmini, dedikodu | Radyo hava tahminleri hep tersi çıkar |
+| **Hayri Hoca** | Emekli öğretmen, tıbbi müşteri | Her alışverişte ders verir |
+| **Cemil** | Komşu, absürt görevler | İneği için "rahatlatıcı" ister (vermezsin) |
+| **Hans** | Alman turist | Yaylaya yerleşmek ister, Türkçesi felaket |
+| **Nevzat Bey** | Denetçi | Ciddi; Gaftî Modu'nda çok komik konuşur |
+
+**Görev zinciri (örnek ilk hafta):** Serayı temizle → İlk hasat → Muhtar'a "numune" → Dükkanı aç →
+Hans'ın ilk siparişi → İlk denetim → Lisans 2. Her görev 1–3 dk'lık bir skeçle biter.
+
+---
+
+## 7. Kamera & Kontroller
+
+**Vadide:** 3. şahıs omuz üstü kamera. **Mini oyunlarda:** sabit yakın çekim kameraya yumuşak geçiş.
+
+| Eylem | PC | Mobil |
+|---|---|---|
+| Hareket | WASD | Sol sanal joystick |
+| Kamera | Fare | Sağ yarı ekran sürükleme |
+| Etkileşim | E / Sol tık | Bağlamsal etkileşim butonu |
+| Koş | Shift | Joystick'i sonuna kadar it |
+| Envanter | Tab | Çanta ikonu |
+| İnşa modu | B | Menü butonu |
+| Mini oyun | Fare sürükle/çevir | Parmakla aynı hareketler |
+
+---
+
+## 8. Mağaza, Gelir & Derecelendirme
+
+- **Gelir:** PC'de Steam ücretli + ayrı demo. Mobilde ücretsiz demo (İlkbahar, 7 gün) + tek seferlik "Tam Sürüm" satın alımı (Play Billing).
+- **Derecelendirme:** 18+ (uyuşturucu kullanımı tasviri). IARC anketi dürüst doldurulacak.
+- **Risk notu:** İçme sahneleri her platformda açık; bu Play Store'da red riskini yükseltir. Teknik sigorta olarak
+  tüm içme içeriği tek bir `content_flags.consumption` bayrağına bağlıdır (varsayılan: açık). Red gelirse
+  mobil derlemede bu bayrak kapatılıp joint "satılık pre-roll", bong "dekor" moduna düşer, ek iş gerekmez.
+- Reklam yok. Gerçek marka/dispanser yok.
+
+---
+
+## 9. Teknik Mimari (Godot 4.7)
+
+- **Renderer:** Mobile (PC'de "Yüksek" grafik ayarında ekstra sis/gölge kalitesi).
+- **Dil:** GDScript, statik tipli. Tüm metinler `tr()` + `localization/strings.csv`.
+
+**Autoload'lar:**
+| Ad | Görev |
+|---|---|
+| `EventBus` | Sistemler arası sinyaller |
+| `GameClock` | Saat, gün, faz, mevsim |
+| `Weather` | Günlük hava, tahmin, ortam efektleri |
+| `Economy` | Para, işlemler, gün sonu raporu |
+| `Reputation` | İtibar, lisans seviyesi, uyum puanı |
+| `Inventory` | Eşyalar, ürünler |
+| `QuestManager` | Komedi görev zinciri, diyalog tetikleri |
+| `SaveSystem` | Kayıt/yükleme (uyuyunca otomatik) |
+| `Settings` | Grafik, ses, kontrol, gün süresi |
+| `ContentFlags` | Platform/içerik bayrakları |
+| `Effects` | Gaftî Modu ekran efektleri, post-process |
+
+**Veri (Resource):** `StrainData`, `PlantState`, `ItemData`, `CustomerProfile`, `QuestData`, `DialogueData`, `BuildableData`.
+
+**Klasör yapısı:**
+```
+res://
+├── autoload/
+├── data/            strains/ items/ customers/ quests/ dialogue/ buildables/
+├── scenes/
+│   ├── world/       valley.tscn, greenhouse/, town/, zones/
+│   ├── player/      player.tscn, camera_rig.tscn, customization/
+│   ├── plants/
+│   ├── npc/
+│   ├── minigames/   rolling/, gravity_bong/, care/, id_check/
+│   ├── shop/
+│   └── ui/          hud/, menus/, mobile_controls/, dialogue/
+├── scripts/         systems/ components/
+├── shaders/         toon.gdshader, foliage_wind, fog_layer, gafti_post
+├── assets/          models/ textures/ audio/ fonts/ logo/
+├── localization/
+└── tests/
+```
+
+**Performans bütçesi (mobil, orta segment Android):** 60 FPS hedef (min 30), ekranda ≤150 draw call,
+≤300k üçgen, bitki modelleri LOD0 ≤4k / LOD1 ≤1k üçgen, doku atlasları 2K.
+
+---
+
+## 10. Sanat Listesi (öncelik + üretici)
+
+| Varlık | Detay | Üretici |
+|---|---|---|
+| **GAFTİ logosu** | Çizgi film tarzı, kalın yuvarlak harfler, İ noktası yaprak/duman; yeşil + sıcak turuncu. SVG + PNG + uygulama ikonu | Codex astra |
+| **Bitki** | 5 aşama × sağlık varyasyonu, rüzgâr shader'ı | Codex astra |
+| **Kova bong seti** | Kova, kesik şişe, kase, su, duman | Codex astra |
+| **Joint seti** | Grinder, kağıt, filtre, joint (sarım aşamaları) | Codex astra |
+| **Oyuncu karakteri** | Gövde + özelleştirme parçaları + temel animasyonlar | Codex astra |
+| **Shader'lar** | Toon, foliage wind, sis katmanları, Gaftî post-process | Codex astra |
+| Sera yapısı, ev | Ahşap/cam yayla serası | Codex astra |
+| NPC'ler (6) | Karakter tabanından türetilmiş | Codex sol |
+| Kasaba binaları, props | Kahvehane, muhtarlık, raflar, saksı, lamba, çit, ağaç | Codex sol |
+| UI teması | İkonlar, paneller, font seçimi | Codex astra (yön) + sol (uygulama) |
+
+---
+
+## 11. MVP Kapsamı (bu geliştirme turunda)
+Vadinin tamamı (blockout + ana modeller), 3. şahıs kontrol (PC + mobil), sera + dış tarla, bitki sistemi,
+çaprazlama, kurutma, **joint sarma**, **kova bong + Gaftî Modu**, dükkan + 4 müşteri tipi + kimlik kontrolü,
+gün/gece + mevsim + hava, lisans 1–3 + denetim, karakter özelleştirme, ilk hafta komedi görevleri (6 NPC),
+kayıt/yükleme, ayarlar, logo + ana menü, CC0 sesler.
+
+**MVP dışı (sonra):** Lisans 4–5, motosiklet, İngilizce, Steam/Play entegrasyonu, satın alma, tam 28 günlük görev zinciri.
+
+
+ succeeded in 959ms:
+# GAFTİ — Ajan Kuralları ve Mimari Sözleşmesi
+
+Bu dosya her ajan (Claude, Codex) için bağlayıcıdır. Tasarım: `GDD.md`.
+
+## 1. Ortam (ZORUNLU)
+- İşletim sistemi **Windows 11**. Kullanıcıya **asla Linux/bash komutu önerme** (`ls`, `cat`, `rm`, `grep`, `sed`...).
+  Kullanıcıya gösterilen her komut **PowerShell** olmalı (`Get-ChildItem`, `Get-Content`, `Remove-Item`, `Select-String`).
+- Kendi çalıştırdığın komutlar için de PowerShell tercih et. Yollar: `C:\Users\31\Documents\we2\...`
+- Godot: `C:\Users\31\Desktop\Godot_v4.7.2-stable_win64.exe`
+  - İçe aktarma: `& $godot --headless --path C:\Users\31\Documents\we2 --import`
+  - Hata kontrolü: `& $godot --headless --path C:\Users\31\Documents\we2 --quit-after 120`
+- Blender 5.3 (Store sürümü, doğrudan exe çalışmaz). Sadece şu sarmalayıcıyı kullan:
+  `powershell -ExecutionPolicy Bypass -File C:\Users\31\Documents\we2\tools\blender\run_blender.ps1 -Script <script.py> [-ScriptArgs a,b]`
+- Kullanıcıdan onay isteme; etkileşimli komut çalıştırma.
+
+## 2. Model/ajan dağılımı
+| İş | Kim |
+|---|---|
+| Önemli/detaylı görseller (logo, bitki, bong, joint seti, karakter, sera, shader) | Codex `gpt-6.2-astra` medium |
+| İkincil modeller, kasaba props, tekrarlayan kod | Codex `gpt-6.2-sol` medium |
+| Çekirdek sistemler, mini oyunlar, oyuncu/dünya kodu | Claude Opus 5.5 alt ajanları |
+| Orkestrasyon, entegrasyon, doğrulama | Ana Claude oturumu |
+
+## 3. Kod kuralları
+- Godot **4.7**, GDScript, **statik tipler zorunlu** (`var x: int = 0`, `func f(a: float) -> void`).
+- Tüm oyuncu metinleri `tr("ANAHTAR")`. Anahtarları `localization/parts/<alan>.csv` dosyasına ekle
+  (başlık satırı: `keys,tr`). Ana oturum bunları `localization/strings.csv` içinde birleştirir.
+  Anahtar biçimi: `ALAN_ACIKLAMA` (ör. `ROLL_STEP_GRIND`).
+- `project.godot` dosyasını **sadece ana oturum** düzenler. Yeni autoload/input gerekiyorsa raporunda belirt.
+- Bir autoload'u yalnızca **sahibi** düzenler (aşağıdaki tablo). Diğerleri sadece genel API'yi çağırır.
+- Sahneler `.tscn` metin biçiminde. Kodla sahne üretmek serbest (`tools/` altında `@tool` veya headless script).
+- Placeholder kullanacaksan model yolunu sabit tut; gerçek `.glb` sonra aynı yola gelir.
+- Mobil uyum: dokunmatik = fare (emulate_touch açık). Mini oyunlar sadece sürükle/tıkla/basılı tut kullanır.
+
+## 4. Autoload API sözleşmesi
+Sahip sütunu: dosyayı kim yazar. İmzalar sabittir, değiştirme.
+
+### EventBus (`autoload/event_bus.gd`) — ana oturum
+Sadece sinyaller:
+```
+signal interaction_prompt(text: String)            # "" = gizle
+signal minigame_requested(id: StringName, context: Dictionary)
+signal minigame_finished(id: StringName, result: Dictionary)
+signal notify(text: String, kind: StringName)      # kind: &"info", &"good", &"bad"
+signal plant_harvested(plant_id: int, item: Dictionary)
+signal sale_completed(amount: int, item: Dictionary, customer_type: StringName)
+signal inspection_finished(score: int, fine: int)
+signal dialogue_requested(dialogue_id: StringName)
+signal dialogue_finished(dialogue_id: StringName)
+signal player_customization_changed(data: Dictionary)
+signal ui_block_input(blocked: bool)               # mini oyun/diyalog açıkken oyuncu hareketi kilitlenir
+```
+
+### ContentFlags — ana oturum
+`var consumption: bool = true` (içme sahneleri), `var is_mobile: bool`, `var is_demo: bool`, `const DEMO_DAY_LIMIT := 7`.
+
+### Settings — ana oturum
+`day_length_minutes: float = 14.0`, `master_volume`, `music_volume`, `sfx_volume`, `graphics_quality: int (0..2)`, `save()`, `load_settings()`.
+
+### InputSetup — ana oturum
+Kodla tanımlanan aksiyonlar: `move_forward, move_back, move_left, move_right, sprint, interact, inventory, build_mode, pause, jump, camera_zoom_in, camera_zoom_out`.
+
+### GameClock — Ajan A (sistemler)
+```
+signal minute_passed(total_minutes: int)
+signal hour_passed(hour: int)
+signal phase_changed(phase: StringName)   # &"morning", &"noon", &"evening", &"night"
+signal day_started(day: int)
+signal season_changed(season: StringName) # &"spring", &"summer", &"autumn", &"winter"
+var day: int; var hour: int; var minute: int; var season: StringName; var paused: bool; var time_scale: float
+func get_time_string() -> String
+func get_day_fraction() -> float          # 0..1, 0 = gece yarısı
+func sleep_until_morning() -> void
+func advance_minutes(m: int) -> void
+```
+
+### Weather — Ajan A
+```
+signal weather_changed(weather: StringName)  # &"sunny", &"cloudy", &"foggy", &"rainy", &"storm", &"snow"
+var current: StringName; var tomorrow: StringName
+func get_customer_multiplier() -> float
+func is_power_out() -> bool
+```
+
+### Economy — Ajan A
+```
+signal money_changed(money: int)
+var money: int
+func add(amount: int, reason: String) -> void
+func spend(amount: int, reason: String) -> bool   # yetersizse false
+func get_day_report() -> Dictionary
+```
+
+### Reputation — Ajan A
+```
+signal reputation_changed(value: float)
+signal license_level_changed(level: int)
+var reputation: float; var license_level: int; var compliance: float
+func add_reputation(v: float) -> void
+func record_id_check(done: bool) -> void
+```
+
+### Inventory — Ajan A
+Eşya = Dictionary: `{ "id": StringName, "kind": StringName, "strain": StringName, "quality": int, "grams": float, "count": int }`
+kind: `&"seed", &"wet_bud", &"dry_bud", &"jar", &"preroll", &"paper", &"filter", &"nutrient", &"tool"`
+```
+signal changed()
+func add_item(item: Dictionary) -> void
+func remove_item(id: StringName, count: int = 1) -> bool
+func count_of(id: StringName) -> int
+func get_items(kind: StringName = &"") -> Array[Dictionary]
+```
+
+### QuestManager — Ajan C
+```
+signal quest_started(id: StringName); signal quest_completed(id: StringName)
+func start(id: StringName) -> void; func complete(id: StringName) -> void
+func is_active(id: StringName) -> bool; func get_active() -> Array[StringName]
+func notify_event(event: StringName, data: Dictionary = {}) -> void   # görev hedefi ilerletme
+```
+
+### SaveSystem — Ajan A
+Her autoload `func get_save_data() -> Dictionary` ve `func load_save_data(d: Dictionary) -> void` sağlar.
+Sahnedeki kalıcı düğümler `persist` grubunda ve aynı iki fonksiyonu sağlar (`get_save_id() -> String` de).
+```
+func save_game() -> void; func load_game() -> bool; func has_save() -> bool; func new_game() -> void
+```
+Kayıt yolu: `user://save_1.json`.
+
+### Effects — Ajan B (mini oyunlar)
+```
+signal gafti_mode_changed(active: bool, strength: float)
+var gafti_active: bool; var gafti_strength: float   # 0..1
+func start_gafti(strength: float, duration_game_minutes: int) -> void
+func get_move_multiplier() -> float                 # Gaftî'de 0.85
+func get_customer_patience_multiplier() -> float    # Gaftî'de 1.3
+func get_rolling_bonus() -> int                     # Gaftî'de +10
+func get_water_jitter() -> float                    # Gaftî'de ±0.2
+```
+
+### AudioManager — Ajan C
+`func play_sfx(id: StringName, pos: Variant = null) -> void`, `func play_music(id: StringName) -> void`, `func set_ambience(id: StringName) -> void`.
+Eksik ses dosyasında sessizce geç (hata verme).
+
+## 5. Etkileşim sözleşmesi
+- Etkileşilebilir her nesne `interactable` grubunda, bir `Area3D` (layer 4) içerir ve şu fonksiyonları sağlar:
+  `func get_interact_text() -> String` ve `func interact(player: Node) -> void`.
+- Oyuncu: `scenes/player/player.tscn`, kök `CharacterBody3D`, `player` grubunda.
+- Mini oyun sahneleri `CanvasLayer` + `SubViewport` ya da kendi `Camera3D` ile yakın çekim. Mini oyunu
+  `scenes/minigames/minigame_host.gd` açar: `EventBus.minigame_requested` dinler, sahneyi yükler, bitince
+  `EventBus.minigame_finished` yayar.
+- Mini oyun id'leri: `&"rolling"`, `&"gravity_bong"`, `&"care"`, `&"id_check"`, `&"customize"`.
+
+## 6. Sahiplik
+| Alan | Sahip |
+|---|---|
+| `autoload/game_clock, weather, economy, reputation, inventory, save_system` + `scripts/systems/` (bitki, genetik, işleme) + `scenes/plants/` + `data/strains,items` | Ajan A (Opus) |
+| `autoload/effects` + `scenes/minigames/` + `shaders/gafti_post.gdshader` | Ajan B (Opus) |
+| `autoload/quest_manager, audio_manager` + `scenes/player/` + `scenes/npc/` + `scenes/shop/` + `scenes/ui/` + `data/customers,quests,dialogue` | Ajan C (Opus) |
+| `scenes/world/` (vadi montajı) | Ana oturum (+ Codex sol yardım) |
+| `assets/models/hero/`, `assets/logo/`, `shaders/` (toon, foliage, fog) | Codex astra |
+| `assets/models/props/`, `assets/models/town/`, `assets/models/characters/npc_*` | Codex sol |
+
+## 7. Model dosya sözleşmesi (Blender → .glb)
+- Ölçek: 1 birim = 1 metre, +Y yukarı (glTF), orijin tabanın ortasında.
+- Script: `tools/blender/<ad>.py` → çıktı `assets/models/<klasör>/<ad>.glb`. Script tekrar çalıştırılabilir olmalı.
+- Stil: detaylı stilize; yumuşak bevel, abartılı oranlar, el boyaması hissi veren vertex color/basit dokular, düşük üçgen sayısı.
+- Bütçe: bitki aşaması ≤4k üçgen, prop ≤2k, karakter ≤12k, bina ≤8k.
+- Animasyonlu modellerde aksiyon isimleri: `idle, walk, run, interact, sit` vb. (küçük harf).
+
+## 8. Model listesi (dosya adları sabit)
+Mesh düğüm adları önemli: kod bunlara göre materyal/görünürlük ayarlar.
+
+### Codex astra → `assets/models/hero/`
+| Dosya | İçerik / düğüm adları |
+|---|---|
+| `plant_germ.glb`, `plant_seedling.glb`, `plant_veg.glb`, `plant_flower.glb`, `plant_harvest.glb` | Saksısız bitki. Düğümler: `Stem`, `Leaves`, `Buds` (germ/seedling'de Buds yok). Vertex color + yaprak maskesi (UV.y = kökten uca 0..1, rüzgâr için). Boylar: 0.08 / 0.25 / 0.7 / 1.1 / 1.2 m |
+| `bong_bucket.glb` | Kova + su yüzeyi. Düğümler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet şişe + kapak-kase. Düğümler: `Bottle`, `Cap`, `Bowl`. Orijin şişenin altı |
+| `lighter.glb` | Çakmak. Düğümler: `Body`, `Wheel` |
+| `grinder.glb` | Düğümler: `Base`, `Lid` (Lid kendi ekseninde döner, orijini merkezde) |
+| `rolling_paper.glb` | Düz kağıt, `Paper` (sarılma için ≥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | Bitmiş joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. Armatür `Armature`, gövde `Body`. Seçmeli parçalar aynı armatüre bağlı: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boş), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | Ahşap + cam yayla serası, iç ölçü ~12×6 m, kapı +Z yönünde. İçeride saksı tezgahları. `Glass` düğümü ayrı (şeffaf materyal) |
+| `house.glb` | Dedenin ahşap Karadeniz evi (dış + basit iç: yatak, ayna, kanepe) |
+
+### Codex sol → `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTİ dükkanı, girilebilir, iç ~8×6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleşimi (Godot koordinatları, metre, Y yukarı)
+Arazi 260×260 m, merkez (0,0,0). Düz alanlar (pad) arazide bu noktalarda olmalı:
+| Bölge | Merkez (x, z) | Yükseklik y | Pad yarıçapı |
+|---|---|---|---|
+| Oyuncu başlangıcı / ev önü | (-62, 28) | 2 | — |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynı pad) |
+| Dış tarla | (-45, 48) | 2 | (aynı pad) |
+| Kurutma ambarı | (-78, 22) | 2 | (aynı pad) |
+| Kasaba meydanı | (60, 0) | 0 | 22 |
+| GAFTİ Dükkanı | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| Muhtarlık | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| Hırdavatçı | (42, -10) | 0 | (meydan) |
+| Minibüs durağı | (72, 48) | 0 | 6 |
+| Köprü & dere | (5, -45) | -1 | dere x yönünde değil, (−130,−60)→(130,−35) boyunca akar |
+| Ladin ormanı | (-45, -70) çevresi | — | ağaçlar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) → (0, 10) → meydan (40, 0); meydandan durağa (72, 48); meydandan köprüye (5,-45) → tepeye patika.
+Arazide yol düğümü `Road` (ayrı materyal), zemin `Ground`, dere yatağı `Creek`. Arazi kenarları dağlarla kapalı (oyuncu çıkamaz).
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw tools/blender/run_blender.ps1' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem tools/blender,assets/models/hero,tools/previews,tools/codex_logs -Name -ErrorAction SilentlyContinue' in C:\Users\31\Documents\we2
+ exited 1 in 1108ms:
+run_blender.ps1
+astra_buildings.log
+astra_buildings_last.md
+astra_character.log
+astra_character_last.md
+astra_logo.log
+astra_logo_last.md
+astra_paraphernalia.log
+astra_paraphernalia_last.md
+astra_plants.log
+astra_plants_last.md
+sol_props.log
+sol_props_last.md
+sol_town.log
+sol_town_last.md
+
+ succeeded in 1127ms:
+param([Parameter(Mandatory=$true)][string]$Script, [string[]]$ScriptArgs = @())
+# Blender'i (Microsoft Store surumu) arka planda bir Python scriptiyle calistirir.
+$launcher = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\blender-launcher.exe"
+$argList = @("--background", "--factory-startup", "--python", "`"$Script`"")
+if ($ScriptArgs.Count -gt 0) { $argList += "--"; $argList += $ScriptArgs }
+$p = Start-Process -FilePath $launcher -ArgumentList $argList -PassThru -Wait -NoNewWindow
+exit $p.ExitCode
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Command python
+Test-Path 'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'
+Get-ChildItem -Name" in C:\Users\31\Documents\we2
+ succeeded in 393ms:
+
+CommandType     Name                                               Version    Source                                   
+-----------     ----                                               -------    ------                                   
+Application     python.exe                                         3.11.11... C:\Users\31\AppData\Local\Programs\Pyt...
+True
+assets
+autoload
+data
+localization
+scenes
+scripts
+shaders
+tests
+tools
+AGENTS.md
+CLAUDE.md
+default_bus_layout.tres
+GDD.md
+project.godot
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Rebuild GAFTI hero buildings and their 512 px previews with run_blender.ps1.\"\"\"
+from collections import defaultdict
+from pathlib import Path
+import json
+import math
+import random
+import struct
+
+import bpy
+from mathutils import Vector
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / \"assets/models/hero\"
+PREVIEW = ROOT / \"tools/previews\"
+OUT.mkdir(parents=True, exist_ok=True)
+PREVIEW.mkdir(parents=True, exist_ok=True)
+
+# Geometry uses Blender metres, with the front at -Y (Godot +Z).
+parts = {}
+rng = random.Random(1912)
+wood = [\"945638\", \"aa6941\", \"a76039\", \"b97749\", \"995b3c\"]
+beamwood = \"683e30\"
+trim = \"ecc895\"
+green = \"377465\"
+stone = [\"72837c\", \"677776\", \"8a9284\", \"778986\", \"929685\", \"737e78\"]
+moss = [\"799348\", \"637e48\", \"97a850\"]
+glass = \"8bc9c3\"
+roof = \"aa5140\"
+
+
+def linear(h):
+    c = int(h, 16) / 255
+    return c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4
+
+
+def mesh(name, vertices, faces, color):
+    verts, polys, colors = parts.setdefault(name, ([], [], []))
+    offset = len(verts)
+    verts.extend(vertices)
+    polys.extend([tuple(i + offset for i in face) for face in faces])
+    tone = tuple(linear(color[i:i+2]) for i in (0, 2, 4))
+    colors.extend([(*tone, 1)] * len(vertices))
+
+
+def block(name, p, size, color, bevel=0, rotation=None):
+    a, b, c = (v / 2 for v in size)
+    r = min(bevel, a * .45, b * .45, c * .45)
+    # Clipped upper and lower edges catch light without subdivision.
+    rings = [(-c, r), (-c+r, 0), (c-r, 0), (c, r)] if r else [(-c, 0), (c, 0)]
+    verts = []
+    for z, inset in rings:
+        for x, y in [(-a+inset,-b+inset),(a-inset,-b+inset),
+                     (a-inset,b-inset),(-a+inset,b-inset)]:
+            v = Vector((x,y,z))
+            verts.append((rotation @ v if rotation else v) + Vector(p))
+    last = len(verts) - 4
+    faces = [(3,2,1,0), tuple(range(last,last+4))]
+    for i in range(0, last, 4):
+        faces.extend((i+j,i+(j+1)%4,i+(j+1)%4+4,i+j+4) for j in range(4))
+    mesh(name, verts, faces, color)
+
+
+def rail(name, start, end, width, depth, color, bevel=0):
+    a, b = Vector(start), Vector(end)
+    delta = b-a
+    block(name, (a+b)/2, (width,depth,delta.length), color, bevel,
+          delta.to_track_quat('Z','Y'))
+
+
+def revolve(name, p, rings, color, n=10):
+    vs = [(p[0]+r*math.cos(i*math.tau/n), p[1]+r*math.sin(i*math.tau/n), p[2]+z)
+          for z,r in rings for i in range(n)]
+    last = len(vs)-n
+    faces = [tuple(reversed(range(n))),tuple(range(last,last+n))]
+    faces.extend((j+i,j+(i+1)%n,j+n+(i+1)%n,j+n+i)
+                 for j in range(0,last,n) for i in range(n))
+    mesh(name, vs, faces, color)
+
+
+def collider(name, p, size):
+    block(name+\"-col\", p, size, \"ffffff\")
+
+
+def enclosure(half_x, half_y, height, opening, head, thick):
+    for s, label in [(-1,\"West\"),(1,\"East\")]:
+        collider(label+\"Wall\", (s*half_x,0,height/2), (thick,2*half_y,height))
+        span = half_x-opening/2
+        collider(\"Front\"+label, (s*(opening/2+span/2),-half_y,height/2),
+                 (span,thick,height))
+    collider(\"RearWall\", (0,half_y,height/2), (2*half_x,thick,height))
+    collider(\"Lintel\", (0,-half_y,(head+height)/2), (opening,thick,height-head))
+
+
+def masonry(name, start, end, rows, height, width, thick, mossy=False):
+    a, b = Vector(start), Vector(end)
+    direction = (b-a).normalized()
+    length = (b-a).length
+    sideways = abs(direction.y) > .5
+    for row in range(rows):
+        cuts = [0]
+        target = width * (.48 if row % 2 else 1)
+        while length-cuts[-1] > target+.32:
+            cuts.append(cuts[-1]+target)
+            target = width*rng.uniform(.78,1.23)
+        cuts.append(length)
+        for lo,hi in zip(cuts,cuts[1:]):
+            p = a + direction*((lo+hi)/2)
+            p.z += (row+.5)*height
+            t = thick + rng.uniform(.008,.045)
+            size = (t,hi-lo-.012,height-.012) if sideways else (hi-lo-.012,t,height-.012)
+            block(name,p,size,rng.choice(stone),.045)
+            if mossy and row==rows-1 and rng.random()<.68:
+                p.z += height/2
+                size = (t*.93,(hi-lo)*.79,.045) if sideways else ((hi-lo)*.79,t*.93,.045)
+                block(name,p,size,rng.choice(moss),.02)
+
+
+def lamp(group, x,y,z):
+    revolve(group,(x,y,z),[(0,.09),(.06,.15),(.3,.11)],\"ffc371\",8)
+    revolve(group,(x,y,z),[(.29,.23),(.34,.24),(.49,.06)],green,10)
+    revolve(group,(x,y,z),[(-.04,.08),(0,.12)],beamwood,8)
+
+
+def greenhouse():
+    g = \"TimberFrame\"
+    block(\"Floor\",(0,0,-.065),(12.25,6.25,.13),\"99856a\")
+    collider(\"Floor\",(0,0,-.065),(12.25,6.25,.13))
+    enclosure(6.1,3.1,2.8,1.84,2.41,.20)
+    for y in [-3.1,3.1]:
+        runs = [(-6.12,-1),(1,6.12)] if y<0 else [(-6.12,6.12)]
+        for lo,hi in runs:
+            masonry(\"MossyFooting\",(lo,y,0),(hi,y,0),2,.23,1,.29,True)
+            for h in [.5,1.52,2.8]:
+                block(g,((lo+hi)/2,y,h),(hi-lo,.13,.105),wood[2],.016)
+        for x in [-6.1,-4.4,-2.7,-1,1,2.7,4.4,6.1]:
+            block(g,(x,y,1.6),(.14,.17,2.52),rng.choice(wood),.016)
+        for lo,hi in zip([-6.1,-4.4,-2.7,-1,1,2.7,4.4],[-4.4,-2.7,-1,1,2.7,4.4,6.1]):
+            floor = 2.48 if y<0 and lo==-1 else .52
+            mesh(\"Glass\",[(lo,y,floor),(hi,y,floor),(hi,y,2.8),(lo,y,2.8)],[(0,1,2,3)],glass)
+    block(g,(0,-3.1,2.46),(2.12,.22,.10),trim,.015)
+    # Offset ridge and uneven pitch echo an old, field-repaired structure.
+    for side in [-1,1]:
+        y=side*3.27
+        mesh(\"Glass\",[(-6.23,y,2.81),(6.23,y,2.81),(6.23,.29,3.82),(-6.23,.29,3.82)],
+             [(0,1,2,3)],glass)
+        block(g,(0,y,2.81),(12.58,.17,.15),green,.02)
+        for x in [-6.18,-4.4,-2.7,-1,1,2.7,4.4,6.18]:
+            rail(g,(x,y,2.81),(x,.29,3.82),.115,.14,rng.choice(wood))
+        block(g,(0,(y+.29)/2,3.31),(12.49,.085,.08),wood[1])
+    block(g,(0,.29,3.84),(12.65,.25,.15),green,.025)
+    for x in [-6.1,6.1]:
+        masonry(\"MossyFooting\",(x,-3.1,0),(x,3.1,0),2,.23,.92,.29,True)
+        pts=[(x,-3.1,.47),(x,3.1,.47),(x,3.1,2.8),(x,.29,3.81),(x,-3.1,2.8)]
+        mesh(\"Glass\",pts,[(0,1,2,3,4)],glass)
+        for h in [.5,1.52,2.79]:
+            block(g,(x,0,h),(.15,6.2,.115),wood[3])
+        for y in [-1.55,.29,1.55]:
+            h=3.78-abs(y-.29)*.34
+            block(g,(x,y,(.46+h)/2),(.15,.13,h-.46),wood[0])
+    for y,label in [(-.78,\"FrontBench\"),(1.77,\"RearBench\")]:
+        for j in range(4):
+            block(label,(0,y+(j-1.5)*.255,.745),(9.8,.25,.11),wood[j],.012)
+        for x in [-4.64,0,4.64]:
+            for side in [-1,1]:
+                block(label,(x,y+side*.36,.36),(.14,.14,.72),green,.012)
+            block(label,(x,y,.64),(.16,1.02,.11),wood[0])
+        for side in [-1,1]:
+            block(label,(0,y+side*.38,.58),(9.55,.085,.17),green)
+        collider(label,(0,y,.40),(9.8,1.015,.80))
+    for x in [-4.0,0,4.0]:
+        rail(\"PendantLamps\",(x,.29,3.78),(x,.29,3.05),.032,.032,beamwood)
+        lamp(\"PendantLamps\",x,.29,2.59)
+    # Hairline fractures held by conspicuously mismatched linen tape.
+    for x,h in [(-1.9,1.87),(3.57,2.11)]:
+        for dx,dz in [(-.37,.34),(.19,.53),(.42,-.39),(-.15,-.31)]:
+            rail(\"PaneRepairs\",(x,-3.112,h),(x+dx,-3.112,h+dz),.02,.018,\"719892\")
+        for dx,dz in [(.14,.14),(-.11,-.12)]:
+            rail(\"PaneRepairs\",(x+dx-.12,-3.13,h+dz-.06),
+                 (x+dx+.12,-3.13,h+dz+.06),.083,.022,\"edca83\")
+    # Narrow runner from the doorway and around the benches.
+    for x in [-4.8,-3.7,-2.6,-1.5,-.4,.7,1.8,2.9,4.0,5.1]:
+        block(\"Floor\",(x,-2.10,.012),(1.04,.72,.024),rng.choice(stone),.01)
+    # An open green sliding door parked against the front wall.
+    for x in [1.14,2.95]:
+        block(\"SlidingDoor\",(x,-3.30,1.19),(.105,.10,2.34),green,.015)
+    for h in [.14,.81,2.34]:
+        block(\"SlidingDoor\",(2.045,-3.30,h),(1.9,.11,.12),green,.016)
+    for i in range(8):
+        block(\"SlidingDoor\",(1.27+i*.22,-3.3,.47),(.214,.069,.57),rng.choice(wood))
+    mesh(\"Glass\",[(1.18,-3.30,.86),(2.90,-3.30,.86),(2.90,-3.30,2.31),(1.18,-3.30,2.31)],[(0,1,2,3)],glass)
+    block(\"SlidingDoor\",(1.19,-3.4,1.13),(.07,.08,.24),trim,.015)
+    block(\"SlidingDoor\",(1,-3.31,2.51),(4.26,.09,.08),\"424c44\")
+'@ | Set-Content -Encoding UTF8 tools/blender/buildings_hero.py" in C:\Users\31\Documents\we2
+ succeeded in 157ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+def window(x,y,h,side=False):
+    def piece(dx,dy,dz,w,d,height,color):
+        p = (x-dy,y+dx,h+dz) if side else (x+dx,y+dy,h+dz)
+        block(\"Joinery\",p,(d,w,height) if side else (w,d,height),color)
+    piece(0,0,0,1.03,.13,1.2,beamwood)
+    piece(0,-.08,0,.86,.06,1.03,\"57827e\")
+    piece(0,-.13,0,.064,.06,1.07,trim)
+    piece(0,-.13,.07,.90,.06,.06,trim)
+    piece(0,-.10,-.61,1.28,.28,.10,trim)
+    for s in [-1,1]:
+        piece(s*.70,0,0,.33,.12,1.12,green)
+        for dz in [-.35,-.13,.10,.33]:
+            piece(s*.70,-.087,dz,.29,.055,.045,\"71a491\")
+
+
+def house():
+    xh,yh=3.93,2.94
+    enclosure(xh,yh,2.82,1.74,2.28,.26)
+    block(\"Floor\",(0,0,-.07),(8.16,6.13,.14),wood[0])
+    collider(\"Floor\",(0,0,-.07),(8.16,6.13,.14))
+    for i in range(17):
+        block(\"Floor\",(0,(i-8)*.35,.013),(7.78,.346,.026),wood[i%5])
+    for s in [-1,1]:
+        block(\"LowerWalls\",(s*xh,0,1.40),(.25,5.89,2.80),\"606b65\")
+        block(\"LowerWalls\",(s*2.403,-yh,1.4),(3.066,.25,2.8),\"606b65\")
+    block(\"LowerWalls\",(0,yh,1.4),(7.93,.25,2.80),\"606b65\")
+    block(\"LowerWalls\",(0,-yh,2.54),(1.75,.25,.52),\"606b65\")
+    for y in [-yh,yh]:
+        spans = [(-3.99,-.92),(.92,3.99)] if y<0 else [(-3.99,3.99)]
+        for a,b in spans:
+            masonry(\"Stonework\",(a,y,0),(b,y,0),6,.46,1.16,.28)
+    for x in [-xh,xh]:
+        masonry(\"Stonework\",(x,-2.93,0),(x,2.93,0),6,.46,1.24,.28)
+    for x in [-.94,.94]:
+        block(\"Joinery\",(x,-3.01,1.14),(.14,.33,2.28),wood[2],.024)
+    block(\"Joinery\",(0,-3.01,2.37),(2.08,.34,.18),wood[1],.024)
+    for x in [-2.49,2.49]:
+        window(x,-3.10,1.57)
+    window(4.09,-.70,1.56,True)
+    block(\"UpperStorey\",(0,0,3.91),(8.18,6.13,2.34),wood[1],.035)
+    for level in range(8):
+        z = 2.91+level*.295
+        for s in [-1,1]:
+            block(\"UpperStorey\",(0,s*3.08,z),(8.20,.07,.285),wood[(level+2)%5])
+            block(\"UpperStorey\",(s*4.11,0,z),(.07,6.18,.285),wood[level%5])
+    for z in [2.81,5.08]:
+        block(\"UpperStorey\",(0,0,z),(8.43,6.38,.19),beamwood,.025)
+    for s in [-1,1]:
+        for x in [-4.04,-1.44,1.44,4.04]:
+            block(\"UpperStorey\",(x,s*3.13,3.95),(.15,.13,2.19),beamwood)
+        for y in [-2.98,0,2.98]:
+            block(\"UpperStorey\",(s*4.17,y,3.95),(.13,.15,2.19),beamwood)
+    for x in [-2.70,2.70]:
+        window(x,-3.18,4.02)
+    for y in [-1.51,1.51]:
+        window(4.19,y,3.98,True)
+    block(\"Joinery\",(0,-3.15,3.87),(1.40,.16,2.02),beamwood)
+    block(\"Joinery\",(0,-3.25,3.85),(1.19,.07,1.96),green)
+    block(\"Joinery\",(0,-3.30,4.13),(.81,.05,.79),\"99b6a5\")
+    block(\"Joinery\",(.42,-3.34,3.64),(.08,.07,.09),trim)
+    # Balcony with a carved diamond frieze and exposed knee braces.
+    block(\"Balcony\",(0,-3.72,2.82),(7.89,1.32,.22),wood[1],.03)
+    for x in [-3.69,-2.46,-1.23,0,1.23,2.46,3.69]:
+        rail(\"Balcony\",(x,-3.06,1.96),(x,-4.29,2.71),.16,.17,beamwood,.016)
+        block(\"Balcony\",(x,-4.30,3.36),(.14,.16,1.08),green,.012)
+        block(\"Balcony\",(x,-4.30,3.91),(.20,.20,.10),trim,.015)
+    for i in range(6):
+        x=-3.69+i*1.23
+        for a,b in [((0,3.34),(.615,3.72)),((.615,3.72),(1.23,3.34)),
+                    ((0,3.34),(.615,3.00)),((.615,3.00),(1.23,3.34))]:
+            rail(\"Balcony\",(x+a[0],-4.30,a[1]),(x+b[0],-4.30,b[1]),.076,.072,\"c79661\")
+    for z in [3.,3.84]:
+        block(\"Balcony\",(0,-4.30,z),(7.61,.17,.11),green,.016)
+        for x in [-3.69,3.69]:
+            block(\"Balcony\",(x,-3.73,z),(.14,1.29,.10),green)
+    # Four pitched standing-seam roof planes over wide deep eaves.
+    a,b,z,ridge,rh = 4.91,4.15,5.22,1.83,7.02
+    corners=[(-a,-b,z),(a,-b,z),(a,b,z),(-a,b,z)]
+    ends=[(-ridge,0,rh),(ridge,0,rh)]
+    for i,face in enumerate([(0,1,5,4),(1,2,5),(2,3,4,5),(3,0,4)]):
+        mesh(\"HippedRoof\",corners+ends,[face],[\"ad5546\",\"994c3e\",\"b7624a\",\"9e493e\"][i])
+    for i in range(4):
+        rail(\"HippedRoof\",corners[i],corners[(i+1)%4],.19,.20,beamwood,.017)
+        rail(\"HippedRoof\",corners[i],ends[0 if i in (0,3) else 1],.105,.105,\"cb7659\")
+    mesh(\"HippedRoof\",corners,[(3,2,1,0)],wood[0])
+    rail(\"HippedRoof\",*ends,.16,.16,\"d48964\",.018)
+    for x in [j*.52 for j in range(-9,10)]:
+        f=min(1,(a-abs(x))/(a-ridge))
+        for s in [-1,1]:
+            rail(\"RoofSeams\",(x,s*b,z+.023),(x,s*b*(1-f),z+f*(rh-z)+.023),.045,.05,\"cb7056\")
+    for y in [j*.59 for j in range(-6,7)]:
+        f=1-abs(y)/b
+        for s in [-1,1]:
+            rail(\"RoofSeams\",(s*a,y,z+.02),(s*(a-(a-ridge)*f),y,z+f*(rh-z)+.02),.045,.05,\"bb6751\")
+    for j in range(7):
+        block(\"Chimney\",(-2.63,1.01,6.18+j*.20),(.62,.67,.207),stone[j%len(stone)],.018)
+    block(\"Chimney\",(-2.63,1.01,7.54),(.79,.85,.14),beamwood,.025)
+    block(\"Chimney\",(-2.63,1.01,7.62),(.56,.56,.06),\"38423e\")
+    for x in [-2.53,2.53]:
+        block(\"WindowBoxes\",(x,-3.34,.96),(1.41,.36,.24),green,.025)
+        for j in range(11):
+            xx=x-.6+j*.12
+            h=rng.uniform(.13,.36)
+            revolve(\"WindowBoxes\",(xx,-3.38,1.05),[(0,.06),(h*.64,.13),(h,.025)],rng.choice(moss),5)
+            if j%2==0:
+                revolve(\"WindowBoxes\",(xx,-3.41,1.05+h),[(0,.04),(.05,.09),(.09,.05)],rng.choice([\"e98b68\",\"edb16b\"]),6)
+    lamp(\"PorchLamp\",1.32,-3.32,1.96)
+    block(\"PorchLamp\",(1.32,-3.21,2.44),(.10,.38,.10),beamwood)
+    # Ground-floor furniture, leaving the middle of the room clear.
+    for name,p,size,color,bev in [
+        (\"Bed\",(-2.86,1.35,.27),(1.55,2.39,.43),wood[0],.05),
+        (\"Bed\",(-2.86,1.35,.55),(1.49,2.26,.23),\"e6caa0\",.08),
+        (\"Bed\",(-2.86,1.02,.69),(1.53,1.59,.12),green,.04),
+        (\"Bed\",(-2.86,2.10,.72),(1.04,.47,.16),\"f2dcb5\",.07),
+        (\"Sofa\",(2.47,1.94,.38),(2.38,.91,.55),\"ae6241\",.10),
+        (\"Sofa\",(2.47,2.34,.74),(2.38,.27,.83),\"a65d41\",.10),
+        (\"Mirror\",(3.76,-1.25,1.45),(.15,1.06,1.51),wood[3],.05),
+        (\"Mirror\",(3.66,-1.25,1.45),(.06,.89,1.33),\"a7c7c2\",.025)]:
+        block(name,p,size,color,bev)
+    for x in [1.38,3.56]:
+        block(\"Sofa\",(x,1.94,.64),(.23,.95,.47),\"bb7654\",.09)
+    for x in [1.98,2.95]:
+        block(\"Sofa\",(x,1.85,.65),(.93,.68,.16),\"db9969\",.055)
+    for j in range(4):
+        block(\"Bed\",(-2.86,.55+j*.13,.753),(1.49,.05,.011),trim)
+    collider(\"Bed\",(-2.86,1.35,.34),(1.55,2.39,.68))
+    collider(\"Sofa\",(2.47,1.94,.42),(2.38,.97,.84))
+
+
+def material(name,alpha):
+    mat=bpy.data.materials.new(name)
+    mat.use_nodes=True
+    mat.use_backface_culling=False
+    nodes=mat.node_tree.nodes
+    bs=nodes.get(\"Principled BSDF\")
+    color=nodes.new(\"ShaderNodeVertexColor\")
+    color.layer_name=\"Paint\"
+    mat.node_tree.links.new(color.outputs[\"Color\"],bs.inputs[\"Base Color\"])
+    bs.inputs[\"Roughness\"].default_value=.80 if alpha==1 else .28
+    bs.inputs[\"Alpha\"].default_value=alpha
+    if alpha<1:
+        mat.surface_render_method='BLENDED'
+    return mat
+
+
+def realize():
+    painted=material(\"Highland paint\",1)
+    glazing=material(\"Rainwashed glass\",.22)
+    invisible=material(\"Collision proxy\",0)
+    for name,(vs,faces,colors) in parts.items():
+        data=bpy.data.meshes.new(name)
+        data.from_pydata(vs,[],faces)
+        data.materials.append(invisible if name.endswith(\"-col\") else glazing if name==\"Glass\" else painted)
+        attr=data.color_attributes.new(name=\"Paint\",type=\"FLOAT_COLOR\",domain=\"POINT\")
+        attr.data.foreach_set(\"color\",[ch for c in colors for ch in c])
+        obj=bpy.data.objects.new(name,data)
+        bpy.context.collection.objects.link(obj)
+        if name.endswith(\"-col\"):
+            obj.hide_render=True
+
+
+def preview(name):
+    scene=bpy.context.scene
+    scene.render.engine=\"CYCLES\" if False else \"CYCLES\"
+    scene.render.engine=\"CYCLES\" if False else \"CYCLES\"
+    scene.render.engine='CYCLES' if False else 'CYCLES'
+    scene.render.engine='CYCLES' if False else 'CYCLES'
+'@ | Add-Content -Encoding UTF8 tools/blender/buildings_hero.py" in C:\Users\31\Documents\we2
+ succeeded in 173ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$path = '"'tools/blender/buildings_hero.py'
+(Get-Content "'$path | Where-Object { $_ -notmatch '"'scene.render.engine' -and "'$_ -notmatch '"'from collections import defaultdict' }) | Set-Content -Encoding UTF8 "'$path
+@'"'
+    scene.render.engine='CYCLES' if False else 'C BLENDER'.strip()
+'@ | Out-Null
+@'
+    scene.render.engine='CYCLES' if False else 'BLENDER_EEVEE'
+    scene.render.resolution_x=scene.render.resolution_y=512
+    scene.render.resolution_percentage=100
+    scene.world=bpy.data.worlds.new(\"Overcast sky\")
+    scene.world.use_nodes=True
+    bg=scene.world.node_tree.nodes.get(\"Background\")
+    bg.inputs[0].default_value=(.71,.78,.82,1)
+    bg.inputs[1].default_value=.62
+    bpy.ops.mesh.primitive_plane_add(size=200,location=(0,0,-.14))
+    floor=bpy.data.materials.new(\"Studio sage\")
+    floor.diffuse_color=(.26,.34,.28,1)
+    bpy.context.object.data.materials.append(floor)
+    for p,power,size in [((-6,-9,13),2600,8),((7,-4,8),1150,7),((0,8,12),2000,6)]:
+        bpy.ops.object.light_add(type='AREA',location=p)
+        light=bpy.context.object
+        light.data.energy=power
+        light.data.shape='DISK'
+        light.data.size=size
+        light.rotation_euler=(-light.location).to_track_quat('-Z','Y').to_euler()
+    target=Vector((0,0,1.5 if name==\"greenhouse\" else 3.15))
+    bpy.ops.object.camera_add(location=target+Vector((9,-17,8.2)))
+    camera=bpy.context.object
+    camera.rotation_euler=(target-camera.location).to_track_quat('-Z','Y').to_euler()
+    camera.data.type='ORTHO'
+    camera.data.ortho_scale=16.1 if name=='greenhouse' else 14.6
+    scene.camera=camera
+    scene.render.filepath=str(PREVIEW/(name+'.png'))
+    bpy.ops.render.render(write_still=True)
+
+
+def generate(name, builder):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    parts.clear()
+    rng.seed(1912)
+    builder()
+    realize()
+    path=OUT/(name+\".glb\")
+    bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',export_yup=True,
+                              export_vertex_color='ACTIVE',export_cameras=False,export_lights=False)
+    raw=path.read_bytes()
+    length=struct.unpack_from('<I',raw,12)[0]
+    gltf=json.loads(raw[20:20+length])
+    tris=sum(gltf['accessors'][p['indices']]['count']//3 for m in gltf['meshes'] for p in m['primitives'])
+    assert tris<=8000,(name,tris)
+    print(name,tris,\"triangles\",flush=True)
+    preview(name)
+
+
+generate(\"greenhouse\",greenhouse)
+generate(\"house\",house)
+'@ | Add-Content -Encoding UTF8 "'$path
+(Get-Content $path -Raw).Replace("'"'CYCLES' if False else 'BLENDER_EEVEE'\",\"'BLENDER_EEVEE'\") | Set-Content -Encoding UTF8 "'$path
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:'"\\Users\\31\\Documents\\we2\\tools\\blender\\buildings_hero.py" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem assets/models/hero,tools/previews -ErrorAction SilentlyContinue | Select-Object Name,Length
+Get-Process | Where-Object ProcessName -like '*blender*' | Select-Object Id,CPU,ProcessName" in C:\Users\31\Documents\we2
+ succeeded in 822ms:
+
+Name               Length
+----               ------
+bong_bucket.glb     48272
+character_base.glb 617948
+greenhouse.glb     437552
+plant_flower.glb   129580
+plant_germ.glb       8444
+plant_harvest.glb  141360
+plant_seedling.glb  22232
+plant_veg.glb      116164
+logo_icon.png       42076
+logo_wordmark.png   63902
+plant_flower.png   327458
+plant_germ.png     269115
+plant_harvest.png  337237
+plant_seedling.png 287963
+plant_veg.png      320698
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+                         
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json,struct,pathlib
+for name in ['greenhouse','house']:
+ p=pathlib.Path('assets/models/hero')/(name+'.glb')
+ if not p.exists(): continue
+ buf=p.read_bytes()
+ data=json.loads(buf[20:20+struct.unpack_from('<I',buf,12)[0]])
+ print(name, [n['name'] for n in data['nodes']])
+ print(sum(data['accessors'][pr['indices']]['count']//3 for m in data['meshes'] for pr in m['primitives']),data['materials'])
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 423ms:
+greenhouse ['EastWall-col', 'Floor', 'Floor-col', 'FrontBench', 'FrontBench-col', 'FrontEast-col', 'FrontWest-col', 'Glass', 'Lintel-col', 'MossyFooting', 'PaneRepairs', 'PendantLamps', 'RearBench', 'RearBench-col', 'RearWall-col', 'SlidingDoor', 'TimberFrame', 'WestWall-col']
+6128 [{'alphaMode': 'MASK', 'doubleSided': True, 'name': 'Collision proxy', 'pbrMetallicRoughness': {'baseColorFactor': [1, 1, 1, 0], 'metallicFactor': 0, 'roughnessFactor': 0.2800000011920929}}, {'doubleSided': True, 'name': 'Highland paint', 'pbrMetallicRoughness': {'metallicFactor': 0, 'roughnessFactor': 0.800000011920929}}, {'alphaMode': 'BLEND', 'doubleSided': True, 'name': 'Rainwashed glass', 'pbrMetallicRoughness': {'baseColorFactor': [1, 1, 1, 0.2199999988079071], 'metallicFactor': 0, 'roughnessFactor': 0.2800000011920929}}]
+house ['Balcony', 'Bed', 'Bed-col', 'Chimney', 'EastWall-col', 'Floor', 'Floor-col', 'FrontEast-col', 'FrontWest-col', 'HippedRoof', 'Joinery', 'Lintel-col', 'LowerWalls', 'Mirror', 'PorchLamp', 'RearWall-col', 'RoofSeams', 'Sofa', 'Sofa-col', 'Stonework', 'UpperStorey', 'WestWall-col', 'WindowBoxes']
+10144 [{'doubleSided': True, 'name': 'Highland paint', 'pbrMetallicRoughness': {'metallicFactor': 0, 'roughnessFactor': 0.800000011920929}}, {'alphaMode': 'MASK', 'doubleSided': True, 'name': 'Collision proxy', 'pbrMetallicRoughness': {'baseColorFactor': [1, 1, 1, 0], 'metallicFactor': 0, 'roughnessFactor': 0.2800000011920929}}]
+
+ succeeded in 36298ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import pathlib,json,struct
+b=pathlib.Path('assets/models/hero/house.glb').read_bytes()
+g=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]])
+print([(m['name'],sum(g['accessors'][p['indices']]['count']//3 for p in m['primitives'])) for m in g['meshes']])
+'@ | python -
+Get-Item tools/previews/greenhouse.png" in C:\Users\31\Documents\we2
+ succeeded in 278ms:
+[('Balcony', 1008), ('Bed', 160), ('Bed-col', 12), ('Chimney', 236), ('EastWall-col', 12), ('Floor', 216), ('Floor-col', 12), ('FrontEast-col', 12), ('FrontWest-col', 12), ('HippedRoof', 196), ('Joinery', 1392), ('Lintel-col', 12), ('LowerWalls', 72), ('Mirror', 56), ('PorchLamp', 140), ('RearWall-col', 12), ('RoofSeams', 768), ('Sofa', 168), ('Sofa-col', 12), ('Stonework', 3976), ('UpperStorey', 636), ('WestWall-col', 12), ('WindowBoxes', 1012)]
+
+
+    Directory: C:\Users\31\Documents\we2\tools\previews
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:25         331457 greenhouse.png                                                       
+
+
+
+codex
+İlk sera renderında kapı ve tezgâhlar okunuyor, ancak çatı camları arka plana karışıyor. Çatıya açık bir havalandırma kanadı ekliyorum. Ev ilk dışa aktarımda 10.144 üçgen çıktı. Taşların siluetini koruyup görünmeyen yüzleri azaltacağım.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$path='"'tools/blender/buildings_hero.py'
+"'$src=Get-Content $path -Raw -Encoding UTF8
+$src=$src.Replace('"'            block(name,p,size,rng.choice(stone),.045)',@'
+            if name == \"Stonework\":
+                # Extrude a five-sided split-stone profile along the wall normal.
+                half=(hi-lo-.012)/2
+                dz=(height-.012)/2
+                profile=[(-half,-dz),(half,-dz),(half,dz-.05),
+                         (half-.12,dz),(-half+.035,dz)]
+                local=[(u,v,w) for v in [-t/2,t/2] for u,w in profile]
+                verts=[p+Vector((-v,u,w) if sideways else (u,v,w)) for u,v,w in local]
+                faces=[(0,1,2,3,4),(9,8,7,6,5)]
+                faces.extend((i,5+i,5+(i+1)%5,(i+1)%5) for i in range(5))
+                mesh(name,verts,faces,rng.choice(stone))
+            else:
+                block(name,p,size,rng.choice(stone),.045)
+'@)
+"'$src=$src.Replace('"'def house():',@'
+def seam(start,end):
+    a,b=Vector(start),Vector(end)
+    side=(b-a).cross(Vector((0,0,1))).normalized()*.027
+    lift=Vector((0,0,.036))
+    mesh(\"RoofSeams\",[a-side,b-side,b+lift,a+lift,a+side,b+side],
+         [(0,3,2,1),(3,4,5,2)],\"cb7056\")
+
+
+def house():
+'@).Replace('rail(\"RoofSeams\",(x,s*b,z+.023),(x,s*b*(1-f),z+f*(rh-z)+.023),.045,.05,\"cb7056\")','seam((x,s*b,z+.023),(x,s*b*(1-f),z+f*(rh-z)+.023))').Replace('rail(\"RoofSeams\",(s*a,y,z+.02),(s*(a-(a-ridge)*f),y,z+f*(rh-z)+.02),.045,.05,\"bb6751\")','seam((s*a,y,z+.02),(s*(a-(a-ridge)*f),y,z+f*(rh-z)+.02))')
+"'$src=$src.Replace('"'        mesh(\"Glass\",[(-6.23,y,2.81),(6.23,y,2.81),(6.23,.29,3.82),(-6.23,.29,3.82)],',@'
+        # Leave the glazing absent beneath the operable front roof light.
+        spans=[(-6.23,-4.4),(-2.7,6.23)] if side==-1 else [(-6.23,6.23)]
+        if side==-1:
+            mesh(\"Glass\",[(-4.4,y,2.81),(-2.7,y,2.81),(-2.7,-1.49,3.315),(-4.4,-1.49,3.315)],[(0,1,2,3)],glass)
+            corners=[(-4.4,.29,3.84),(-2.7,.29,3.84),(-2.7,-1.46,4.06),(-4.4,-1.46,4.06)]
+            mesh(\"Glass\",corners,[(0,1,2,3)],glass)
+            for j in range(4):
+                rail(\"RoofVent\",corners[j],corners[(j+1)%4],.095,.10,green,.01)
+            rail(\"RoofVent\",(-3.52,-1.46,3.32),(-3.52,-1.46,4.06),.05,.055,beamwood)
+        for lo,hi in spans:
+            mesh(\"Glass\",[(lo,y,2.81),(hi,y,2.81),(hi,.29,3.82),(lo,.29,3.82)],
+'@)
+"'$src=$src.Replace('"'    # Narrow runner',@'
+    # A hand-painted sprout above the entrance.
+    block(\"NurserySign\",(0,-3.26,2.76),(1.20,.12,.43),green,.045)
+    for s in [-1,1]:
+        mesh(\"NurserySign\",[(0,-3.327,2.69),(s*.19,-3.327,2.70),
+                            (s*.32,-3.327,2.84),(s*.13,-3.327,2.82)],[(0,1,2,3)],trim)
+    rail(\"NurserySign\",(0,-3.33,2.60),(0,-3.33,2.77),.035,.022,trim)
+    # Narrow runner
+'@)
+"'$src=$src.Replace("    scene.render.resolution_x", "    scene.view_settings.look='"'AgX - Medium High Contrast'"'`n    scene.render.resolution_x").Replace('"'default_value=.62','default_value=.40')
+"'$src | Set-Content -Encoding UTF8 $path
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:'"\\Users\\31\\Documents\\we2\\tools\\blender\\buildings_hero.py" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem tools/previews/greenhouse.png,tools/previews/house.png,assets/models/hero/house.glb -ErrorAction SilentlyContinue | Select-Object Name,Length,LastWriteTime
+Get-Item 'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe' | Select-Object Length" in C:\Users\31\Documents\we2
+ succeeded in 479ms:
+
+Name              Length LastWriteTime      
+----              ------ -------------      
+greenhouse.png    331457 24.11.2026 12:25:53
+house.glb         723916 24.11.2026 12:25:53
+               180858888                    
+
+
+
+ succeeded in 23108ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$qa=Join-Path $env:TEMP '"'gafti-astra-buildings-import-qa'
+New-Item -ItemType Directory -Force "'$qa | Out-Null
+@'"'
+config_version=5
+[application]
+config/name=\"GAFTI asset verification\"
+[rendering]
+renderer/rendering_method=\"gl_compatibility\"
+'@ | Set-Content -Encoding ascii (Join-Path "'$qa '"'project.godot')
+@'
+extends SceneTree
+
+var failures: int = 0
+
+func _initialize() -> void:
+    call_deferred(\"check_assets\")
+
+func expect(ok: bool, desc: String) -> void:
+    if not ok:
+        failures += 1
+        push_error(desc)
+
+func cast(node: Node3D, a: Vector3, b: Vector3) -> Dictionary:
+    return node.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(a,b))
+
+func check_assets() -> void:
+    for key: String in [\"greenhouse\",\"house\"]:
+        var asset: PackedScene = load(\"res://%s.glb\" % key)
+        var obj: Node3D = asset.instantiate() as Node3D
+        root.add_child(obj)
+        await physics_frame
+        await physics_frame
+        var shapes: Array[Node] = obj.find_children(\"*\",\"CollisionShape3D\",true,false)
+        expect(shapes.size()==9,key+\" collision count\")
+        print(key,\" shapes \",shapes.size())
+        var edge: float = .91 if key==\"greenhouse\" else .86
+        for x: float in [-edge,0.0,edge]:
+            for h: float in [.2,1.0,2.10]:
+                expect(cast(obj,Vector3(x,h,4),Vector3(x,h,2.55)).is_empty(),key+\" entry\")
+        expect(not cast(obj,Vector3(2,1.3,4),Vector3(2,1.3,2.4)).is_empty(),key+\" front wall\")
+        if key==\"greenhouse\":
+            for z: float in [.78,-1.77]:
+                for x: float in [-4,-2.4,-.8,.8,2.4,4]:
+                    var hit: Dictionary = cast(obj,Vector3(x,1.5,z),Vector3(x,.3,z))
+                    expect(not hit.is_empty() and is_equal_approx(hit.position.y,.8),\"bench seat\")
+        obj.free()
+    print(\"failures \",failures)
+    quit(failures)
+'@ | Set-Content -Encoding utf8 (Join-Path "'$qa '"'verify.gd')
+Get-ChildItem tools/previews/greenhouse.png,tools/previews/house.png -ErrorAction SilentlyContinue | Select-Object Name,Length,LastWriteTime" in C:\Users\31\Documents\we2
+ succeeded in 192ms:
+
+Name           Length LastWriteTime      
+----           ------ -------------      
+greenhouse.png 345513 24.11.2026 12:26:58
+house.png      362164 24.11.2026 12:27:02
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$qa=Join-Path $env:TEMP '"'gafti-astra-buildings-import-qa'
+Copy-Item assets/models/hero/greenhouse.glb,assets/models/hero/house.glb -Destination "'$qa
+$godot='"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'
+& "'$godot --headless --path $qa --import | Out-String
+& $godot --headless --path $qa --script res://verify.gd | Out-String' in C:\Users\31\Documents\we2
+ succeeded in 3351ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Projenin ilk başlatılması (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Dosya yapısı taranıyor...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Genel sınıf isimleri yükleniyor...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | GDExtension'lar doğrulanıyor...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Otomatik yükleme betikleri oluşturuluyor...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Eklentiler başlatılıyor...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Dosya taraması başlatılıyor...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1m_update_scan_actions[22m | Started Eylemler taranıyor... (2 steps)[39m[0m
+[   0% ] [90m[1m_update_scan_actions[22m | greenhouse.glb[39m[0m
+[  33% ] [90m[1m_update_scan_actions[22m | house.glb[39m[0m
+[92m[ DONE ][39m [1m_update_scan_actions[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started Varlıklar (Yeniden)İçe Aktarılıyor (2 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Dosyalar, yeniden içe aktarma için hazırlanıyor...[39m[0m
+[  33% ] [90m[1mreimport[22m | Dosyalar, yeniden içe aktarma için hazırlanıyor...[39m[0m
+[   0% ] [90m[1mreimport[22m | Yeniden içe aktarma öncesi işlemler yürütülüyor...[39m[0m
+[   0% ] [90m[1mreimport[22m | greenhouse.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Sahneyi İçe Aktar (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Sahne İçe Aktarılıyor...[39m[0m
+[   1% ] [90m[1mimport[22m | Özel Betik Çalıştırılıyor...[39m[0m
+[  99% ] [90m[1mimport[22m | Kaydediliyor...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  33% ] [90m[1mreimport[22m | house.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Sahneyi İçe Aktar (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Sahne İçe Aktarılıyor...[39m[0m
+[   1% ] [90m[1mimport[22m | Özel Betik Çalıştırılıyor...[39m[0m
+[  99% ] [90m[1mimport[22m | Kaydediliyor...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  66% ] [90m[1mreimport[22m | Varlık İçe Aktarımı Tamamlanıyor...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started Varlıklar (Yeniden)İçe Aktarılıyor (2 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Yeniden içe aktarma sonrası işlemler yürütülüyor...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Düzenleyici yükleniyor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Düzenleyici yerleşim düzeni yükleniyor...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Yuvalar yükleniyor...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+greenhouse shapes 9
+house shapes 9
+failures 0
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json,struct,pathlib
+for name in [\"greenhouse\",\"house\"]:
+ b=pathlib.Path(\"assets/models/hero\",name+\".glb\").read_bytes()
+ d=json.loads(b[20:20+struct.unpack_from(\"<I\",b,12)[0]])
+ print(name,sum(d[\"accessors\"][p[\"indices\"]][\"count\"]//3 for m in d[\"meshes\"] for p in m[\"primitives\"]))
+ print(\", \".join(n[\"name\"] for n in d[\"nodes\"] if not n[\"name\"].endswith(\"-col\")))
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 362ms:
+greenhouse 6302
+Floor, FrontBench, Glass, MossyFooting, NurserySign, PaneRepairs, PendantLamps, RearBench, RoofVent, SlidingDoor, TimberFrame
+house 7928
+Balcony, Bed, Chimney, Floor, HippedRoof, Joinery, LowerWalls, Mirror, PorchLamp, RoofSeams, Sofa, Stonework, UpperStorey, WindowBoxes
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+# GAFTİ · Dedenin serası ve evi
+
+| Model | Çarpışma dahil üçgen | Net kapı açıklığı (en × boy) | Blender Eevee önizlemesi |
+|---|---:|---|---|
+| [greenhouse.glb](../../assets/models/hero/greenhouse.glb) | 6.302 | 1,84 × 2,41 m | [greenhouse.png](../previews/greenhouse.png) |
+| [house.glb](../../assets/models/hero/house.glb) | 7.928 | 1,74 × 2,28 m | [house.png](../previews/house.png) |
+
+Her iki modelin girişi Godot yerel +Z yönüne bakar. Orijin tabanın merkezinde, yürüme düzlemi Y = 0 m'dedir. Ölçek 1 birim = 1 metredir. [buildings_hero.py](../blender/buildings_hero.py) iki GLB'yi ve 512 × 512 px önizlemelerini yeniden üretir.
+
+## Sera ve saksı yerleşimi
+
+Duvar çarpışmalarının iç yüzleri arasında X boyunca 12,00 m, Z boyunca 6,00 m vardır. Her tezgâhın üst yüzeyi 9,80 × 1,015 m'dir. Ön tezgâhın merkezi (0, 0.80, 0.78), arka tezgâhın merkezi (0, 0.80, -1.77) konumundadır. Saksı tabanları için yerel Godot koordinatları metre cinsinden aşağıdadır.
+
+| Saksı | FrontBench (X, Y, Z) | RearBench (X, Y, Z) |
+|---|---|---|
+| 1 | (-4.00, 0.80, 0.78) | (-4.00, 0.80, -1.77) |
+| 2 | (-2.40, 0.80, 0.78) | (-2.40, 0.80, -1.77) |
+| 3 | (-0.80, 0.80, 0.78) | (-0.80, 0.80, -1.77) |
+| 4 | (0.80, 0.80, 0.78) | (0.80, 0.80, -1.77) |
+| 5 | (2.40, 0.80, 0.78) | (2.40, 0.80, -1.77) |
+| 6 | (4.00, 0.80, 0.78) | (4.00, 0.80, -1.77) |
+
+**Sera düğümleri** — Floor, FrontBench, Glass, MossyFooting, NurserySign, PaneRepairs, PendantLamps, RearBench, RoofVent, SlidingDoor, TimberFrame. Glass ayrı, çift taraflı ve 0,22 alfa değerli bir mesh'tir. Sürgü kapı açık konumdadır.
+
+**Ev düğümleri** — Balcony, Bed, Chimney, Floor, HippedRoof, Joinery, LowerWalls, Mirror, PorchLamp, RoofSeams, Sofa, Stonework, UpperStorey, WindowBoxes. Oynanabilir tek oda taş zemin kattadır. Yatak arka solda, kanepe arka sağda, ayna sağ duvardadır.
+
+**Ortak çarpışma düğümleri** — Floor-col, WestWall-col, EastWall-col, FrontWest-col, FrontEast-col, RearWall-col, Lintel-col. Serada ayrıca FrontBench-col ve RearBench-col, evde Bed-col ve Sofa-col bulunur. Her biri 12 üçgenli kutu geometrisidir.
+
+## Doğrulama ve kapsam
+
+Her iki Eevee renderı görsel olarak incelendi. Üçgen sayıları dışa aktarılan GLB indekslerinden hesaplandı. Modeller yalıtılmış bir Godot 4.7.2 projesine içe aktarıldı. Motor her binada dokuz CollisionShape3D üretti. Fizik ışınları her iki girişte üç genişlik konumu ve üç yükseklikte serbest geçişi, bitişik duvarlarda çarpışmayı ve 12 saksı merkezinde Y = 0,80 m tezgâh yüksekliğini doğruladı.
+
+Balkon ve üst kat dış cephe dekorudur. Sürgü kapı, havalandırma kanadı ve mobilyalar statiktir. Vadi yerleşimi ve oyuncu kamerasıyla yürüyüş testi entegrasyon aşamasına aittir.
+'@ | Set-Content -Encoding UTF8 tools/codex_logs/astra_buildings_report.md
+Get-Item tools/codex_logs/astra_buildings_report.md | Select-Object Length" in C:\Users\31\Documents\we2
+ succeeded in 601ms:
+
+Length
+------
+  2827
+
+
+
+codex
+Sera ve ev tamamlandı. Her iki model de çarpışma geometrisi dahil **8.000 üçgen sınırının altında**.
+
+| Model | Üçgen | +Z giriş genişliği | 512 px önizleme |
+|---|---:|---:|---|
+| [Sera](assets/models/hero/greenhouse.glb) | 6.302 | 1,84 m | [Sera renderı](tools/previews/greenhouse.png) |
+| [Ev](assets/models/hero/house.glb) | 7.928 | 1,74 m | [Ev renderı](tools/previews/house.png) |
+
+İki Eevee önizlemesini görsel olarak inceledim. Godot 4.7.2 fizik testinde her iki girişin açık olduğunu, bitişik duvarların çarpışma verdiğini ve seradaki 12 saksı konumunun tamamında tezgâh yüksekliğinin **0,80 m** olduğunu doğruladım.
+
+Evin girilebilir odası taş zemin katta. Balkon ve ahşap üst kat dekoratif. Vadi içinde oyuncu kamerasıyla yürüyüş testi entegrasyon aşamasına kaldı.
+
+[Üretim betiği](tools/blender/buildings_hero.py) · [Düğüm adları, saksı koordinatları ve doğrulama raporu](tools/codex_logs/astra_buildings_report.md)
+tokens used
+53.904
+Sera ve ev tamamlandı. Her iki model de çarpışma geometrisi dahil **8.000 üçgen sınırının altında**.
+
+| Model | Üçgen | +Z giriş genişliği | 512 px önizleme |
+|---|---:|---:|---|
+| [Sera](assets/models/hero/greenhouse.glb) | 6.302 | 1,84 m | [Sera renderı](tools/previews/greenhouse.png) |
+| [Ev](assets/models/hero/house.glb) | 7.928 | 1,74 m | [Ev renderı](tools/previews/house.png) |
+
+İki Eevee önizlemesini görsel olarak inceledim. Godot 4.7.2 fizik testinde her iki girişin açık olduğunu, bitişik duvarların çarpışma verdiğini ve seradaki 12 saksı konumunun tamamında tezgâh yüksekliğinin **0,80 m** olduğunu doğruladım.
+
+Evin girilebilir odası taş zemin katta. Balkon ve ahşap üst kat dekoratif. Vadi içinde oyuncu kamerasıyla yürüyüş testi entegrasyon aşamasına kaldı.
+
+[Üretim betiği](tools/blender/buildings_hero.py) · [Düğüm adları, saksı koordinatları ve doğrulama raporu](tools/codex_logs/astra_buildings_report.md)

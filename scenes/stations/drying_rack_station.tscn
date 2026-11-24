@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/stations/drying_rack_station.gd" id="1"]
+
+[node name="DryingRackStation" type="Node3D"]
+script = ExtResource("1")
+body_size = Vector3(1.2, 1.8, 0.5)
+interact_size = Vector3(1.8, 2, 1.4)

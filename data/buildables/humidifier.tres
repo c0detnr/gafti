@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/buildable_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"humidifier"
+name_key = "BUILD_HUMIDIFIER"
+description_key = "BUILD_HUMIDIFIER_DESC"
+price = 200
+scene_path = ""
+model_path = "res://assets/models/props/humidifier.glb"
+size = Vector3(0.35, 0.6, 0.35)
+color = Color(0.8, 0.85, 0.9, 1)
+footprint = 0.25
+effect = &"humidity"
+effect_radius = 2.5
+power_cost_per_day = 5
+min_license = 1

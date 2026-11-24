@@ -1,0 +1,1910 @@
+OpenAI Codex v0.172.0
+--------
+workdir: C:\Users\31\Documents\we2
+model: gpt-6.2-astra
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a20cdc-cc7e-7520-9329-f535f2039151
+--------
+user
+Sen GAFTİ adlı Godot 4.7 oyun projesinde çalışan bir alt ajansın. Proje kökü: C:\Users\31\Documents\we2
+ÖNCE AGENTS.md ve GDD.md dosyalarını oku; oradaki sözleşmeye (dosya adları, düğüm adları, ölçek, bütçe, Blender sarmalayıcısı tools\blender\run_blender.ps1) birebir uy.
+Windows 11 + PowerShell kullan. Kullanıcıya soru sorma, onay bekleme, iş bitene kadar çalış. project.godot dosyasını DÜZENLEME. Sana verilmeyen alanlardaki dosyalara dokunma.
+Görsel kaliteyi kontrol et: ürettiğin her modeli Blender ile (Eevee ya da Workbench) 512px önizleme olarak tools\previews\<ad>.png dosyasına render et, görüntüyü kendin incele ve iyi görünmüyorsa düzelt.
+Stil: "detaylı stilize" — Karadeniz yaylası, el boyaması hissi, yumuşak bevel, sıcak ve sevimli, abartılı ama okunaklı oranlar. Doygun yeşiller, ahşap kahvesi, ıslak taş grisi, sıcak turuncu.
+Bitince tools\codex_logs\<GOREV>_report.md dosyasına üretilen dosyaları, düğüm adlarını ve bilinen eksikleri yaz.
+
+GOREV=astra_plants
+İŞ: Kenevir bitkisi modelleri + stilize shader'lar. Bu oyunun yıldızı bu bitki; kaliteye en çok burada özen göster.
+1. tools\blender\plants.py: 5 aşamayı (plant_germ, plant_seedling, plant_veg, plant_flower, plant_harvest) prosedürel üreten tek script → assets\models\hero\plant_*.glb. Stilize ama tanınabilir kenevir silueti: tırtıklı 5-7-9 parmaklı yapraklar (düşük poli geometri), merkez gövde, dallar; çiçek aşamasında dolgun tomurcuk kümeleri (Buds); hasatta turuncu tüycükler ve buzlu reçine hissi (vertex color). Her aşama ≤4k üçgen. Düğümler: Stem, Leaves, Buds. UV.y kökten uca 0..1. Vertex color R kanalı = rüzgâr ağırlığı (gövde 0, yaprak uçları 1).
+2. shaders\foliage_wind.gdshader (spatial, Mobile renderer uyumlu): vertex color R ağırlıklı rüzgâr salınımı (wind_strength, wind_speed, TIME), health (0..1: kuru sarı-kahveden sağlıklı yeşile), thirst (0..1: yapraklar aşağı sarkar), leaf_color, bud_color, quality (0..1: tomurcuklarda hafif parlak reçine), 3 kademeli yumuşak toon ışık + rim light.
+3. shaders\toon.gdshader: genel stilize toon shader (albedo texture + albedo_color, isteğe bağlı vertex color, 3 kademe yumuşak gölge, rim). Tüm props bunu kullanabilsin.
+4. shaders\fog_layer.gdshader: yerde kayan gürültü tabanlı yumuşak sis (büyük düz mesh üstüne; density, color, speed). Mobilde ucuz.
+5. scenes\plants\plant_visual.tscn + scenes\plants\plant_visual.gd (Node3D, statik tipli GDScript): 5 aşama modelini içerir; func set_stage(i: int) -> void, func set_health(v: float) -> void, func set_thirst(v: float) -> void, func set_quality(v: float) -> void. Materyali foliage_wind ile override eder.
+
+codex
+Önce proje sözleşmesini ve tasarım belgesini okuyacağım. Ardından beş modeli üretip Blender önizlemelerini inceleyecek, shader’ları ve sahneyi Godot’ta doğrulayacağım.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw -Encoding UTF8 AGENTS.md' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw -Encoding UTF8 GDD.md' in C:\Users\31\Documents\we2
+ succeeded in 1090ms:
+# GAFTİ — Ajan Kuralları ve Mimari Sözleşmesi
+
+Bu dosya her ajan (Claude, Codex) için bağlayıcıdır. Tasarım: `GDD.md`.
+
+## 1. Ortam (ZORUNLU)
+- İşletim sistemi **Windows 11**. Kullanıcıya **asla Linux/bash komutu önerme** (`ls`, `cat`, `rm`, `grep`, `sed`...).
+  Kullanıcıya gösterilen her komut **PowerShell** olmalı (`Get-ChildItem`, `Get-Content`, `Remove-Item`, `Select-String`).
+- Kendi çalıştırdığın komutlar için de PowerShell tercih et. Yollar: `C:\Users\31\Documents\we2\...`
+- Godot: `C:\Users\31\Desktop\Godot_v4.7.2-stable_win64.exe`
+  - İçe aktarma: `& $godot --headless --path C:\Users\31\Documents\we2 --import`
+  - Hata kontrolü: `& $godot --headless --path C:\Users\31\Documents\we2 --quit-after 120`
+- Blender 5.3 (Store sürümü, doğrudan exe çalışmaz). Sadece şu sarmalayıcıyı kullan:
+  `powershell -ExecutionPolicy Bypass -File C:\Users\31\Documents\we2\tools\blender\run_blender.ps1 -Script <script.py> [-ScriptArgs a,b]`
+- Kullanıcıdan onay isteme; etkileşimli komut çalıştırma.
+
+## 2. Model/ajan dağılımı
+| İş | Kim |
+|---|---|
+| Önemli/detaylı görseller (logo, bitki, bong, joint seti, karakter, sera, shader) | Codex `gpt-6.2-astra` medium |
+| İkincil modeller, kasaba props, tekrarlayan kod | Codex `gpt-6.2-sol` medium |
+| Çekirdek sistemler, mini oyunlar, oyuncu/dünya kodu | Claude Opus 5.5 alt ajanları |
+| Orkestrasyon, entegrasyon, doğrulama | Ana Claude oturumu |
+
+## 3. Kod kuralları
+- Godot **4.7**, GDScript, **statik tipler zorunlu** (`var x: int = 0`, `func f(a: float) -> void`).
+- Tüm oyuncu metinleri `tr("ANAHTAR")`. Anahtarları `localization/parts/<alan>.csv` dosyasına ekle
+  (başlık satırı: `keys,tr`). Ana oturum bunları `localization/strings.csv` içinde birleştirir.
+  Anahtar biçimi: `ALAN_ACIKLAMA` (ör. `ROLL_STEP_GRIND`).
+- `project.godot` dosyasını **sadece ana oturum** düzenler. Yeni autoload/input gerekiyorsa raporunda belirt.
+- Bir autoload'u yalnızca **sahibi** düzenler (aşağıdaki tablo). Diğerleri sadece genel API'yi çağırır.
+- Sahneler `.tscn` metin biçiminde. Kodla sahne üretmek serbest (`tools/` altında `@tool` veya headless script).
+- Placeholder kullanacaksan model yolunu sabit tut; gerçek `.glb` sonra aynı yola gelir.
+- Mobil uyum: dokunmatik = fare (emulate_touch açık). Mini oyunlar sadece sürükle/tıkla/basılı tut kullanır.
+
+## 4. Autoload API sözleşmesi
+Sahip sütunu: dosyayı kim yazar. İmzalar sabittir, değiştirme.
+
+### EventBus (`autoload/event_bus.gd`) — ana oturum
+Sadece sinyaller:
+```
+signal interaction_prompt(text: String)            # "" = gizle
+signal minigame_requested(id: StringName, context: Dictionary)
+signal minigame_finished(id: StringName, result: Dictionary)
+signal notify(text: String, kind: StringName)      # kind: &"info", &"good", &"bad"
+signal plant_harvested(plant_id: int, item: Dictionary)
+signal sale_completed(amount: int, item: Dictionary, customer_type: StringName)
+signal inspection_finished(score: int, fine: int)
+signal dialogue_requested(dialogue_id: StringName)
+signal dialogue_finished(dialogue_id: StringName)
+signal player_customization_changed(data: Dictionary)
+signal ui_block_input(blocked: bool)               # mini oyun/diyalog açıkken oyuncu hareketi kilitlenir
+```
+
+### ContentFlags — ana oturum
+`var consumption: bool = true` (içme sahneleri), `var is_mobile: bool`, `var is_demo: bool`, `const DEMO_DAY_LIMIT := 7`.
+
+### Settings — ana oturum
+`day_length_minutes: float = 14.0`, `master_volume`, `music_volume`, `sfx_volume`, `graphics_quality: int (0..2)`, `save()`, `load_settings()`.
+
+### InputSetup — ana oturum
+Kodla tanımlanan aksiyonlar: `move_forward, move_back, move_left, move_right, sprint, interact, inventory, build_mode, pause, jump, camera_zoom_in, camera_zoom_out`.
+
+### GameClock — Ajan A (sistemler)
+```
+signal minute_passed(total_minutes: int)
+signal hour_passed(hour: int)
+signal phase_changed(phase: StringName)   # &"morning", &"noon", &"evening", &"night"
+signal day_started(day: int)
+signal season_changed(season: StringName) # &"spring", &"summer", &"autumn", &"winter"
+var day: int; var hour: int; var minute: int; var season: StringName; var paused: bool; var time_scale: float
+func get_time_string() -> String
+func get_day_fraction() -> float          # 0..1, 0 = gece yarısı
+func sleep_until_morning() -> void
+func advance_minutes(m: int) -> void
+```
+
+### Weather — Ajan A
+```
+signal weather_changed(weather: StringName)  # &"sunny", &"cloudy", &"foggy", &"rainy", &"storm", &"snow"
+var current: StringName; var tomorrow: StringName
+func get_customer_multiplier() -> float
+func is_power_out() -> bool
+```
+
+### Economy — Ajan A
+```
+signal money_changed(money: int)
+var money: int
+func add(amount: int, reason: String) -> void
+func spend(amount: int, reason: String) -> bool   # yetersizse false
+func get_day_report() -> Dictionary
+```
+
+### Reputation — Ajan A
+```
+signal reputation_changed(value: float)
+signal license_level_changed(level: int)
+var reputation: float; var license_level: int; var compliance: float
+func add_reputation(v: float) -> void
+func record_id_check(done: bool) -> void
+```
+
+### Inventory — Ajan A
+Eşya = Dictionary: `{ "id": StringName, "kind": StringName, "strain": StringName, "quality": int, "grams": float, "count": int }`
+kind: `&"seed", &"wet_bud", &"dry_bud", &"jar", &"preroll", &"paper", &"filter", &"nutrient", &"tool"`
+```
+signal changed()
+func add_item(item: Dictionary) -> void
+func remove_item(id: StringName, count: int = 1) -> bool
+func count_of(id: StringName) -> int
+func get_items(kind: StringName = &"") -> Array[Dictionary]
+```
+
+### QuestManager — Ajan C
+```
+signal quest_started(id: StringName); signal quest_completed(id: StringName)
+func start(id: StringName) -> void; func complete(id: StringName) -> void
+func is_active(id: StringName) -> bool; func get_active() -> Array[StringName]
+func notify_event(event: StringName, data: Dictionary = {}) -> void   # görev hedefi ilerletme
+```
+
+### SaveSystem — Ajan A
+Her autoload `func get_save_data() -> Dictionary` ve `func load_save_data(d: Dictionary) -> void` sağlar.
+Sahnedeki kalıcı düğümler `persist` grubunda ve aynı iki fonksiyonu sağlar (`get_save_id() -> String` de).
+```
+func save_game() -> void; func load_game() -> bool; func has_save() -> bool; func new_game() -> void
+```
+Kayıt yolu: `user://save_1.json`.
+
+### Effects — Ajan B (mini oyunlar)
+```
+signal gafti_mode_changed(active: bool, strength: float)
+var gafti_active: bool; var gafti_strength: float   # 0..1
+func start_gafti(strength: float, duration_game_minutes: int) -> void
+func get_move_multiplier() -> float                 # Gaftî'de 0.85
+func get_customer_patience_multiplier() -> float    # Gaftî'de 1.3
+func get_rolling_bonus() -> int                     # Gaftî'de +10
+func get_water_jitter() -> float                    # Gaftî'de ±0.2
+```
+
+### AudioManager — Ajan C
+`func play_sfx(id: StringName, pos: Variant = null) -> void`, `func play_music(id: StringName) -> void`, `func set_ambience(id: StringName) -> void`.
+Eksik ses dosyasında sessizce geç (hata verme).
+
+## 5. Etkileşim sözleşmesi
+- Etkileşilebilir her nesne `interactable` grubunda, bir `Area3D` (layer 4) içerir ve şu fonksiyonları sağlar:
+  `func get_interact_text() -> String` ve `func interact(player: Node) -> void`.
+- Oyuncu: `scenes/player/player.tscn`, kök `CharacterBody3D`, `player` grubunda.
+- Mini oyun sahneleri `CanvasLayer` + `SubViewport` ya da kendi `Camera3D` ile yakın çekim. Mini oyunu
+  `scenes/minigames/minigame_host.gd` açar: `EventBus.minigame_requested` dinler, sahneyi yükler, bitince
+  `EventBus.minigame_finished` yayar.
+- Mini oyun id'leri: `&"rolling"`, `&"gravity_bong"`, `&"care"`, `&"id_check"`, `&"customize"`.
+
+## 6. Sahiplik
+| Alan | Sahip |
+|---|---|
+| `autoload/game_clock, weather, economy, reputation, inventory, save_system` + `scripts/systems/` (bitki, genetik, işleme) + `scenes/plants/` + `data/strains,items` | Ajan A (Opus) |
+| `autoload/effects` + `scenes/minigames/` + `shaders/gafti_post.gdshader` | Ajan B (Opus) |
+| `autoload/quest_manager, audio_manager` + `scenes/player/` + `scenes/npc/` + `scenes/shop/` + `scenes/ui/` + `data/customers,quests,dialogue` | Ajan C (Opus) |
+| `scenes/world/` (vadi montajı) | Ana oturum (+ Codex sol yardım) |
+| `assets/models/hero/`, `assets/logo/`, `shaders/` (toon, foliage, fog) | Codex astra |
+| `assets/models/props/`, `assets/models/town/`, `assets/models/characters/npc_*` | Codex sol |
+
+## 7. Model dosya sözleşmesi (Blender → .glb)
+- Ölçek: 1 birim = 1 metre, +Y yukarı (glTF), orijin tabanın ortasında.
+- Script: `tools/blender/<ad>.py` → çıktı `assets/models/<klasör>/<ad>.glb`. Script tekrar çalıştırılabilir olmalı.
+- Stil: detaylı stilize; yumuşak bevel, abartılı oranlar, el boyaması hissi veren vertex color/basit dokular, düşük üçgen sayısı.
+- Bütçe: bitki aşaması ≤4k üçgen, prop ≤2k, karakter ≤12k, bina ≤8k.
+- Animasyonlu modellerde aksiyon isimleri: `idle, walk, run, interact, sit` vb. (küçük harf).
+
+## 8. Model listesi (dosya adları sabit)
+Mesh düğüm adları önemli: kod bunlara göre materyal/görünürlük ayarlar.
+
+### Codex astra → `assets/models/hero/`
+| Dosya | İçerik / düğüm adları |
+|---|---|
+| `plant_germ.glb`, `plant_seedling.glb`, `plant_veg.glb`, `plant_flower.glb`, `plant_harvest.glb` | Saksısız bitki. Düğümler: `Stem`, `Leaves`, `Buds` (germ/seedling'de Buds yok). Vertex color + yaprak maskesi (UV.y = kökten uca 0..1, rüzgâr için). Boylar: 0.08 / 0.25 / 0.7 / 1.1 / 1.2 m |
+| `bong_bucket.glb` | Kova + su yüzeyi. Düğümler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet şişe + kapak-kase. Düğümler: `Bottle`, `Cap`, `Bowl`. Orijin şişenin altı |
+| `lighter.glb` | Çakmak. Düğümler: `Body`, `Wheel` |
+| `grinder.glb` | Düğümler: `Base`, `Lid` (Lid kendi ekseninde döner, orijini merkezde) |
+| `rolling_paper.glb` | Düz kağıt, `Paper` (sarılma için ≥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | Bitmiş joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. Armatür `Armature`, gövde `Body`. Seçmeli parçalar aynı armatüre bağlı: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boş), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | Ahşap + cam yayla serası, iç ölçü ~12×6 m, kapı +Z yönünde. İçeride saksı tezgahları. `Glass` düğümü ayrı (şeffaf materyal) |
+| `house.glb` | Dedenin ahşap Karadeniz evi (dış + basit iç: yatak, ayna, kanepe) |
+
+### Codex sol → `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTİ dükkanı, girilebilir, iç ~8×6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleşimi (Godot koordinatları, metre, Y yukarı)
+Arazi 260×260 m, merkez (0,0,0). Düz alanlar (pad) arazide bu noktalarda olmalı:
+| Bölge | Merkez (x, z) | Yükseklik y | Pad yarıçapı |
+|---|---|---|---|
+| Oyuncu başlangıcı / ev önü | (-62, 28) | 2 | — |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynı pad) |
+| Dış tarla | (-45, 48) | 2 | (aynı pad) |
+| Kurutma ambarı | (-78, 22) | 2 | (aynı pad) |
+| Kasaba meydanı | (60, 0) | 0 | 22 |
+| GAFTİ Dükkanı | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| Muhtarlık | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| Hırdavatçı | (42, -10) | 0 | (meydan) |
+| Minibüs durağı | (72, 48) | 0 | 6 |
+| Köprü & dere | (5, -45) | -1 | dere x yönünde değil, (−130,−60)→(130,−35) boyunca akar |
+| Ladin ormanı | (-45, -70) çevresi | — | ağaçlar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) → (0, 10) → meydan (40, 0); meydandan durağa (72, 48); meydandan köprüye (5,-45) → tepeye patika.
+Arazide yol düğümü `Road` (ayrı materyal), zemin `Ground`, dere yatağı `Creek`. Arazi kenarları dağlarla kapalı (oyuncu çıkamaz).
+
+
+ succeeded in 1247ms:
+# GAFTİ — Oyun Tasarım Dokümanı (GDD) v1.0
+
+> Karadeniz yaylasında lisanslı kenevir serası + dükkan işletme oyunu. Komedi tonlu, cozy ama sonuçlu.
+> Motor: Godot 4.7 · Platform: PC (Steam) + Mobil (Play Store) · Dil: Türkçe (çeviriye hazır) · Derecelendirme: 18+
+
+---
+
+## 1. Özet
+
+Şehirde her işi batırmış karakterimiz, kimsenin istemediği yayla serasını devralır ve **Pusludere**
+yaylasına taşınır. Sisli sabahlarda bitkilerine bakar, öğlen hasadını kurutup joint sarar, akşam kasaba
+meydanındaki dükkanında köylülere ve turistlere satış yapar. Gece serada kova bongla günü kapatır.
+Kasabanın tuhaf insanları, absürt görevleri ve kesintisiz bir yayla mizahı oyunu taşır.
+
+**Üç sütun:**
+1. **Dokunsal ustalık:** Bakım, sarma ve bong anları elle hissedilen mini oyunlardır.
+2. **Atmosfer:** Sis, yağmur, mevsimler, ahşap ve yeşil. Oyunun asıl hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeç. Ciddi bir ana hikâye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | İçerik |
+|---|---|
+| **Hikâye (Komedi)** | Ana hikâye yok; birbirine bağlı **komik görev zinciri** (NPC skeçleri). Oyunu öğretir, lisans seviyelerini açar. ~4 mevsim (28 gün). |
+| **Serbest** | Hikâye bittikten sonra ya da baştan: sonsuz işletme, tüm sistemler açık. |
+
+**Zorluk:** Cozy ama sonuçlu. Bitki ölebilir, para eksiye düşebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandırıcı) borç alınır.
+
+---
+
+## 3. Dünya: Pusludere Yaylası
+
+### 3.1 Harita (küçük açık vadi, yüklemesiz)
+```
+                 ⛰  KEKLİKTEPE (manzara, hikâye finali)
+                      │ patika
+        🌲 LADİN ORMANI ── 🌉 KÖPRÜ & DERE (su deposu dolumu)
+              │                      │
+ [DEDENİN SERASI + EV] ── çay bahçeli yol ── [KASABA MEYDANI]
+   ├ Sera (saksılar)                          ├ GAFTİ Dükkanı
+   ├ Dış tarla (mevsimsel)                    ├ Fadime'nin Kahvehanesi
+   ├ Kurutma ambarı                           ├ Muhtarlık
+   ├ Sarma masası                             ├ Lisans & Denetim Ofisi
+   └ Kova bong köşesi                         └ Hırdavatçı (ekipman/tohum)
+                                                   │
+                                          🚐 MİNİBÜS DURAĞI
+                                       (turistler, toptan siparişler)
+```
+- Sera → dükkan yürüme süresi ~40 sn; ilerleyen oyunda **eski motosiklet** (sürüş, ~15 sn).
+- Mobil: bölgeler `VisibilityRange` + streaming ile parça parça yüklenir; oyuncu yükleme ekranı görmez.
+
+### 3.2 Atmosfer
+- **Görsel stil:** Detaylı stilize. El boyaması hissi veren toon shading, yumuşak kenar ışığı, doygun yeşiller,
+  ahşap/taş dokuları, rüzgârla sallanan bitki shader'ı, katmanlı sis.
+- **Renk paleti:** Ladin yeşili, çay yeşili, ıslak taş grisi, ahşap kahvesi, sıcak lamba turuncusu (sera ışıkları).
+- **Ses:** Yağmurun çatıya vuruşu, dere, kuşlar, uzaktan inek çanı, kahvehanede tavla sesi. Müzik: lo-fi + kemençe
+  dokunuşlu sakin parçalar (CC0). Gece daha sakin bir müzik çalar, fırtınada müzik kısılır.
+
+### 3.3 Mevsimler & Hava
+1 yıl = 4 mevsim × 7 gün = 28 gün.
+
+| Mevsim | Etki |
+|---|---|
+| İlkbahar | Ekim bonusu (+%15 çimlenme), sık yağmur (dış tarla kendiliğinden sulanır) |
+| Yaz | Dış tarla en verimli, turist sayısı ×2, sıcaklık stresi |
+| Sonbahar | Hasat bonusu (+kalite), fırtına ihtimali |
+| Kış | Dış tarla kapalı, kar, sera ısıtma gideri; müşteri az ama fiyat yüksek |
+
+| Hava | Etki |
+|---|---|
+| Güneşli | Dış ışık +, su tüketimi + |
+| Bulutlu | Nötr |
+| Sisli | Görüş düşük, atmosfer max; müşteri biraz az |
+| Yağmurlu | Dış tarla otomatik sulanır, müşteri −%20 |
+| Fırtına | Dış bitkilere hasar riski, **elektrik kesintisi** (jeneratör yükseltmesi çözer) |
+| Kar | Kışa özel, sera ısı ihtiyacı + |
+
+Ertesi günün hava tahmini akşamları kahvehane radyosundan duyulur.
+
+---
+
+## 4. Çekirdek Döngü
+
+```
+SABAH  (06–11)  Sera & tarla: sula, besle, ışık ayarla, buda, zararlı temizle, hasat et
+ÖĞLE   (11–16)  İşleme: kurut, kürle, paketle, joint sar (pre-roll)
+AKŞAM  (16–22)  Dükkan: rafları diz, fiyat koy, kimlik kontrol et, sat
+GECE   (22–02)  Planla: yükselt, çaprazla, inşa et · Kova bong · Uyu (kayıt)
+```
+- 1 oyun günü ≈ 14 dk gerçek zaman (ayarlardan 10–20 dk).
+- Fazlar öneridir; dükkan sadece 16–22 arası açıktır.
+- 02:00'da uyumazsan karakter bayılır: ertesi sabah geç uyanır, −%10 para (bayıldığı yerden eve "taşıma ücreti").
+
+---
+
+## 5. Sistemler
+
+### 5.1 Bitki
+| Aşama | Gün | Etkileşim |
+|---|---|---|
+| Çimlenme | 1 | Ekim, nem |
+| Fide | 2 | Sulama, hafif ışık |
+| Vejetatif | 3–5 | Besin, budama, saksı büyütme |
+| Çiçeklenme | 4–6 | Işık döngüsü, pH, zararlı kontrolü |
+| Hasat | — | Zamanlama: erken = az verim, geç = kalite düşer |
+
+- **Değişkenler:** Su, Işık, Besin, pH, Sıcaklık, Nem, Sağlık.
+- Türün ideal aralığında geçen süre → **Kalite (0–100)**. Sağlık 0 → bitki ölür (kompost olur, gübre verir).
+- **Zararlılar:** Yaprak biti, küf (nem yüksekse). Elle temizlenir ya da ilaçlanır.
+- Görsel: Her aşamanın ayrı bir modeli var. Kalite, sağlık ve susuzluk yaprak rengine ve duruşuna yansır.
+
+### 5.2 Genetik / Çaprazlama
+- Özellikler: **Verim, Hız, Dayanıklılık, Aroma, Kalite Potansiyeli**, ayrıca görsel özellikler (yaprak tonu, boy).
+- Çaprazlama: yavru özelliği ebeveyn ortalaması ± sapma; %5 mutasyon (nadir özellik).
+- Başlangıçta 3 tür: **Pusu Kuşu**, **Ladin Duman**, **Çay Yaprağı**. Hikâye ödülü: **GAFTİ** türü.
+- Yeni türlere oyuncu isim verir; **Tohum Defteri** koleksiyonu.
+
+### 5.3 İşleme
+Kurutma (3–7 saat, nem dengesi) → Kürleme (opsiyonel, 1–3 gün, +kalite) → Ürün:
+- **Kavanoz** (gram satış)
+- **Pre-roll** (joint sarma mini oyunu, ×1.6 değer)
+
+### 5.4 Joint Sarma Mini Oyunu (yakın çekim, dokunsal)
+| Adım | Etkileşim (fare / dokunmatik) | Kaliteye etkisi |
+|---|---|---|
+| 1. Öğüt | Grinder kapağını dairesel çevir | Az çevirirsen iri tane, çok çevirirsen toz olur |
+| 2. Filtre | Kartonu zikzak katla (3 sürükleme) | Düzgün filtre olursa çekiş iyi olur |
+| 3. Dağıt | Kağıda sürükleyerek serp | Eşit dağılım için ısı haritası göstergesi |
+| 4. Sar | Yukarı-aşağı ritmik kaydırma, basınç çubuğu | Gevşek sararsan söner, sıkı sararsan çekmez |
+| 5. Yapıştır | Kenar boyunca sürükle (yala) | Eksik bırakırsan açılır |
+| 6. Bük | Ucu döndür | Bitiş |
+
+- Sonuç **Sarma Skoru (0–100)**; ürün kalitesiyle çarpılır. Beceri arttıkça yardım çubukları azalır.
+- Komedi: Çok kötü sarımlar "Muhtar'ın Kağıdı", "Kibrit Çöpü" gibi komik isimler alır ama yine satılabilir (ucuza).
+
+### 5.5 Kova Bong Mini Oyunu (gravity bong, yakın çekim)
+| Adım | Etkileşim |
+|---|---|
+| 1. Hazırla | Kesik pet şişeyi su dolu kovaya batır |
+| 2. Doldur | Kaseyi doldur (miktar seçimi: az / orta / bol) |
+| 3. Yak | Çakmağı çak (basılı tut) |
+| 4. Kaldır | Şişeyi **yavaşça** yukarı kaldır; hızlı kaldırırsan duman kaçar |
+| 5. Çek | Kaseyi çıkar, nefes çubuğunu doğru anda bırak |
+
+- **Etki: "Gaftî Modu"** (süre miktara bağlı, 1–3 oyun saati):
+  - Ekran: renk doygunluğu artar, hafif dalga efekti, yumuşak bulanıklık, müzik yavaşlar ve filtrelenir.
+  - **Artı:** Müşteri sabrı +%30, bakım mini oyunlarında "sakin el" (sarma skoru +10).
+  - **Eksi:** Hareket −%15, sulama miktarı rastgele ±%20 kayar, NPC diyalogları absürtleşir.
+  - "Bol" doz: komik bayılma ihtimali (kanepede uyanırsın, 2 saat kaybedersin).
+- Seradaki bong yükseltilebilir (kova → bidon → "Muhtar'ın Kazanı" süs görünümleri).
+
+### 5.6 Dükkan
+- Raf ve vitrin grid yerleşimi, ürün başına fiyat, gün sonu raporu.
+- **Müşteri tipleri:**
+  | Tip | Tercih | Bütçe |
+  |---|---|---|
+  | Yayla Köylüsü | Ucuz, kavanoz | Düşük |
+  | Turist | Pre-roll, şık paket | Yüksek |
+  | Tıbbi Hasta (Hayri Hoca vb.) | Yüksek kalite, aroma | Orta |
+  | Uzman (şehirli) | Nadir tür, mutasyon | Çok yüksek |
+- **Kimlik kontrolü:** Her müşteride hızlı kart kontrolü yapılır. Atlarsan denetimde ceza gelir. Komik sahte kimlikler de çıkar.
+- Memnuniyet → **İtibar** → müşteri sayısı ve kalitesi.
+
+### 5.7 Lisans & Denetim
+- Kurgusal "Yayla Kenevir Lisansı", 5 seviye. Her seviye yeni saksı sayısı, ekipman, tür ve dükkan alanı açar.
+- **Denetçi Nevzat Bey** habersiz gelir: kayıt defteri, etiket, kimlik kontrol geçmişi ve hijyen puanlanır.
+- Düşük puan → para cezası; üst üste düşük puan → 1 gün dükkan kapalı.
+
+### 5.8 İnşa & Yükseltme
+Grid yerleşim: saksılar, LED lambalar, damla sulama, nemlendirici, ısıtıcı, jeneratör, kurutma rafı, dükkan rafları.
+Otomasyon orta seviyede gelir; zevkli işler (sarma, bong, hasat) hiç otomatikleşmez.
+
+### 5.9 Ekonomi (başlangıç dengesi)
+- Başlangıç: 2.000 ₺, 6 saksı, 3 tohum türü × 2.
+- Giderler: elektrik (günlük, lamba sayısına bağlı), su (dere deposu bedava ama taşıma gerekir), kış ısıtma, tohum, ekipman.
+- Hedef: 3. günde kâra geçmek, 7. günde ilk lisans yükseltmesi.
+
+### 5.10 Karakter Özelleştirme
+Ten tonu (6), saç (6 model × renk), sakal/bıyık (5), Karadeniz giyimi: yağmurluk, örgü kazak, kasket,
+lastik çizme (renkler). Ayna/dolap ile her zaman değiştirilebilir.
+
+---
+
+## 6. Karakterler & Komedi Görevleri
+
+| NPC | Rol | Komedi |
+|---|---|---|
+| **Muhtar Rüstem** | Hikâye görevleri, borç | Her şeye "hallederuk" der, hiçbir şeyi halletmez |
+| **Fadime Abla** | Kahvehane, hava tahmini, dedikodu | Radyo hava tahminleri hep tersi çıkar |
+| **Hayri Hoca** | Emekli öğretmen, tıbbi müşteri | Her alışverişte ders verir |
+| **Cemil** | Komşu, absürt görevler | İneği için "rahatlatıcı" ister (vermezsin) |
+| **Hans** | Alman turist | Yaylaya yerleşmek ister, Türkçesi felaket |
+| **Nevzat Bey** | Denetçi | Ciddi; Gaftî Modu'nda çok komik konuşur |
+
+**Görev zinciri (örnek ilk hafta):** Serayı temizle → İlk hasat → Muhtar'a "numune" → Dükkanı aç →
+Hans'ın ilk siparişi → İlk denetim → Lisans 2. Her görev 1–3 dk'lık bir skeçle biter.
+
+---
+
+## 7. Kamera & Kontroller
+
+**Vadide:** 3. şahıs omuz üstü kamera. **Mini oyunlarda:** sabit yakın çekim kameraya yumuşak geçiş.
+
+| Eylem | PC | Mobil |
+|---|---|---|
+| Hareket | WASD | Sol sanal joystick |
+| Kamera | Fare | Sağ yarı ekran sürükleme |
+| Etkileşim | E / Sol tık | Bağlamsal etkileşim butonu |
+| Koş | Shift | Joystick'i sonuna kadar it |
+| Envanter | Tab | Çanta ikonu |
+| İnşa modu | B | Menü butonu |
+| Mini oyun | Fare sürükle/çevir | Parmakla aynı hareketler |
+
+---
+
+## 8. Mağaza, Gelir & Derecelendirme
+
+- **Gelir:** PC'de Steam ücretli + ayrı demo. Mobilde ücretsiz demo (İlkbahar, 7 gün) + tek seferlik "Tam Sürüm" satın alımı (Play Billing).
+- **Derecelendirme:** 18+ (uyuşturucu kullanımı tasviri). IARC anketi dürüst doldurulacak.
+- **Risk notu:** İçme sahneleri her platformda açık; bu Play Store'da red riskini yükseltir. Teknik sigorta olarak
+  tüm içme içeriği tek bir `content_flags.consumption` bayrağına bağlıdır (varsayılan: açık). Red gelirse
+  mobil derlemede bu bayrak kapatılıp joint "satılık pre-roll", bong "dekor" moduna düşer, ek iş gerekmez.
+- Reklam yok. Gerçek marka/dispanser yok.
+
+---
+
+## 9. Teknik Mimari (Godot 4.7)
+
+- **Renderer:** Mobile (PC'de "Yüksek" grafik ayarında ekstra sis/gölge kalitesi).
+- **Dil:** GDScript, statik tipli. Tüm metinler `tr()` + `localization/strings.csv`.
+
+**Autoload'lar:**
+| Ad | Görev |
+|---|---|
+| `EventBus` | Sistemler arası sinyaller |
+| `GameClock` | Saat, gün, faz, mevsim |
+| `Weather` | Günlük hava, tahmin, ortam efektleri |
+| `Economy` | Para, işlemler, gün sonu raporu |
+| `Reputation` | İtibar, lisans seviyesi, uyum puanı |
+| `Inventory` | Eşyalar, ürünler |
+| `QuestManager` | Komedi görev zinciri, diyalog tetikleri |
+| `SaveSystem` | Kayıt/yükleme (uyuyunca otomatik) |
+| `Settings` | Grafik, ses, kontrol, gün süresi |
+| `ContentFlags` | Platform/içerik bayrakları |
+| `Effects` | Gaftî Modu ekran efektleri, post-process |
+
+**Veri (Resource):** `StrainData`, `PlantState`, `ItemData`, `CustomerProfile`, `QuestData`, `DialogueData`, `BuildableData`.
+
+**Klasör yapısı:**
+```
+res://
+├── autoload/
+├── data/            strains/ items/ customers/ quests/ dialogue/ buildables/
+├── scenes/
+│   ├── world/       valley.tscn, greenhouse/, town/, zones/
+│   ├── player/      player.tscn, camera_rig.tscn, customization/
+│   ├── plants/
+│   ├── npc/
+│   ├── minigames/   rolling/, gravity_bong/, care/, id_check/
+│   ├── shop/
+│   └── ui/          hud/, menus/, mobile_controls/, dialogue/
+├── scripts/         systems/ components/
+├── shaders/         toon.gdshader, foliage_wind, fog_layer, gafti_post
+├── assets/          models/ textures/ audio/ fonts/ logo/
+├── localization/
+└── tests/
+```
+
+**Performans bütçesi (mobil, orta segment Android):** 60 FPS hedef (min 30), ekranda ≤150 draw call,
+≤300k üçgen, bitki modelleri LOD0 ≤4k / LOD1 ≤1k üçgen, doku atlasları 2K.
+
+---
+
+## 10. Sanat Listesi (öncelik + üretici)
+
+| Varlık | Detay | Üretici |
+|---|---|---|
+| **GAFTİ logosu** | Çizgi film tarzı, kalın yuvarlak harfler, İ noktası yaprak/duman; yeşil + sıcak turuncu. SVG + PNG + uygulama ikonu | Codex astra |
+| **Bitki** | 5 aşama × sağlık varyasyonu, rüzgâr shader'ı | Codex astra |
+| **Kova bong seti** | Kova, kesik şişe, kase, su, duman | Codex astra |
+| **Joint seti** | Grinder, kağıt, filtre, joint (sarım aşamaları) | Codex astra |
+| **Oyuncu karakteri** | Gövde + özelleştirme parçaları + temel animasyonlar | Codex astra |
+| **Shader'lar** | Toon, foliage wind, sis katmanları, Gaftî post-process | Codex astra |
+| Sera yapısı, ev | Ahşap/cam yayla serası | Codex astra |
+| NPC'ler (6) | Karakter tabanından türetilmiş | Codex sol |
+| Kasaba binaları, props | Kahvehane, muhtarlık, raflar, saksı, lamba, çit, ağaç | Codex sol |
+| UI teması | İkonlar, paneller, font seçimi | Codex astra (yön) + sol (uygulama) |
+
+---
+
+## 11. MVP Kapsamı (bu geliştirme turunda)
+Vadinin tamamı (blockout + ana modeller), 3. şahıs kontrol (PC + mobil), sera + dış tarla, bitki sistemi,
+çaprazlama, kurutma, **joint sarma**, **kova bong + Gaftî Modu**, dükkan + 4 müşteri tipi + kimlik kontrolü,
+gün/gece + mevsim + hava, lisans 1–3 + denetim, karakter özelleştirme, ilk hafta komedi görevleri (6 NPC),
+kayıt/yükleme, ayarlar, logo + ana menü, CC0 sesler.
+
+**MVP dışı (sonra):** Lisans 4–5, motosiklet, İngilizce, Steam/Play entegrasyonu, satın alma, tam 28 günlük görev zinciri.
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -Raw tools/blender/run_blender.ps1
+Get-ChildItem -Name
+Get-ChildItem tools/blender,shaders,scenes/plants,assets/models/hero -Name -ErrorAction SilentlyContinue
+Test-Path C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe' in C:\Users\31\Documents\we2
+ succeeded in 1110ms:
+param([Parameter(Mandatory=$true)][string]$Script, [string[]]$ScriptArgs = @())
+# Blender'i (Microsoft Store surumu) arka planda bir Python scriptiyle calistirir.
+$launcher = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\blender-launcher.exe"
+$argList = @("--background", "--factory-startup", "--python", "`"$Script`"")
+if ($ScriptArgs.Count -gt 0) { $argList += "--"; $argList += $ScriptArgs }
+$p = Start-Process -FilePath $launcher -ArgumentList $argList -PassThru -Wait -NoNewWindow
+exit $p.ExitCode
+
+assets
+autoload
+data
+localization
+scenes
+scripts
+shaders
+tests
+tools
+AGENTS.md
+CLAUDE.md
+default_bus_layout.tres
+GDD.md
+project.godot
+run_blender.ps1
+True
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content project.godot -Head 65
+Get-ChildItem -Name tools
+Get-Command python
+Get-ChildItem "$env:LOCALAPPDATA/Microsoft/WindowsApps/blender-launcher.exe"' in C:\Users\31\Documents\we2
+ succeeded in 721ms:
+; Engine configuration file.
+; GAFTÄ° â€” Godot 4.7
+
+config_version=5
+
+[application]
+
+config/name="GAFTÄ°"
+config/description="Karadeniz yaylasÄ±nda kenevir serasÄ± ve dÃ¼kkan iÅŸletme oyunu."
+config/version="0.1.0"
+run/main_scene="res://scenes/ui/menus/main_menu.tscn"
+config/features=PackedStringArray("4.7", "Mobile")
+config/icon="res://assets/logo/icon.svg"
+
+[autoload]
+
+EventBus="*res://autoload/event_bus.gd"
+ContentFlags="*res://autoload/content_flags.gd"
+Settings="*res://autoload/settings.gd"
+InputSetup="*res://autoload/input_setup.gd"
+GameClock="*res://autoload/game_clock.gd"
+Weather="*res://autoload/weather.gd"
+Economy="*res://autoload/economy.gd"
+Reputation="*res://autoload/reputation.gd"
+Inventory="*res://autoload/inventory.gd"
+QuestManager="*res://autoload/quest_manager.gd"
+SaveSystem="*res://autoload/save_system.gd"
+Effects="*res://autoload/effects.gd"
+AudioManager="*res://autoload/audio_manager.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+window/handheld/orientation=4
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[internationalization]
+
+locale/translations=PackedStringArray("res://localization/strings.tr.translation")
+locale/fallback="tr"
+
+[physics]
+
+common/physics_ticks_per_second=60
+
+[rendering]
+
+renderer/rendering_method="mobile"
+renderer/rendering_method.mobile="mobile"
+textures/vram_compression/import_etc2_astc=true
+anti_aliasing/quality/msaa_3d=1
+blender
+codex_logs
+codex_prompts
+
+CommandType     Name                                               Version    Source                                   
+-----------     ----                                               -------    ------                                   
+Application     python.exe                                         3.11.11... C:\Users\31\AppData\Local\Programs\Pyt...
+
+LastWriteTime : 12.11.2026 11:52:25
+Length        : 0
+Name          : blender-launcher.exe
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Build the five GAFTİ hero plants. Run via run_blender.ps1.\"\"\"
+from math import sin, cos, pi, sqrt
+from pathlib import Path
+from random import Random
+
+import bpy
+from mathutils import Vector
+
+ROOT = Path(__file__).resolve().parents[2]
+MODELS = ROOT / \"assets/models/hero\"
+PREVIEWS = ROOT / \"tools/previews\"
+STAGES = (\"germ\", \"seedling\", \"veg\", \"flower\", \"harvest\")
+HEIGHTS = (.08, .25, .7, 1.1, 1.2)
+UP = Vector((0, 0, 1))
+
+
+def radial(angle):
+    return Vector((cos(angle), sin(angle), 0))
+
+
+def blend(a, b, t):
+    return tuple(x + (y - x) * t for x, y in zip(a, b))
+
+
+class Part:
+    def __init__(self, name):
+        self.name = name
+        self.points = []
+        self.faces = []
+        self.uv = []
+        self.mask = []
+        self.paint = []
+
+    def point(self, p, u=.5, t=0, wind=0, shade=.5, accent=0):
+        self.points.append(p.copy())
+        self.uv.append((u, 1 - t))  # glTF exporter flips V.
+        self.mask.append((wind, shade, accent, 1))
+        if self.name == \"Stem\":
+            color = blend((.12, .13, .038), (.42, .52, .13), shade)
+        elif self.name == \"Leaves\":
+            color = blend((.011, .09, .044), (.14, .46, .065), shade)
+            color = blend(color, (.46, .65, .16), accent)
+        else:
+            color = blend((.075, .21, .095), (.54, .72, .40), shade)
+            color = blend(color, (.98, .29, .045), accent)
+        self.paint.append((*color, 1))
+        return len(self.points) - 1
+
+    def build(self, scale):
+        mesh = bpy.data.meshes.new(self.name)
+        mesh.from_pydata([p * scale for p in self.points], [], self.faces)
+        mesh.update()
+        uv = mesh.uv_layers.new(name=\"RootToTip\")
+        for loop in mesh.loops:
+            uv.data[loop.index].uv = self.uv[loop.vertex_index]
+        for name, values in ((\"WindPaint\", self.mask), (\"Preview\", self.paint)):
+            attr = mesh.color_attributes.new(name=name, type=\"FLOAT_COLOR\", domain=\"POINT\")
+            attr.data.foreach_set(\"color\", [v for rgba in values for v in rgba])
+        mesh.color_attributes.active_color_index = 0
+        mesh.color_attributes.render_color_index = 0
+        obj = bpy.data.objects.new(self.name, mesh)
+        bpy.context.collection.objects.link(obj)
+        return obj
+
+
+def tube(part, centers, radii, sides=6):
+    rings = []
+    for j, (c, r) in enumerate(zip(centers, radii)):
+        axis = (centers[min(j+1, len(centers)-1)] - centers[max(j-1, 0)]).normalized()
+        side = axis.cross(Vector((1, .2, 0))).normalized()
+        forward = axis.cross(side)
+        ring = []
+        for k in range(sides):
+            a = 2*pi*k/sides
+            ring.append(part.point(c + r*(side*cos(a)+forward*sin(a)), k/sides,
+                                   j/(len(centers)-1), shade=.47+.25*cos(a)+.12*j/(len(centers)-1)))
+        if rings:
+            old = rings[-1]
+            for k in range(sides):
+                n = (k+1) % sides
+                part.faces.append((old[k], old[n], ring[n], ring[k]))
+        rings.append(ring)
+    part.faces.extend((tuple(reversed(rings[0])), tuple(rings[-1])))
+
+
+def blade(part, root, direction, length, width, lift, curve, shade, teeth=3):
+    side = UP.cross(direction).normalized()
+    start = part.point(root, t=0, shade=shade, accent=.48)
+    rows = []
+    fractions = [.14, .28, .43, .59, .72, .85] if teeth else [.18, .45, .7, .87]
+    for j, t in enumerate(fractions):
+        center = root + length*(direction*t + UP*(lift*t+curve*sin(pi*t)))
+        half = width * sin(pi*t)**(.70 if teeth else .52)
+        # Project alternating margin points towards the tip for saw teeth.
+        inset = .63 if teeth and j % 2 == 0 else 1
+        sweep = .055*length if teeth and j % 2 else 0
+        row = []
+        for k in (-1, 0, 1):
+            pos = center + side*(k*half*inset)
+            pos += direction*sweep*abs(k) + UP*(half*(.28 if k == 0 else -.08 + .10*k))
+            row.append(part.point(pos, (k+1)/2, t, t**1.4,
+                                  min(1, max(0, shade+.18*k+.14*t)), .36 if k == 0 else 0))
+        if rows:
+            old = rows[-1]
+            for k in range(2):
+                part.faces.append((old[k], row[k], row[k+1], old[k+1]))
+        else:
+            part.faces.extend(((start, row[0], row[1]), (start, row[1], row[2])))
+        rows.append(row)
+    end = part.point(root + length*(direction + UP*lift), t=1, wind=1, shade=min(1,shade+.22))
+    part.faces.extend(((rows[-1][0], end, rows[-1][1]), (rows[-1][1], end, rows[-1][2])))
+
+
+def fan(leaves, root, angle, size, fingers, lift, shade):
+    mid = fingers//2
+    for i in range(-mid, mid+1):
+        s = abs(i)/max(mid, 1)
+        blade(leaves, root, radial(angle+i*.36), size*(1-.52*s),
+              size*(.23 if fingers == 1 else .094)*(1-.38*s),
+              lift+.08*s, .17, shade, teeth=fingers > 1)
+
+
+def cluster(buds, base, radius, height, ripe, rng):
+    # Overlapping keeled bracts taper into a single terminal spear.
+    for tier, count in enumerate((6, 5, 4, 3, 1)):
+        t = tier/5
+        for j in range(count):
+            a = 2*pi*j/count + tier*2.4 + rng.uniform(-.14,.14)
+            d, side = radial(a), radial(a+pi/2)
+            r = radius*(1-.73*t)
+            c = base + UP*(height*t)
+            foot = buds.point(c+d*r*.17, shade=.20)
+            rim = []
+            for k in range(5):
+                b = 2*pi*k/5
+                p = c + UP*(height*.14) + d*r*(.63+.39*cos(b)) + side*r*.56*sin(b)
+                rim.append(buds.point(p, t=.45, shade=.35+.21*cos(b)+rng.uniform(-.09,.09)))
+            apex = c + UP*(height*(.27+rng.uniform(0,.07))) + d*r*.79
+            tip = buds.point(apex, t=1, shade=.98 if ripe else .70)
+            for k in range(5):
+                n = (k+1)%5
+                buds.faces.extend(((foot,rim[n],rim[k]),(rim[k],rim[n],tip)))
+            if ripe and (j+tier)%2 == 0:
+                p = apex-UP*(height*.09)+d*r*.06
+                bend = p+d*radius*.23+UP*height*.10
+                ids = [buds.point(q, accent=1, shade=.6) for q in
+                       (p-side*radius*.062,p+side*radius*.062,bend+side*radius*.036,
+                        bend-side*radius*.036,bend+UP*height*.075-side*radius*.12)]
+                buds.faces.extend(((ids[0],ids[1],ids[2],ids[3]),(ids[3],ids[2],ids[4])))
+
+
+def generate(stage):
+    stem, leaves, buds = [Part(n) for n in (\"Stem\",\"Leaves\",\"Buds\")]
+    rng = Random(4700+stage)
+    def spine(z):
+        return Vector((.036*sin(z*5), .035*sin(z*3.3), z))
+    tip = (.78,.84,1,.91,.91)[stage]
+    tube(stem,[spine(tip*k/8) for k in range(9)],
+         [(.028 if stage < 2 else .017)*(1-.84*k/8) for k in range(9)],8)
+    if stage < 2:
+        for i in range(2):
+            fan(leaves,spine(.59 if stage == 0 else .31),i*pi+.28,
+                .60 if stage == 0 else .28,1,.22,.77)
+        for i in range(2):
+            fan(leaves,spine(tip),i*pi+1.54,.28 if stage == 0 else .52,
+                1 if stage == 0 else 5,.62,.54)
+        if stage == 1:
+            for i in range(2):
+                fan(leaves,spine(.55),i*pi+.54,.50,3,.21,.35)
+    else:
+        for i in range(10):
+            t = i/9
+            z = .23+.62*t
+            a = .34+i*2.40 + rng.uniform(-.14,.14)
+            d = radial(a)
+            span = (.26-.15*t)*(1.1 if stage == 2 else 1)
+            root = spine(z)
+            joint = root + span*d + UP*(.055+.056*t)
+            end = joint + .047*d + UP*(.085+.012*t)
+            tube(stem,[root,joint,end],[.009,.0055,.0028],5)
+            fan(leaves,joint,a, (.39-.18*t)*(1.13 if stage == 2 else 1),
+                (5,7,9,7,5)[i%5], rng.uniform(-.34,.16),.27+.36*t)
+            if stage >= 3 and i % 2 == 0:
+                cluster(buds,end,.045 if stage == 3 else .060,
+                        .105 if stage == 3 else .145,stage == 4,rng)
+        if stage == 2:
+            fan(leaves,spine(tip),2.1,.17,5,.65,.74)
+            # Unopened apical meristem.
+            cluster(buds,spine(tip),.012,.04,False,rng)
+        else:
+            cluster(buds,spine(.83),.066 if stage == 3 else .087,
+                    .23 if stage == 3 else .29,stage == 4,rng)
+    parts = [part for part in (stem, leaves, buds) if part.points]
+    scale = HEIGHTS[stage]/max(p.z for part in parts for p in part.points)
+    return [part.build(scale) for part in parts]
+
+
+def preview(objects, path):
+    scene = bpy.context.scene
+    scene.render.engine = \"BLENDER_WORKBENCH\"
+    sh = scene.display.shading
+    sh.light, sh.color_type = \"STUDIO\", \"VERTEX\"
+    sh.background_type, sh.background_color = \"VIEWPORT\", (.034,.055,.049)
+    sh.show_shadows = True
+    sh.show_cavity = True
+    sh.cavity_type = \"WORLD\"
+    sh.cavity_ridge_factor, sh.cavity_valley_factor = .65,.8
+    scene.display.render_aa = \"16\"
+    scene.view_settings.view_transform = \"Standard\"
+    for obj in objects:
+        obj.data.color_attributes.active_color_index = 1
+        obj.data.color_attributes.render_color_index = 1
+    points = [v.co for obj in objects for v in obj.data.vertices]
+    target = Vector((0,0,max(p.z for p in points)*.5))
+    direction = Vector((1.2,-2.8,1.38)).normalized()
+    bpy.ops.object.camera_add(location=target + direction*4)
+    cam = bpy.context.object
+    cam.rotation_euler = (-direction).to_track_quat(\"-Z\",\"Y\").to_euler()
+    rotation = cam.rotation_euler.to_matrix().transposed()
+    projected = [rotation @ (p-target) for p in points]
+    bounds = [(min(p[i] for p in projected),max(p[i] for p in projected)) for i in (0,1)]
+    cam.location += rotation.transposed() @ Vector((*[(a+b)/2 for a,b in bounds],0))
+    cam.data.type = \"ORTHO\"
+    cam.data.ortho_scale = max(b-a for a,b in bounds)*1.13
+    scene.camera = cam
+    scene.render.resolution_x = scene.render.resolution_y = 512
+    scene.render.resolution_percentage = 100
+    scene.render.filepath = str(path)
+    bpy.ops.render.render(write_still=True)
+
+
+def main():
+    MODELS.mkdir(parents=True,exist_ok=True)
+    PREVIEWS.mkdir(parents=True,exist_ok=True)
+    for index, suffix in enumerate(STAGES):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        objects = generate(index)
+        triangles = sum(len(p.vertices)-2 for o in objects for p in o.data.polygons)
+        assert triangles <= 4000, (suffix,triangles)
+        name = \"plant_\"+suffix
+        bpy.ops.export_scene.gltf(filepath=str(MODELS/(name+\".glb\")),
+                                  export_vertex_color=\"ACTIVE\", export_all_vertex_colors=False,
+                                  export_attributes=False, export_materials=\"NONE\",export_yup=True)
+        preview(objects,PREVIEWS/(name+\".png\"))
+        print(name,triangles,flush=True)
+
+
+if __name__ == \"__main__\":
+    main()
+'@ | Set-Content -Encoding UTF8 tools/blender/plants.py
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path tools/blender/plants.py)" in C:\Users\31\Documents\we2
+ succeeded in 10660ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+shader_type spatial;
+render_mode cull_disabled, specular_disabled;
+
+uniform float wind_strength : hint_range(0.0, 2.0) = 0.5;
+uniform float wind_speed : hint_range(0.0, 6.0) = 1.3;
+uniform float health : hint_range(0.0, 1.0) = 1.0;
+uniform float thirst : hint_range(0.0, 1.0) = 0.0;
+uniform float quality : hint_range(0.0, 1.0) = 0.5;
+uniform vec4 leaf_color : source_color = vec4(0.37, 0.69, 0.29, 1.0);
+uniform vec4 bud_color : source_color = vec4(0.48, 0.68, 0.39, 1.0);
+uniform int part : hint_enum(\"Stem\", \"Leaves\", \"Buds\") = 1;
+uniform float plant_height = 1.0;
+
+void vertex() {
+    float phase = dot(MODEL_MATRIX[3].xz, vec2(0.74, 1.23)) + UV.x * 0.18;
+    float wave = sin(TIME * wind_speed + phase) + 0.28 * sin(2.1 * TIME * wind_speed + phase);
+    float amplitude = plant_height * COLOR.r;
+    VERTEX.xz += vec2(0.031, 0.014) * wave * amplitude * wind_strength;
+    VERTEX.y -= 0.16 * amplitude * thirst;
+}
+
+void fragment() {
+    float paint = COLOR.g;
+    vec3 pigment = mix(leaf_color.rgb * vec3(0.18, 0.29, 0.54), leaf_color.rgb * 1.18, paint);
+    pigment = mix(pigment, vec3(0.46, 0.65, 0.16), COLOR.b);
+    if (part == 0) {
+        pigment = mix(vec3(0.12,0.13,0.038), vec3(0.42,0.52,0.13), paint);
+    } else if (part == 2) {
+        pigment = mix(bud_color.rgb * 0.48, mix(bud_color.rgb, vec3(0.64,0.82,0.56), quality * 0.78), paint);
+        pigment = mix(pigment, vec3(0.98,0.29,0.045), COLOR.b);
+    }
+    ALBEDO = mix(mix(vec3(0.15,0.068,0.025), vec3(0.58,0.40,0.086), paint), pigment, health);
+    ROUGHNESS = part == 2 ? 0.85 - 0.36 * quality : 0.9;
+    float rim = pow(1.0 - abs(dot(NORMAL, VIEW)), 3.0);
+    EMISSION = ALBEDO * rim * 0.13;
+}
+
+void light() {
+    float n = dot(NORMAL, LIGHT);
+    float bands = 0.18 + 0.45 * smoothstep(-0.12,0.12,n) + 0.37 * smoothstep(0.45,0.69,n);
+    DIFFUSE_LIGHT += ATTENUATION * LIGHT_COLOR * bands / PI;
+    if (part == 2) {
+        float glint = pow(max(dot(NORMAL, normalize(LIGHT + VIEW)),0.0), 20.0);
+        SPECULAR_LIGHT += LIGHT_COLOR * ATTENUATION * glint * quality * 0.12;
+    }
+}
+'@ | Set-Content -Encoding ascii shaders/foliage_wind.gdshader
+@'
+shader_type spatial;
+render_mode specular_disabled;
+
+uniform sampler2D albedo_texture : source_color, hint_default_white, filter_linear_mipmap_anisotropic;
+uniform vec4 albedo_color : source_color = vec4(1.0);
+uniform bool use_vertex_color = false;
+uniform float rim_strength : hint_range(0.0, 1.0) = 0.15;
+
+void fragment() {
+    vec3 pigment = texture(albedo_texture, UV).rgb * albedo_color.rgb;
+    ALBEDO = use_vertex_color ? pigment * COLOR.rgb : pigment;
+    ROUGHNESS = 0.86;
+    float rim = pow(1.0 - clamp(dot(NORMAL, VIEW), 0.0, 1.0), 3.0);
+    EMISSION = ALBEDO * rim_strength * rim;
+}
+
+void light() {
+    float n = dot(NORMAL, LIGHT);
+    float shade = 0.19 + 0.45 * smoothstep(-0.10, 0.12, n) + 0.36 * smoothstep(0.46, 0.68, n);
+    DIFFUSE_LIGHT += LIGHT_COLOR * ATTENUATION * shade / PI;
+}
+'@ | Set-Content -Encoding ascii shaders/toon.gdshader
+@'
+shader_type spatial;
+render_mode unshaded, cull_disabled, depth_draw_never, shadows_disabled;
+
+uniform float density : hint_range(0.0, 1.0) = 0.28;
+uniform vec4 color : source_color = vec4(0.79, 0.85, 0.80, 1.0);
+uniform float speed : hint_range(0.0, 2.0) = 0.22;
+varying vec2 ground_position;
+
+float hash(vec2 p) {
+    vec3 q = fract(p.xyx * 0.1031);
+    q += dot(q, q.yzx + 33.33);
+    return fract((q.x + q.y) * q.z);
+}
+
+float noise2(vec2 p) {
+    vec2 cell = floor(p);
+    vec2 t = fract(p);
+    t = t*t*(3.0-2.0*t);
+    return mix(mix(hash(cell), hash(cell + vec2(1,0)), t.x),
+               mix(hash(cell + vec2(0,1)), hash(cell + vec2(1,1)), t.x), t.y);
+}
+
+void vertex() {
+    ground_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xz;
+}
+
+void fragment() {
+    vec2 p = ground_position * vec2(0.13,0.23);
+    vec2 drift = vec2(TIME * speed, TIME * speed * 0.37);
+    float mist = 0.72 * noise2(p - drift) + 0.28 * noise2(p * 2.3 - drift * 1.35);
+    vec2 edge = min(UV, 1.0 - UV);
+    ALBEDO = color.rgb;
+    ALPHA = density * color.a * smoothstep(0.19, 0.84, mist) * smoothstep(0.0, 0.13, min(edge.x,edge.y));
+}
+'@ | Set-Content -Encoding ascii shaders/fog_layer.gdshader
+@'
+extends Node3D
+
+const FOLIAGE: Shader = preload(\"res://shaders/foliage_wind.gdshader\")
+const HEIGHTS: Array[float] = [0.08, 0.25, 0.70, 1.10, 1.20]
+const PARTS: Array[StringName] = [&\"Stem\", &\"Leaves\", &\"Buds\"]
+
+var _stage: int = 0
+var _health: float = 1.0
+var _thirst: float = 0.0
+var _quality: float = 0.5
+var _materials: Array[ShaderMaterial] = []
+
+
+func _ready() -> void:
+	for part_index: int in range(PARTS.size()):
+		var material: ShaderMaterial = ShaderMaterial.new()
+		material.shader = FOLIAGE
+		material.set_shader_parameter(&\"part\", part_index)
+		_materials.append(material)
+	for child: Node in get_children():
+		for node: Node in child.find_children(\"*\", \"MeshInstance3D\", true, false):
+			var mesh_node: MeshInstance3D = node as MeshInstance3D
+			var index: int = PARTS.find(mesh_node.name)
+			if index >= 0:
+				mesh_node.material_override = _materials[index]
+				mesh_node.extra_cull_margin = 0.25
+	set_stage(_stage)
+	set_health(_health)
+	set_thirst(_thirst)
+	set_quality(_quality)
+
+
+func set_stage(i: int) -> void:
+	_stage = clampi(i, 0, HEIGHTS.size() - 1)
+	for index: int in range(get_child_count()):
+		var stage_node: Node3D = get_child(index) as Node3D
+		stage_node.visible = index == _stage
+	_set_parameter(&\"plant_height\", HEIGHTS[_stage])
+
+
+func set_health(v: float) -> void:
+	_health = clampf(v, 0.0, 1.0)
+	_set_parameter(&\"health\", _health)
+
+
+func set_thirst(v: float) -> void:
+	_thirst = clampf(v, 0.0, 1.0)
+	_set_parameter(&\"thirst\", _thirst)
+
+
+func set_quality(v: float) -> void:
+	_quality = clampf(v, 0.0, 1.0)
+	_set_parameter(&\"quality\", _quality)
+
+
+func _set_parameter(parameter: StringName, value: float) -> void:
+	for material: ShaderMaterial in _materials:
+		material.set_shader_parameter(parameter, value)
+'@ | Set-Content -Encoding ascii scenes/plants/plant_visual.gd
+@'
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type=\"Script\" path=\"res://scenes/plants/plant_visual.gd\" id=\"1\"]
+[ext_resource type=\"PackedScene\" path=\"res://assets/models/hero/plant_germ.glb\" id=\"2\"]
+[ext_resource type=\"PackedScene\" path=\"res://assets/models/hero/plant_seedling.glb\" id=\"3\"]
+[ext_resource type=\"PackedScene\" path=\"res://assets/models/hero/plant_veg.glb\" id=\"4\"]
+[ext_resource type=\"PackedScene\" path=\"res://assets/models/hero/plant_flower.glb\" id=\"5\"]
+[ext_resource type=\"PackedScene\" path=\"res://assets/models/hero/plant_harvest.glb\" id=\"6\"]
+
+[node name=\"PlantVisual\" type=\"Node3D\"]
+script = ExtResource(\"1\")
+
+[node name=\"Germ\" parent=\".\" instance=ExtResource(\"2\")]
+
+[node name=\"Seedling\" parent=\".\" instance=ExtResource(\"3\")]
+visible = false
+
+[node name=\"Veg\" parent=\".\" instance=ExtResource(\"4\")]
+visible = false
+
+[node name=\"Flower\" parent=\".\" instance=ExtResource(\"5\")]
+visible = false
+
+[node name=\"Harvest\" parent=\".\" instance=ExtResource(\"6\")]
+visible = false
+'@ | Set-Content -Encoding ascii scenes/plants/plant_visual.tscn
+Get-ChildItem assets/models/hero/plant*,tools/previews/plant* -ErrorAction SilentlyContinue | Select-Object Name,Length" in C:\Users\31\Documents\we2
+ succeeded in 176ms:
+
+Name               Length
+----               ------
+plant_flower.glb   326796
+plant_germ.glb      19984
+plant_harvest.glb  342884
+plant_seedling.glb  52484
+plant_veg.glb      218212
+plant_flower.png   328415
+plant_germ.png     275134
+plant_harvest.png  332298
+plant_seedling.png 288556
+plant_veg.png      315875
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json,struct,pathlib
+for p in pathlib.Path('assets/models/hero').glob('plant_*.glb'):
+ b=p.read_bytes(); j=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]])
+ print(p.stem,[(m['name'],j['accessors'][m['primitives'][0]['indices']]['count']//3,m['primitives'][0]['attributes']) for m in j['meshes']])
+'@ | python -
+Get-ChildItem C:/Users/31/Desktop/Godot*" in C:\Users\31\Documents\we2
+ succeeded in 743ms:
+plant_flower [('Buds', 1140, {'POSITION': 0, 'NORMAL': 1, 'TEXCOORD_0': 2, 'COLOR_0': 3}), ('Leaves', 1584, {'POSITION': 5, 'NORMAL': 6, 'TEXCOORD_0': 7, 'COLOR_0': 8}), ('Stem', 400, {'POSITION': 10, 'NORMAL': 11, 'TEXCOORD_0': 12, 'COLOR_0': 13})]
+plant_germ [('Leaves', 64, {'POSITION': 0, 'NORMAL': 1, 'TEXCOORD_0': 2, 'COLOR_0': 3}), ('Stem', 140, {'POSITION': 5, 'NORMAL': 6, 'TEXCOORD_0': 7, 'COLOR_0': 8})]
+plant_harvest [('Buds', 1302, {'POSITION': 0, 'NORMAL': 1, 'TEXCOORD_0': 2, 'COLOR_0': 3}), ('Leaves', 1584, {'POSITION': 5, 'NORMAL': 6, 'TEXCOORD_0': 7, 'COLOR_0': 8}), ('Stem', 400, {'POSITION': 10, 'NORMAL': 11, 'TEXCOORD_0': 12, 'COLOR_0': 13})]
+plant_seedling [('Leaves', 416, {'POSITION': 0, 'NORMAL': 1, 'TEXCOORD_0': 2, 'COLOR_0': 3}), ('Stem', 140, {'POSITION': 5, 'NORMAL': 6, 'TEXCOORD_0': 7, 'COLOR_0': 8})]
+plant_veg [('Buds', 190, {'POSITION': 0, 'NORMAL': 1, 'TEXCOORD_0': 2, 'COLOR_0': 3}), ('Leaves', 1704, {'POSITION': 5, 'NORMAL': 6, 'TEXCOORD_0': 7, 'COLOR_0': 8}), ('Stem', 400, {'POSITION': 10, 'NORMAL': 11, 'TEXCOORD_0': 12, 'COLOR_0': 13})]
+
+
+    Directory: C:\Users\31\Desktop
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        17.08.2026     17:50      180858888 Godot_v4.7.2-stable_win64.exe                                        
+
+
+
+codex
+İlk önizlemelerde olgun bitkilerin bazı dalları çıplak, tomurcukları ise fazla köşeli görünüyordu. Dal uçlarına genç yapraklar ekleyip tomurcukları daha yuvarlak ve asimetrik biçimlendireceğim.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from pathlib import Path
+p=Path('tools/blender/plants.py')
+s=p.read_text(encoding='utf-8-sig').replace('mesh.update()','mesh.update()\\n        for face in mesh.polygons:\\n            face.use_smooth = True')
+s=s.replace('sin(pi*t)**(.70 if teeth else .52)','sin(pi*t)**(.70 if teeth else .38)').replace('.63 if teeth','.48 if teeth').replace('.055*length','.075*length')
+s=s.replace('c = base + UP*(height*t)','c = base + UP*(height*(t+rng.uniform(-.043,.043))) + radial(tier*1.8)*radius*.13')
+s=s.replace('height*.14','height*.115').replace('(.63+.39*cos(b))','(.53+.53*cos(b))').replace('side*r*.56','side*r*.65').replace('(.27+rng.uniform(0,.07))','(.24+rng.uniform(0,.06))').replace('d*r*.79','d*r*.62')
+s=s.replace('apex-UP*(height*.09)+d*r*.06','apex-UP*(height*.09)+d*r*.46').replace('side*radius*.062','side*radius*.085').replace('side*radius*.036','side*radius*.047')
+s=s.replace('if stage >= 3 and i % 2 == 0:', '''if stage == 2 or i % 2 == 1:
+                fan(leaves,end,a+1.03,.12-.037*t,3,.55,.69)
+            if stage >= 3 and i % 2 == 0:''')
+s=s.replace('sh.show_shadows = True','sh.studiolight_rotate_z = 0.85\\n    sh.show_shadows = False').replace('1.2,-2.8,1.38','1.2,-2.8,2.05').replace('scene.display.render_aa = \"16\"','scene.display.render_aa = \"16\"\\n    scene.view_settings.exposure = 0.5')
+p.write_text(s,encoding='utf-8')
+'@ | python -
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path tools/blender/plants.py)" in C:\Users\31\Documents\we2
+ succeeded in 5772ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$plantTest = Join-Path $env:TEMP ('"'gafti-plant-' + [guid]::NewGuid())
+New-Item -ItemType Directory -Path "'$plantTest | Out-Null
+foreach ($folder in '"'assets/models/hero','scenes/plants','shaders') {New-Item -ItemType Directory -Path (Join-Path "'$plantTest $folder) -Force | Out-Null}
+Copy-Item assets/models/hero/plant_*.glb (Join-Path $plantTest '"'assets/models/hero')
+Copy-Item scenes/plants/plant_visual.gd,scenes/plants/plant_visual.tscn (Join-Path "'$plantTest '"'scenes/plants')
+Copy-Item shaders/foliage_wind.gdshader,shaders/fog_layer.gdshader,shaders/toon.gdshader (Join-Path "'$plantTest '"'shaders')
+@'
+config_version=5
+[rendering]
+renderer/rendering_method=\"mobile\"
+renderer/rendering_method.mobile=\"mobile\"
+'@ | Set-Content -Encoding ascii (Join-Path "'$plantTest '"'project.godot')
+@'
+extends SceneTree
+
+func _initialize() -> void:
+	call_deferred(\"verify\")
+
+func verify() -> void:
+	var scene: PackedScene = load(\"res://scenes/plants/plant_visual.tscn\")
+	var first = scene.instantiate()
+	var second = scene.instantiate()
+	first.set_stage(4)
+	first.set_quality(2)
+	root.add_child(first)
+	root.add_child(second)
+	for i: int in range(5):
+		first.set_stage(i)
+		for j: int in range(5):
+			assert(first.get_child(j).visible == (j == i))
+		for node in first.get_child(i).find_children(\"*\", \"MeshInstance3D\", true, false):
+			assert(node.material_override "'!= null)
+	first.set_health(-1)
+	first.set_thirst(2)
+	var mat: ShaderMaterial = first.get_child(4).find_child("Leaves",true,false).material_override
+	assert(mat.get_shader_parameter("health") == 0.0)
+	assert(mat.get_shader_parameter("thirst") == 1.0)
+	assert(mat.get_shader_parameter("quality") == 1.0)
+	assert(second.get_child(0).visible)
+	assert(second.get_child(0).find_child("Leaves",true,false).material_override != mat)
+	for name in ["toon","fog_layer","foliage_wind"]:
+		var shader: Shader = load("res://shaders/"+name+".gdshader")
+		assert(shader.get_shader_uniform_list().size() > 0)
+	print("PLANT_VISUAL_PASS")
+	quit()
+'"'@ | Set-Content -Encoding ascii (Join-Path "'$plantTest '"'verify.gd')
+"'$godotPlant = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+Write-Output "'$plantTest
+& $godotPlant --headless --path $plantTest --import 2>&1 | Out-String -Stream | Select-String '"'Error|Warning|Godot'
+& "'$godotPlant --headless --path $plantTest --script res://verify.gd --quit-after 120 2>&1 | Out-String' in C:\Users\31\Documents\we2
+ succeeded in 3866ms:
+C:\Users\31\AppData\Local\Temp\gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PLANT_VISUAL_PASS
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json, struct, pathlib
+for p in sorted(pathlib.Path('assets/models/hero').glob('plant_*.glb')):
+ b=p.read_bytes(); l=struct.unpack_from('<I',b,12)[0]; j=json.loads(b[20:20+l]); buf=b[28+l:]; total=0
+ for m in j['meshes']:
+  prim=m['primitives'][0]; ats=prim['attributes']; total+=j['accessors'][prim['indices']]['count']//3
+  if m['name']=='Stem':
+   pos=j['accessors'][ats['POSITION']]; print(p.stem,'root:',pos['min'][1])
+  if m['name']=='Leaves':
+   for name in ('COLOR_0','TEXCOORD_0'):
+    ac=j['accessors'][ats[name]]; v=j['bufferViews'][ac['bufferView']]; fmt={5126:'f',5123:'H',5121:'B'}[ac['componentType']]; n={'VEC2':2,'VEC3':3,'VEC4':4}[ac['type']]
+    vals=[struct.unpack_from('<'+fmt*n,buf,v.get('byteOffset',0)+ac.get('byteOffset',0)+k*v.get('byteStride',struct.calcsize(fmt*n))) for k in range(ac['count'])]
+    print(name,tuple(min(v[i] for v in vals) for i in range(n)),tuple(max(v[i] for v in vals) for i in range(n)))
+ print(total)
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 387ms:
+COLOR_0 (0, 7183, 0, 65535) (65535, 64814, 31457, 65535)
+TEXCOORD_0 (0.0, 0.0) (1.0, 1.0)
+plant_flower root: -0.003134799422696233
+3484
+COLOR_0 (0, 25244, 0, 65535) (65535, 65535, 31457, 65535)
+TEXCOORD_0 (0.0, 0.0) (1.0, 1.0)
+plant_germ root: -0.00043588486732915044
+204
+COLOR_0 (0, 7183, 0, 65535) (65535, 64814, 31457, 65535)
+TEXCOORD_0 (0.0, 0.0) (1.0, 1.0)
+plant_harvest root: -0.0032604255247861147
+3646
+COLOR_0 (0, 12425, 0, 65535) (65535, 65535, 31457, 65535)
+TEXCOORD_0 (0.0, 0.0) (1.0, 1.0)
+plant_seedling root: -0.0011215336853638291
+556
+COLOR_0 (0, 7183, 0, 65535) (65535, 65535, 31457, 65535)
+TEXCOORD_0 (0.0, 0.0) (1.0, 1.0)
+plant_veg root: -0.0019684399012476206
+3014
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from pathlib import Path
+p=Path('tools/blender/plants.py')
+s=p.read_text().replace('side = axis.cross(Vector((1, .2, 0))).normalized()', '''if j == 0 and c.length == 0:
+            axis = UP
+        side = axis.cross(Vector((1, .2, 0))).normalized()''')
+s=s.replace('scene.render.engine = \"BLENDER_WORKBENCH\"','scene.render.engine = \"CYCLES\"' if False else 'scene.render.engine = \"CYCLES\"')
+a=s.index('    sh = scene.display.shading'); b=s.index('    points =',a)
+s=s[:a]+'''    scene.render.engine = \"CYCLES\" if False else \"CYCLES\"
+    scene.render.engine = \"CYCLES\" if False else \"BLENDER_EEVEE\"
+    scene.view_settings.view_transform = \"AgX\"
+    scene.world = bpy.data.worlds.new(\"Studio sky\")
+    scene.world.use_nodes = True
+    scene.world.node_tree.nodes[\"Background\"].inputs[0].default_value = (.41,.55,.56,1)
+    scene.world.node_tree.nodes[\"Background\"].inputs[1].default_value = .38
+    for obj in objects:
+        material = bpy.data.materials.new(\"Paint\")
+        material.use_nodes = True
+        color = material.node_tree.nodes.new(\"ShaderNodeVertexColor\")
+        color.layer_name = \"Preview\"
+        surface = material.node_tree.nodes.get(\"Principled BSDF\")
+        surface.inputs[\"Roughness\"].default_value = .78
+        material.node_tree.links.new(color.outputs[\"Color\"], surface.inputs[\"Base Color\"])
+        obj.data.materials.append(material)
+'''+s[b:]
+s=s.replace('    target = Vector', '''    height = max(p.z for p in points)
+    for location, power, tint in (((-1.5,-2.3,3.8),170,(1,.88,.71)),
+                                  ((1.9,-1.2,1.4),70,(.74,.87,1)),
+                                  ((-.6,1.3,2.5),140,(.94,1,.77))):
+        bpy.ops.object.light_add(type=\"AREA\",location=Vector(location)*height)
+        light = bpy.context.object
+        light.rotation_euler = (UP*height*.5-light.location).to_track_quat(\"-Z\",\"Y\").to_euler()
+        light.data.energy = power*height**2
+        light.data.shape = \"DISK\"
+        light.data.size = height*1.6
+        light.data.color = tint
+    bpy.ops.mesh.primitive_plane_add(size=200*height)
+    floor = bpy.context.object
+    matte = bpy.data.materials.new(\"Backdrop\")
+    matte.diffuse_color = (.043,.079,.073,1)
+    floor.data.materials.append(matte)
+    target = Vector''')
+a=s.index('    scene.render.engine'); b=s.index('    scene.view_settings',a)
+s=s[:a]+'    scene.render.engine = \"CYCLES\"\\n    scene.cycles.samples = 12\\n    scene.cycles.use_denoising = True\\n'+s[b:]
+# Choose Eevee as requested.
+s=s.replace('    scene.render.engine = \"CYCLES\"\\n    scene.cycles.samples = 12\\n    scene.cycles.use_denoising = True','    scene.render.engine = \"CYCLES\"' if False else '    scene.render.engine = \"BLENDER_EEVEE\"')
+p.write_text(s)
+'@ | python -
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path tools/blender/plants.py)" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "(Get-Content shaders/foliage_wind.gdshader) -replace 'render_mode cull_disabled, specular_disabled;', 'render_mode cull_disabled;' | Set-Content -Encoding ascii shaders/foliage_wind.gdshader
+"'$plantTest = '"'C:/Users/31/AppData/Local/Temp/gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb'
+Copy-Item shaders/foliage_wind.gdshader (Join-Path "'$plantTest '"'shaders') -Force
+@'
+extends SceneTree
+
+func _initialize() -> void:
+	call_deferred(\"verify\")
+
+func verify() -> void:
+	var plant = load(\"res://scenes/plants/plant_visual.tscn\").instantiate()
+	plant.set_stage(4)
+	root.add_child(plant)
+	for n in [\"toon\",\"fog_layer\"]:
+		var mesh := MeshInstance3D.new()
+		mesh.mesh = BoxMesh.new()
+		var material := ShaderMaterial.new()
+		material.shader = load(\"res://shaders/\"+n+\".gdshader\")
+		mesh.material_override = material
+		root.add_child(mesh)
+		mesh.position.x = 1.5 if n == \"toon\" else -1.5
+	var cam := Camera3D.new()
+	root.add_child(cam)
+	cam.position = Vector3(0,1.0,3.0)
+	cam.look_at(Vector3(0,0.6,0))
+	var sun := DirectionalLight3D.new()
+	root.add_child(sun)
+	sun.rotation_degrees = Vector3(-45,-45,0)
+	for i in range(5):
+		await RenderingServer.frame_post_draw
+	print(\"GPU_PASS \", RenderingServer.get_current_rendering_method())
+	quit()
+'@ | Set-Content -Encoding ascii (Join-Path "'$plantTest '"'draw.gd')
+"'$godotPlant = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+& "'$godotPlant --path $plantTest --resolution 512x512 --rendering-method mobile --audio-driver Dummy --script res://draw.gd --quit-after 60 2>&1 | Out-String
+Get-ChildItem tools/previews/plant*.png | Select-Object Name,LastWriteTime' in C:\Users\31\Documents\we2
+ succeeded in 25878ms:
+ succeeded in 3728ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.323 - Forward Mobile - Using Device #0: Intel - Intel(R) UHD Graphics
+
+GPU_PASS mobile
+
+
+Name               LastWriteTime      
+----               -------------      
+plant_flower.png   24.11.2026 12:26:57
+plant_germ.png     24.11.2026 12:26:47
+plant_harvest.png  24.11.2026 12:27:02
+plant_seedling.png 24.11.2026 12:26:50
+plant_veg.png      24.11.2026 12:26:53
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content tools/blender/plants.py -Tail 87' in C:\Users\31\Documents\we2
+ succeeded in 184ms:
+            if stage == 2 or i % 2 == 1:
+                fan(leaves,end,a+1.03,.12-.037*t,3,.55,.69)
+            if stage >= 3 and i % 2 == 0:
+                cluster(buds,end,.045 if stage == 3 else .060,
+                        .105 if stage == 3 else .145,stage == 4,rng)
+        if stage == 2:
+            fan(leaves,spine(tip),2.1,.17,5,.65,.74)
+            # Unopened apical meristem.
+            cluster(buds,spine(tip),.012,.04,False,rng)
+        else:
+            cluster(buds,spine(.83),.066 if stage == 3 else .087,
+                    .23 if stage == 3 else .29,stage == 4,rng)
+    parts = [part for part in (stem, leaves, buds) if part.points]
+    scale = HEIGHTS[stage]/max(p.z for part in parts for p in part.points)
+    return [part.build(scale) for part in parts]
+
+
+def preview(objects, path):
+    scene = bpy.context.scene
+    scene.render.engine = "BLENDER_EEVEE"
+    scene.view_settings.view_transform = "AgX"
+    scene.world = bpy.data.worlds.new("Studio sky")
+    scene.world.use_nodes = True
+    scene.world.node_tree.nodes["Background"].inputs[0].default_value = (.41,.55,.56,1)
+    scene.world.node_tree.nodes["Background"].inputs[1].default_value = .38
+    for obj in objects:
+        material = bpy.data.materials.new("Paint")
+        material.use_nodes = True
+        color = material.node_tree.nodes.new("ShaderNodeVertexColor")
+        color.layer_name = "Preview"
+        surface = material.node_tree.nodes.get("Principled BSDF")
+        surface.inputs["Roughness"].default_value = .78
+        material.node_tree.links.new(color.outputs["Color"], surface.inputs["Base Color"])
+        obj.data.materials.append(material)
+    points = [v.co for obj in objects for v in obj.data.vertices]
+    height = max(p.z for p in points)
+    for location, power, tint in (((-1.5,-2.3,3.8),170,(1,.88,.71)),
+                                  ((1.9,-1.2,1.4),70,(.74,.87,1)),
+                                  ((-.6,1.3,2.5),140,(.94,1,.77))):
+        bpy.ops.object.light_add(type="AREA",location=Vector(location)*height)
+        light = bpy.context.object
+        light.rotation_euler = (UP*height*.5-light.location).to_track_quat("-Z","Y").to_euler()
+        light.data.energy = power*height**2
+        light.data.shape = "DISK"
+        light.data.size = height*1.6
+        light.data.color = tint
+    bpy.ops.mesh.primitive_plane_add(size=200*height)
+    floor = bpy.context.object
+    matte = bpy.data.materials.new("Backdrop")
+    matte.diffuse_color = (.043,.079,.073,1)
+    floor.data.materials.append(matte)
+    target = Vector((0,0,max(p.z for p in points)*.5))
+    direction = Vector((1.2,-2.8,2.05)).normalized()
+    bpy.ops.object.camera_add(location=target + direction*4)
+    cam = bpy.context.object
+    cam.rotation_euler = (-direction).to_track_quat("-Z","Y").to_euler()
+    rotation = cam.rotation_euler.to_matrix().transposed()
+    projected = [rotation @ (p-target) for p in points]
+    bounds = [(min(p[i] for p in projected),max(p[i] for p in projected)) for i in (0,1)]
+    cam.location += rotation.transposed() @ Vector((*[(a+b)/2 for a,b in bounds],0))
+    cam.data.type = "ORTHO"
+    cam.data.ortho_scale = max(b-a for a,b in bounds)*1.13
+    scene.camera = cam
+    scene.render.resolution_x = scene.render.resolution_y = 512
+    scene.render.resolution_percentage = 100
+    scene.render.filepath = str(path)
+    bpy.ops.render.render(write_still=True)
+
+
+def main():
+    MODELS.mkdir(parents=True,exist_ok=True)
+    PREVIEWS.mkdir(parents=True,exist_ok=True)
+    for index, suffix in enumerate(STAGES):
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        objects = generate(index)
+        triangles = sum(len(p.vertices)-2 for o in objects for p in o.data.polygons)
+        assert triangles <= 4000, (suffix,triangles)
+        name = "plant_"+suffix
+        bpy.ops.export_scene.gltf(filepath=str(MODELS/(name+".glb")),
+                                  export_vertex_color="ACTIVE", export_all_vertex_colors=False,
+                                  export_attributes=False, export_materials="NONE",export_yup=True)
+        preview(objects,PREVIEWS/(name+".png"))
+        print(name,triangles,flush=True)
+
+
+if __name__ == "__main__":
+    main()
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from pathlib import Path
+p=Path('tools/blender/plants.py')
+s=p.read_text().replace('    scene.view_settings.view_transform = \"AgX\"','    scene.view_settings.view_transform = \"Standard\"\\n    scene.view_settings.exposure = -0.65').replace('matte.diffuse_color = (.043,.079,.073,1)','matte.use_nodes = True\\n    matte.node_tree.nodes[\"Principled BSDF\"].inputs[\"Base Color\"].default_value = (.039,.066,.056,1)').replace('.48 if teeth','.68 if teeth')
+s=s.replace('        obj.data.materials.append(material)','''        if obj.name == \"Leaves\":
+            # Fine painted midrib in the same leaflet UVs sampled in Godot.
+            nodes, links = material.node_tree.nodes, material.node_tree.links
+            coords = nodes.new(\"ShaderNodeTexCoord\")
+            split = nodes.new(\"ShaderNodeSeparateXYZ\")
+            links.new(coords.outputs[\"UV\"], split.inputs[0])
+            midrib = nodes.new(\"ShaderNodeValToRGB\")
+            ramp = midrib.color_ramp
+            ramp.elements[0].position = .464
+            ramp.elements[0].color = (0,0,0,1)
+            ramp.elements[1].position = .50
+            ramp.elements[1].color = (.63,.63,.63,1)
+            ramp.elements.new(.536).color = (0,0,0,1)
+            links.new(split.outputs[\"X\"], midrib.inputs[0])
+            paint = nodes.new(\"ShaderNodeMixRGB\")
+            links.new(midrib.outputs[0], paint.inputs[0])
+            links.new(color.outputs[0], paint.inputs[1])
+            paint.inputs[2].default_value = (.51,.67,.18,1)
+            links.new(paint.outputs[0], surface.inputs[\"Base Color\"])
+        obj.data.materials.append(material)''')
+p.write_text(s)
+p=Path('shaders/foliage_wind.gdshader');s=p.read_text().replace('    if (part == 0)', '''    float midrib = 1.0 - smoothstep(0.0, max(0.036, fwidth(UV.x)), abs(UV.x - 0.5));
+    pigment = mix(pigment, vec3(0.51,0.67,0.18), 0.63 * midrib);
+    if (part == 0)''');p.write_text(s)
+'@ | python -
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path tools/blender/plants.py)" in C:\Users\31\Documents\we2
+ succeeded in 23917ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$plantTest = '"'C:/Users/31/AppData/Local/Temp/gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb'
+Copy-Item assets/models/hero/plant_*.glb (Join-Path "'$plantTest '"'assets/models/hero') -Force
+Copy-Item shaders/foliage_wind.gdshader (Join-Path "'$plantTest '"'shaders') -Force
+@'
+extends SceneTree
+
+func _initialize() -> void:
+	var plant = load(\"res://scenes/plants/plant_visual.tscn\").instantiate()
+	for stage in plant.get_children():
+		for mesh_node in stage.find_children(\"*\",\"MeshInstance3D\",true,false):
+			var d: Dictionary = mesh_node.mesh.get(\"_surfaces\")[0]
+			var lods: Array = d.get(\"lods\",[])
+			var counts: Array[int] = []
+			for i: int in range(1,lods.size(),2):
+				counts.append(lods[i].size()/6)
+			print(stage.name,\" \",mesh_node.name,\" \",counts)
+	plant.free()
+	quit()
+'@ | Set-Content -Encoding ascii (Join-Path "'$plantTest '"'lod.gd')
+"'$godotPlant = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+& "'$godotPlant --headless --path $plantTest --import 2>&1 | Out-String -Stream | Select-String '"'Error|Warning|Godot'
+& "'$godotPlant --headless --path $plantTest --script res://lod.gd 2>&1 | Out-String
+& $godotPlant --headless --path $plantTest --script res://verify.gd --quit-after 120 2>&1 | Out-String
+& $godotPlant --path $plantTest --resolution 512x512 --rendering-method mobile --audio-driver Dummy --script res://draw.gd --quit-after 60 2>&1 | Out-String' in C:\Users\31\Documents\we2
+ succeeded in 8617ms:
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Germ Leaves [32, 16]
+Germ Stem [70, 34, 16, 8]
+Seedling Leaves [208]
+Seedling Stem [70, 34, 16, 8]
+Veg Buds [94, 46, 22, 10, 4]
+Veg Leaves [1212, 336]
+Veg Stem [200, 100, 50, 24, 12, 6]
+Flower Buds [570, 284, 142, 70, 34, 16, 8]
+Flower Leaves [972, 336]
+Flower Stem [200, 100, 50, 24, 12, 6]
+Harvest Buds [651, 325, 161, 79, 39, 27]
+Harvest Leaves [972, 336]
+Harvest Stem [200, 100, 50, 24, 12, 6]
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PLANT_VISUAL_PASS
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.323 - Forward Mobile - Using Device #0: Intel - Intel(R) UHD Graphics
+
+GPU_PASS mobile
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$plantTest = '"'C:/Users/31/AppData/Local/Temp/gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb'
+Get-Content (Join-Path "'$plantTest '"'assets/models/hero/plant_harvest.glb.import')
+@'
+extends SceneTree
+func _initialize() -> void:
+	for c in [\"ArrayMesh\",\"RenderingServer\",\"ImporterMesh\"]:
+		for m in ClassDB.class_get_method_list(c):
+			if \"lod\" in str(m.name): print(c,\" \",m.name)
+	quit()
+'@ | Set-Content -Encoding ascii (Join-Path "'$plantTest '"'methods.gd')
+& 'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe' --headless --path "'$plantTest --script res://methods.gd | Out-String' in C:\Users\31\Documents\we2
+ succeeded in 431ms:
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://bp7basg4ou8h1"
+path="res://.godot/imported/plant_harvest.glb-ee7b457987f2652fadc24094eedd6c4d.scn"
+
+[deps]
+
+source_file="res://assets/models/hero/plant_harvest.glb"
+dest_files=["res://.godot/imported/plant_harvest.glb-ee7b457987f2652fadc24094eedd6c4d.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+ArrayMesh _surface_get_lods
+RenderingServer reflection_probe_set_mesh_lod_threshold
+RenderingServer instance_geometry_set_lod_bias
+ImporterMesh get_surface_lod_count
+ImporterMesh get_surface_lod_size
+ImporterMesh get_surface_lod_indices
+ImporterMesh generate_lods
+
+
+codex
+Beş model de 4.000 üçgenin altında. Godot’un otomatik ürettiği ilk uzaklık seviyesi üç olgun modelde 1.000 üçgeni aştı. İçe aktarma sırasında uygun sadeleştirme seviyesini seçip GDD’deki uzak görünüm bütçesini de doğrulayacağım.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+@tool
+extends EditorScenePostImport
+
+# The importer simplifies each surface independently. Reserve a portion of the
+# whole-plant LOD1 budget for each of the three parts.
+const TRIANGLES: Dictionary[StringName, int] = {&\"Leaves\": 480, &\"Stem\": 200, &\"Buds\": 320}
+
+
+func _post_import(scene: Node) -> Object:
+	for child: Node in scene.find_children(\"*\", \"MeshInstance3D\", true, false):
+		var instance: MeshInstance3D = child as MeshInstance3D
+		var source: ArrayMesh = instance.mesh as ArrayMesh
+		var lods: Dictionary = source._surface_get_lods(0)
+		var retained: Dictionary = {}
+		for distance: float in lods:
+			var indices: PackedInt32Array = lods[distance]
+			if indices.size() <= 3 * TRIANGLES[instance.name]:
+				retained[distance] = indices
+		if retained.size() == lods.size():
+			continue
+		var mesh: ArrayMesh = ArrayMesh.new()
+		mesh.resource_name = source.resource_name
+		mesh.add_surface_from_arrays(source.surface_get_primitive_type(0),
+				source.surface_get_arrays(0), [], retained,
+				source.surface_get_format(0) & Mesh.ARRAY_FLAG_COMPRESS_ATTRIBUTES)
+		mesh.surface_set_material(0, source.surface_get_material(0))
+		mesh.surface_set_name(0, source.surface_get_name(0))
+		instance.mesh = mesh
+	return scene
+'@ | Set-Content -Encoding ascii scenes/plants/plant_lod_import.gd
+"'$plantTest = '"'C:/Users/31/AppData/Local/Temp/gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb'
+Copy-Item scenes/plants/plant_lod_import.gd (Join-Path "'$plantTest '"'scenes/plants')
+foreach ("'$meta in Get-ChildItem (Join-Path $plantTest '"'assets/models/hero/plant_*.glb.import')) {
+  (Get-Content "'$meta.FullName) -replace '"'import_script/path=\"\"','import_script/path=\"res://scenes/plants/plant_lod_import.gd\"' | Set-Content -Encoding ascii "'$meta.FullName
+}
+$godotPlant = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+& "'$godotPlant --headless --path $plantTest --import 2>&1 | Out-String -Stream | Select-String '"'Error|Warning|Godot|plant_lod'
+& "'$godotPlant --headless --path $plantTest --script res://lod.gd 2>&1 | Out-String' in C:\Users\31\Documents\we2
+ succeeded in 5564ms:
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Godot_v4.7.2-stable_win64.exe : SCRIPT ERROR: Invalid call. Nonexistent function '_surface_get_lods' in base 'ArrayMesh
++ & $godotPlant --headless --path $plantTest --import 2>&1 | Out-String ...
+    + CategoryInfo          : NotSpecified: (SCRIPT ERROR: I...se 'ArrayMesh'.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+   at: _post_import (res://scenes/plants/plant_lod_import.gd:13)
+       [0] _post_import (res://scenes/plants/plant_lod_import.gd:13)
+SCRIPT ERROR: Invalid call. Nonexistent function '_surface_get_lods' in base 'ArrayMesh'.
+   at: _post_import (res://scenes/plants/plant_lod_import.gd:13)
+       [0] _post_import (res://scenes/plants/plant_lod_import.gd:13)
+ERROR: Attempting to parent and popup a dialog that already has a parent.
+SCRIPT ERROR: Invalid call. Nonexistent function '_surface_get_lods' in base 'ArrayMesh'.
+   at: _post_import (res://scenes/plants/plant_lod_import.gd:13)
+       [0] _post_import (res://scenes/plants/plant_lod_import.gd:13)
+ERROR: Attempting to parent and popup a dialog that already has a parent.
+SCRIPT ERROR: Invalid call. Nonexistent function '_surface_get_lods' in base 'ArrayMesh'.
+   at: _post_import (res://scenes/plants/plant_lod_import.gd:13)
+       [0] _post_import (res://scenes/plants/plant_lod_import.gd:13)
+ERROR: Attempting to parent and popup a dialog that already has a parent.
+SCRIPT ERROR: Invalid call. Nonexistent function '_surface_get_lods' in base 'ArrayMesh'.
+   at: _post_import (res://scenes/plants/plant_lod_import.gd:13)
+       [0] _post_import (res://scenes/plants/plant_lod_import.gd:13)
+ERROR: Attempting to parent and popup a dialog that already has a parent.
+ERROR: 13 RID allocations of type 'N13RendererDummy15MaterialStorage13DummyMaterialE' were leaked at exit.
+ERROR: 1 RID allocations of type 'N13RendererDummy15MaterialStorage11DummyShaderE' were leaked at exit.
+ERROR: 26 RID allocations of type 'N13RendererDummy9DummyMeshE' were leaked at exit.
+ERROR: 13 RID allocations of type 'N17RendererSceneCull8InstanceE' were leaked at exit.
+ERROR: Pages in use exist at exit in PagedAllocator: N20RasterizerSceneDummy21GeometryInstanceDummyE
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Germ Leaves [32, 16]
+Germ Stem [70, 34, 16, 8]
+Seedling Leaves [208]
+Seedling Stem [70, 34, 16, 8]
+Veg Buds [94, 46, 22, 10, 4]
+Veg Leaves [1212, 336]
+Veg Stem [200, 100, 50, 24, 12, 6]
+Flower Buds [570, 284, 142, 70, 34, 16, 8]
+Flower Leaves [972, 336]
+Flower Stem [200, 100, 50, 24, 12, 6]
+Harvest Buds [651, 325, 161, 79, 39, 27]
+Harvest Leaves [972, 336]
+Harvest Stem [200, 100, 50, 24, 12, 6]
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+@tool
+extends EditorScenePostImport
+
+# Godot 4.7 stores native mesh LODs as distance/index-buffer pairs.
+# Reserve 1,000 triangles across the three independently simplified surfaces.
+const TRIANGLES: Dictionary[StringName, int] = {&\"Leaves\": 480, &\"Stem\": 200, &\"Buds\": 320}
+
+
+func _post_import(scene: Node) -> Object:
+	for child: Node in scene.find_children(\"*\", \"MeshInstance3D\", true, false):
+		var instance: MeshInstance3D = child as MeshInstance3D
+		var source: ArrayMesh = instance.mesh as ArrayMesh
+		var surfaces: Array = source.get(\"_surfaces\")
+		var surface: Dictionary = surfaces[0]
+		var lods: Array = surface.get(\"lods\", [])
+		var retained: Array = []
+		var index_bytes: int = 2 if int(surface[\"vertex_count\"]) <= 65536 else 4
+		for i: int in range(0, lods.size(), 2):
+			var indices: PackedByteArray = lods[i + 1]
+			if indices.size() <= index_bytes * 3 * TRIANGLES[instance.name]:
+				retained.append(lods[i])
+				retained.append(indices)
+		if retained.size() < lods.size():
+			surface[\"lods\"] = retained
+			var mesh: ArrayMesh = ArrayMesh.new()
+			mesh.resource_name = source.resource_name
+			mesh.set(\"_surfaces\", surfaces)
+			instance.mesh = mesh
+	return scene
+'@ | Set-Content -Encoding ascii scenes/plants/plant_lod_import.gd
+"'$plantTest = '"'C:/Users/31/AppData/Local/Temp/gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb'
+Copy-Item scenes/plants/plant_lod_import.gd (Join-Path "'$plantTest '"'scenes/plants') -Force
+"'$godotPlant = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+& "'$godotPlant --headless --path $plantTest --import 2>&1 | Out-String -Stream | Select-String '"'Error|Warning|Godot'
+& "'$godotPlant --headless --path $plantTest --script res://lod.gd 2>&1 | Out-String
+Get-ChildItem assets/models/hero/plant*.import' in C:\Users\31\Documents\we2
+ succeeded in 3291ms:
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Germ Leaves [32, 16]
+Germ Stem [70, 34, 16, 8]
+Seedling Leaves [208]
+Seedling Stem [70, 34, 16, 8]
+Veg Buds [94, 46, 22, 10, 4]
+Veg Leaves [1212, 336]
+Veg Stem [200, 100, 50, 24, 12, 6]
+Flower Buds [570, 284, 142, 70, 34, 16, 8]
+Flower Leaves [972, 336]
+Flower Stem [200, 100, 50, 24, 12, 6]
+Harvest Buds [651, 325, 161, 79, 39, 27]
+Harvest Leaves [972, 336]
+Harvest Stem [200, 100, 50, 24, 12, 6]
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$plantOld = '"'C:/Users/31/AppData/Local/Temp/gafti-plant-7c742b8e-c508-47bc-ade7-e824e24f46bb'
+"'$plantTest = Join-Path $env:TEMP ('"'gafti-lod-' + [guid]::NewGuid())
+New-Item -ItemType Directory "'$plantTest | Out-Null
+Get-ChildItem $plantOld | Where-Object Name -ne '"'.godot' | Copy-Item -Destination "'$plantTest -Recurse
+Get-Content (Join-Path $plantTest '"'assets/models/hero/plant_harvest.glb.import') | Select-String 'import_script'
+"'$godotPlant = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+& "'$godotPlant --headless --path $plantTest --import 2>&1 | Out-String -Stream | Select-String '"'Error|Warning|Godot'
+& "'$godotPlant --headless --path $plantTest --script res://lod.gd 2>&1 | Out-String
+& $godotPlant --headless --path $plantTest --script res://verify.gd --quit-after 120 2>&1 | Out-String
+& $godotPlant --path $plantTest --resolution 512x512 --rendering-method mobile --audio-driver Dummy --script res://draw.gd --quit-after 60 2>&1 | Out-String
+Write-Output $plantTest' in C:\Users\31\Documents\we2
+ succeeded in 4362ms:
+
+import_script/path="res://scenes/plants/plant_lod_import.gd"
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Germ Leaves [32, 16]
+Germ Stem [70, 34, 16, 8]
+Seedling Leaves [208]
+Seedling Stem [70, 34, 16, 8]
+Veg Buds [94, 46, 22, 10, 4]
+Veg Leaves [336]
+Veg Stem [200, 100, 50, 24, 12, 6]
+Flower Buds [284, 142, 70, 34, 16, 8]
+Flower Leaves [336]
+Flower Stem [200, 100, 50, 24, 12, 6]
+Harvest Buds [161, 79, 39, 27]
+Harvest Leaves [336]
+Harvest Stem [200, 100, 50, 24, 12, 6]
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PLANT_VISUAL_PASS
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Vulkan 1.4.323 - Forward Mobile - Using Device #0: Intel - Intel(R) UHD Graphics
+
+GPU_PASS mobile
+
+C:\Users\31\AppData\Local\Temp\gafti-lod-1860cac3-cd18-463d-a0a6-c6b9ad671472
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$plantTest = '"'C:/Users/31/AppData/Local/Temp/gafti-lod-1860cac3-cd18-463d-a0a6-c6b9ad671472'
+foreach ("'$meta in Get-ChildItem (Join-Path $plantTest '"'assets/models/hero/plant_*.glb.import')) {
+ "'$dest = Join-Path '"'assets/models/hero' "'$meta.Name
+ if (Test-Path $dest) {(Get-Content $dest) -replace '"'"'^import_script/path=.*'"','import_script/path=\"res://scenes/plants/plant_lod_import.gd\"' | Set-Content -Encoding ascii "'$dest}
+ else {Copy-Item $meta.FullName $dest}
+}
+@'"'
+import pathlib,json,struct
+base=pathlib.Path('.')
+for name,h in zip(('germ','seedling','veg','flower','harvest'),(.08,.25,.7,1.1,1.2)):
+ stem='plant_'+name
+ b=(base/'assets/models/hero'/(stem+'.glb')).read_bytes()
+ ln=struct.unpack_from('<I',b,12)[0]; d=json.loads(b[20:20+ln]); buf=b[28+ln:]; access=d['accessors']
+ def vals(idx):
+  a=access[idx];v=d['bufferViews'][a['bufferView']]; fmt={5126:'f',5123:'H',5121:'B'}[a['componentType']]*{'VEC2':2,'VEC3':3,'VEC4':4}[a['type']]
+  return [struct.unpack_from('<'+fmt,buf,v.get('byteOffset',0)+a.get('byteOffset',0)+i*v.get('byteStride',struct.calcsize(fmt))) for i in range(a['count'])]
+ assert {n['name'] for n in d['nodes']}==({'Stem','Leaves'} if name in ('germ','seedling') else {'Stem','Leaves','Buds'})
+ low=1; high=0; tris=0
+ for m in d['meshes']:
+  p=m['primitives'][0]; a=p['attributes']; positions=access[a['POSITION']]; low=min(low,positions['min'][1]);high=max(high,positions['max'][1]);tris+=access[p['indices']]['count']//3
+  colors=vals(a['COLOR_0']);uv=vals(a['TEXCOORD_0'])
+  if m['name']=='Stem': assert all(c[0]==0 for c in colors)
+  if m['name']=='Leaves':
+   assert {t[1] for t in uv}>={0.,1.}
+   assert all(c[0]==0 for c,t in zip(colors,uv) if t[1]==0.)
+   assert all(c[0]==65535 for c,t in zip(colors,uv) if t[1]==1.)
+ assert abs(low)<1e-6 and abs(high-h)<1e-6 and tris<=4000
+ png=(base/'tools/previews'/(stem+'.png')).read_bytes();assert struct.unpack_from('>II',png,16)==(512,512)
+ print(stem,tris,h,'OK')
+'@ | python -
+@'
+# GAFTİ bitki görselleri
+
+Beş saksısız modelin taban merkezi orijindir. glTF uzayında yukarı yön +Y, uzunluk birimi metredir. Her aşama için Blender Eevee ile 512 × 512 piksel önizleme alındı ve görüntüler incelendi.
+
+| Model (assets/models/hero/) | Önizleme (tools/previews/) | Boy | LOD0 üçgen | LOD1 üçgen¹ | Mesh düğümleri |
+|---|---|---:|---:|---:|---|
+| plant_germ.glb | plant_germ.png | 0,08 m | 204 | 102 | Stem, Leaves |
+| plant_seedling.glb | plant_seedling.png | 0,25 m | 556 | 278 | Stem, Leaves |
+| plant_veg.glb | plant_veg.png | 0,70 m | 3.014 | 630 | Stem, Leaves, Buds |
+| plant_flower.glb | plant_flower.png | 1,10 m | 3.484 | 820 | Stem, Leaves, Buds |
+| plant_harvest.glb | plant_harvest.png | 1,20 m | 3.646 | 697 | Stem, Leaves, Buds |
+
+¹ Godot her mesh için uzaklık seviyesini ayrı seçer. Değer, üç parçanın her birinde ilk sadeleştirme seviyesi seçildiğindeki toplamdır. Vejetatif aşamadaki Buds, gövdenin ucundaki küçük kapalı sürgündür.
+
+## Dosyalar ve kullanım
+
+- "'`tools/blender/plants.py` beş GLB ve karşılık gelen PNG dosyalarını üretir. Kamera, stüdyo ışıkları ve zemin yalnızca önizlemede kullanılır.
+- `scenes/plants/plant_visual.tscn` kökü PlantVisual olan Node3D sahnesidir. Alt sahneler sırasıyla Germ, Seedling, Veg, Flower ve Harvest adını taşır.
+- `scenes/plants/plant_visual.gd` üzerindeki `set_stage(i)` 0–4 aşamalarından birini görünür kılar. `set_health(v)`, `set_thirst(v)` ve `set_quality(v)` 0–1 aralığı kullanır. Materyaller her bitki örneğine özeldir.
+- `shaders/foliage_wind.gdshader` gövdeyi sabit tutar. Yaprak uçlarında rüzgâr salınımı ve susuzluk sarkması artar. COLOR_0.r rüzgâr ağırlığını, .g boyalı ton farkını, .b yaprak damarı veya turuncu tüy vurgusunu taşır. TEXCOORD_0.y yaprakçık dibinde 0, ucunda 1’dir. Oyun paletini sahnenin materyal override’ı uygular.
+- `shaders/toon.gdshader` genel prop yüzeyleri için üç kademe ışık, kenar ışığı, albedo dokusu, renk ve isteğe bağlı vertex color sağlar.
+- `shaders/fog_layer.gdshader` yatay bir mesh üzerinde dünya koordinatlarında kayan iki ölçekli gürültü kullanır. 0–1 UV alanının kenarlarında sis saydamlaşır.
+- `scenes/plants/plant_lod_import.gd` ve beş `assets/models/hero/plant_*.glb.import` dosyası ilk sadeleştirme seviyesinin üçgen bütçesini uygular. Bu işlem Godot editöründe içe aktarım sırasında çalışır.
+
+## Doğrulama ve sınırlar
+
+GLB dosyalarından düğüm adları, taban ve tepe yüksekliği, üçgen sayıları, UV uç değerleri ve rüzgâr ağırlıkları okundu. Önizlemelerde dal uçlarındaki genç yapraklar, tomurcuk silueti ve yaprak damarları görsel inceleme sonrası düzeltildi.
+
+Teslim edilen kaynakların yalıtılmış kopyası Godot 4.7.2 ile temiz içe aktarıldı. Aşama görünürlüğü, materyal atamaları, hazır olmadan verilen değerler, parametre sınırları ve iki bitkinin materyal bağımsızlığı sınandı. Üç shader Windows üzerinde Intel UHD Graphics ve Vulkan Forward Mobile ile çizildi.
+
+Fiziksel Android cihazda kare süresi ve tam vadi sahnesindeki görünüm ölçülmedi. Yeni autoload veya giriş aksiyonu gerekmiyor.
+'"'@ | Set-Content -Encoding UTF8 tools/codex_logs/astra_plants_report.md" in C:\Users\31\Documents\we2
+ succeeded in 449ms:
+plant_germ 204 0.08 OK
+plant_seedling 556 0.25 OK
+plant_veg 3014 0.7 OK
+plant_flower 3484 1.1 OK
+plant_harvest 3646 1.2 OK
+
+codex
+Beş büyüme aşamasının modelleri, üç shader ve [PlantVisual sahnesi](C:/Users/31/Documents/we2/scenes/plants/plant_visual.tscn) tamamlandı. Her modeli Blender Eevee’de 512 × 512 piksel olarak render edip inceledim. [Hasat önizlemesi](C:/Users/31/Documents/we2/tools/previews/plant_harvest.png)
+
+Beş model de üçgen bütçesi içinde. En yoğun yakın görünüm 3.646, en yoğun LOD1 görünümü 820 üçgen. Dosyalardan model boylarını, düğüm adlarını, yaprak UV’lerini ve rüzgâr ağırlıklarını doğruladım.
+
+Godot 4.7.2’de aşama geçişleri, sağlık, susuzluk ve kalite kontrolleri testten geçti. Üç shader Windows’ta Vulkan Mobile ile çizildi. Fiziksel Android cihazda performans ölçümü yapılmadı.
+
+[Dosya listesi, model ölçüleri ve doğrulama raporu](C:/Users/31/Documents/we2/tools/codex_logs/astra_plants_report.md)
+tokens used
+54.103
+Beş büyüme aşamasının modelleri, üç shader ve [PlantVisual sahnesi](C:/Users/31/Documents/we2/scenes/plants/plant_visual.tscn) tamamlandı. Her modeli Blender Eevee’de 512 × 512 piksel olarak render edip inceledim. [Hasat önizlemesi](C:/Users/31/Documents/we2/tools/previews/plant_harvest.png)
+
+Beş model de üçgen bütçesi içinde. En yoğun yakın görünüm 3.646, en yoğun LOD1 görünümü 820 üçgen. Dosyalardan model boylarını, düğüm adlarını, yaprak UV’lerini ve rüzgâr ağırlıklarını doğruladım.
+
+Godot 4.7.2’de aşama geçişleri, sağlık, susuzluk ve kalite kontrolleri testten geçti. Üç shader Windows’ta Vulkan Mobile ile çizildi. Fiziksel Android cihazda performans ölçümü yapılmadı.
+
+[Dosya listesi, model ölçüleri ve doğrulama raporu](C:/Users/31/Documents/we2/tools/codex_logs/astra_plants_report.md)

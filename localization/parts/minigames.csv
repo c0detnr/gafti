@@ -1,0 +1,120 @@
+keys,tr
+MG_CANCEL,Vazgeç
+MG_DONE,Tamam
+MG_OK,Tamam
+MG_BUSY,Önce elindeki işi bitir.
+MG_MISSING,Bu mini oyun henüz hazır değil: %s
+MG_RATE_PERFECT,Efsane!
+MG_RATE_GOOD,İyi iş!
+MG_RATE_MEH,"Eh, idare eder..."
+MG_RATE_BAD,Felaket!
+FX_FAINT,Gözlerin karardı... Bol doz fazla geldi!
+FX_WAKE_UP,Kanepede uyandın. İki saat uçup gitmiş.
+ROLL_TITLE,Joint Sarma
+ROLL_INTERACT,Joint sar
+ROLL_NEED_PAPER,Sarma kâğıdın kalmamış. Hırdavatçıya uğra.
+ROLL_NEED_BUD,"En az 0,5 g kuru ürün lazım. Önce kurut!"
+ROLL_NO_MATERIALS,Malzeme kalmamış! Kâğıt ya da ürün eksik.
+ROLL_STEP_GRIND,Öğüt
+ROLL_STEP_FILTER,Filtre
+ROLL_STEP_SPREAD,Dağıt
+ROLL_STEP_ROLL,Sar
+ROLL_STEP_LICK,Yapıştır
+ROLL_STEP_TWIST,Bük
+ROLL_HINT_GRIND,"Grinder kapağını parmağınla daire çizerek çevir. Az çevirirsen iri, çok çevirirsen toz olur."
+ROLL_HINT_FILTER,"Kartonu zikzak katla: sağa, sola, sağa düz çizgilerle sürükle."
+ROLL_HINT_SPREAD,Kâğıdın üzerinde sürükleyerek serp. Isı haritası yeşil olsun!
+ROLL_HINT_ROLL,Yukarı-aşağı ritmik kaydır. Basınç yeşil bölgede kalsın.
+ROLL_HINT_LICK,Parlayan kenar boyunca sürükle. Eksik bırakırsan açılır!
+ROLL_HINT_TWIST,Ucun etrafında daire çizerek bük. Fazla bükersen kopar!
+ROLL_COARSE,İri
+ROLL_POWDER,Toz
+ROLL_TIGHT,Sıkı
+ROLL_LOOSE,Gevşek
+ROLL_BUD_LEFT,Kalan ürün
+ROLL_PROGRESS,Sarım
+ROLL_GLUE,Yapışma
+ROLL_TWIST_LESS,Az
+ROLL_TWIST_MORE,Çok
+ROLL_POP_GRIND_OK,Kıvamında!
+ROLL_POP_DUST,Toz bulutu oldu!
+ROLL_POP_WRONG_WAY,Ters katladın!
+ROLL_POP_SPILL,Yarısı tepsiye döküldü!
+ROLL_POP_LICK,Şlurp!
+ROLL_POP_SOAKED,Sırılsıklam etti!
+ROLL_POP_SNAP,Koptu!
+ROLL_RESULT,Sonuç
+ROLL_RESULT_TITLE,Joint Hazır!
+ROLL_RESULT_QUALITY,Kalite: %d
+ROLL_RESULT_CALM_HAND,Gaftî sakin eli: +%d
+ROLL_KEEP,Satmak için sakla
+ROLL_SMOKE_NOW,Hemen İç
+ROLL_ADDED,Envantere eklendi: %s
+ROLL_SMOKED,Ohh... Yayla havası bambaşka geldi.
+ROLL_NAME_MASTER,Usta İşi
+ROLL_NAME_CLASSIC,Yayla Klasiği
+ROLL_NAME_OK,İdare Eder
+ROLL_NAME_PEBBLE,Çakıl Taşı
+ROLL_NAME_DUST,Toz Bulutu
+ROLL_NAME_CHIMNEY,Tıkalı Baca
+ROLL_NAME_CARROT,Havuç
+ROLL_NAME_MUHTAR,Muhtar'ın Kağıdı
+ROLL_NAME_MATCH,Kibrit Çöpü
+ROLL_NAME_UMBRELLA,Açılan Şemsiye
+ROLL_NAME_COMET,Kuyruklu Yıldız
+BONG_TITLE,Kova Bong
+BONG_INTERACT,Kova bongu kullan
+BONG_INTERACT_DECOR,Kovaya bak
+BONG_DECOR_ONLY,Bu kova artık sadece süs. Dedenin hatırası.
+BONG_DECOR_1,Kovada bir kurbağa yaşıyor. Adı Rıza olsun.
+BONG_DECOR_2,Kesik pet şişe ile kova... Dedemin sanat eseri herhalde.
+BONG_DECOR_3,Su değiştirilmeli. Ya da değiştirilmemeli. Kova karar versin.
+BONG_NO_BUD,Kaseye koyacak kuru ürün yok.
+BONG_STEP_PREP,Hazırla
+BONG_STEP_FILL,Doldur
+BONG_STEP_LIGHT,Yak
+BONG_STEP_LIFT,Kaldır
+BONG_STEP_DRAW,Çek
+BONG_HINT_PREP,Kesik şişeyi aşağı sürükleyerek su dolu kovaya batır.
+BONG_HINT_FILL,Ne kadar koyalım? Bol doz komik sonuçlar doğurabilir...
+BONG_HINT_LIGHT,"Basılı tut: çakmak çaksın, kor dolsun. Fazla tutarsan kömür olur!"
+BONG_HINT_LIFT,"Şişeyi YAVAŞÇA yukarı sürükle. Hızlı kaldırırsan duman kaçar, sudan çıkarırsan her şey biter!"
+BONG_HINT_DRAW,Önce kaseyi çıkar.
+BONG_HINT_BREATH,"Basılı tutarak çek, nefes çubuğu yeşilken bırak!"
+BONG_DEPTH,Derinlik
+BONG_DOSE_LOW,Az
+BONG_DOSE_MID,Orta
+BONG_DOSE_HIGH,Bol
+BONG_EMBER,Kor
+BONG_SMOKE,Duman
+BONG_BREATH,Nefes
+BONG_LUNGS_FULL,Ciğer dolu
+BONG_REMOVE_CAP,Kaseyi çıkar
+BONG_POP_CHARCOAL,Kömür ettin!
+BONG_POP_HIGH,Cesursun...
+BONG_POP_LEAK,Duman kaçtı!
+BONG_POP_OUT,Şişe sudan çıktı! Hepsi gitti!
+BONG_POP_COUGH,ÖHÖ ÖHÖ ÖHÖ!
+BONG_POP_COUGH_SMALL,öhö!
+BONG_POP_EXHALE,Fuuuh...
+BONG_RESULT,Sonuç
+BONG_RESULT_TITLE,Gaftî Modu
+BONG_RESULT_STRENGTH,Etki: %%%d
+BONG_RESULT_DURATION,Süre: %.1f saat
+BONG_RESULT_COUGHED,Ciğerlerin isyan etti ama değdi.
+BONG_RESULT_HIGH_WARN,Bol doz: Bir kanepe bulsan iyi olur.
+CARE_TITLE,Bitki Bakımı
+CARE_STEP_WATER,Sula
+CARE_STEP_FEED,Besle
+CARE_STEP_PRUNE,Buda
+CARE_STEP_PEST,Zararlı Temizliği
+CARE_HINT_POUR,"Basılı tutup kabı eğ, doluluk yeşil çizgideyken bırak."
+CARE_HINT_PRUNE,"Sararmış, işaretli yaprakları dokunarak kes. Sağlıklılara dokunma!"
+CARE_HINT_PEST,Yaprak bitlerine dokunarak ez! Süre dolmadan hepsini temizle.
+CARE_FULL,Dolu
+CARE_TIME,Süre: %.0f
+CARE_POP_FLOOD,Saksı taştı!
+CARE_POP_SNIP,Çıt!
+CARE_POP_WRONG_LEAF,O sağlıklıydı!
+CARE_POP_SQUASH,Ezildi!
+CARE_POP_TIME_UP,Süre doldu!

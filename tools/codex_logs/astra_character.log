@@ -1,0 +1,1460 @@
+OpenAI Codex v0.172.0
+--------
+workdir: C:\Users\31\Documents\we2
+model: gpt-6.2-astra
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a20cdc-d9c7-75a1-b56a-4a2108c3dcdf
+--------
+user
+Sen GAFTİ adlı Godot 4.7 oyun projesinde çalışan bir alt ajansın. Proje kökü: C:\Users\31\Documents\we2
+ÖNCE AGENTS.md ve GDD.md dosyalarını oku; oradaki sözleşmeye (dosya adları, düğüm adları, ölçek, bütçe, Blender sarmalayıcısı tools\blender\run_blender.ps1) birebir uy.
+Windows 11 + PowerShell kullan. Kullanıcıya soru sorma, onay bekleme, iş bitene kadar çalış. project.godot dosyasını DÜZENLEME. Sana verilmeyen alanlardaki dosyalara dokunma.
+Görsel kaliteyi kontrol et: ürettiğin her modeli Blender ile (Eevee ya da Workbench) 512px önizleme olarak tools\previews\<ad>.png dosyasına render et, görüntüyü kendin incele ve iyi görünmüyorsa düzelt.
+Stil: "detaylı stilize" — Karadeniz yaylası, el boyaması hissi, yumuşak bevel, sıcak ve sevimli, abartılı ama okunaklı oranlar. Doygun yeşiller, ahşap kahvesi, ıslak taş grisi, sıcak turuncu.
+Bitince tools\codex_logs\<GOREV>_report.md dosyasına üretilen dosyaları, düğüm adlarını ve bilinen eksikleri yaz.
+
+GOREV=astra_character
+İŞ: Rigli, animasyonlu, özelleştirilebilir oyuncu karakteri (NPC'ler de aynı tabanı kullanacak).
+1. tools\blender\character.py → assets\models\hero\character_base.glb. Stilize, sevimli oranlar (biraz büyük kafa, büyük eller), ~1.75 m, +Z ileri bakar (Godot'ta -Z'ye döndürülecekse raporda belirt). İskelet "Armature": hips, spine, chest, neck, head, shoulder/upper_arm/forearm/hand (.L/.R), thigh/shin/foot (.L/.R). Body tek mesh; ten materyalinin adı "Skin" (Godot'ta renk değişecek). Yüz: basit sevimli gözler/kaşlar (doku ya da geometri).
+2. Seçmeli parçalar aynı armatüre skin'li ayrı mesh'ler: Hair_01..Hair_06 (kısa, kıvırcık, at kuyruğu, kel+yanlar, dalgalı, topuz), Beard_00 (görünmez küçük mesh), Beard_01..Beard_04 (bıyık, Karadeniz palabıyık, kirli sakal, gür sakal), Hat_Kasket, Top_Raincoat (sarı yağmurluk), Top_Sweater (örgü kazak), Top_Shirt, Pants_01, Boots_Rubber. Saç/kıyafet materyalleri ayrı adlı (Hair, Cloth_Top, Cloth_Pants, Boots) ki renklendirilebilsin.
+3. Animasyonlar (glTF action; idle/walk/run döngüsel): idle, walk, run, interact, sit, roll, smoke, faint, wave. Abartılı ve sevimli.
+4. Bütçe ≤12k üçgen. Önizlemede 3 farklı kombinasyonu render et (tools\previews\character_*.png).
+
+codex
+Önce proje sözleşmesini, tasarım belgesini ve Blender sarmalayıcısını okuyacağım. Ardından karakteri üretip dışa aktarılan GLB’yi ve üç kombinasyonun önizlemelerini kontrol edeceğim.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Raw -Encoding UTF8 'GDD.md'" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Raw -Encoding UTF8 'AGENTS.md'" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Content -Raw -Encoding UTF8 'tools/blender/run_blender.ps1'" in C:\Users\31\Documents\we2
+ succeeded in 1078ms:
+# GAFTİ — Ajan Kuralları ve Mimari Sözleşmesi
+
+Bu dosya her ajan (Claude, Codex) için bağlayıcıdır. Tasarım: `GDD.md`.
+
+## 1. Ortam (ZORUNLU)
+- İşletim sistemi **Windows 11**. Kullanıcıya **asla Linux/bash komutu önerme** (`ls`, `cat`, `rm`, `grep`, `sed`...).
+  Kullanıcıya gösterilen her komut **PowerShell** olmalı (`Get-ChildItem`, `Get-Content`, `Remove-Item`, `Select-String`).
+- Kendi çalıştırdığın komutlar için de PowerShell tercih et. Yollar: `C:\Users\31\Documents\we2\...`
+- Godot: `C:\Users\31\Desktop\Godot_v4.7.2-stable_win64.exe`
+  - İçe aktarma: `& $godot --headless --path C:\Users\31\Documents\we2 --import`
+  - Hata kontrolü: `& $godot --headless --path C:\Users\31\Documents\we2 --quit-after 120`
+- Blender 5.3 (Store sürümü, doğrudan exe çalışmaz). Sadece şu sarmalayıcıyı kullan:
+  `powershell -ExecutionPolicy Bypass -File C:\Users\31\Documents\we2\tools\blender\run_blender.ps1 -Script <script.py> [-ScriptArgs a,b]`
+- Kullanıcıdan onay isteme; etkileşimli komut çalıştırma.
+
+## 2. Model/ajan dağılımı
+| İş | Kim |
+|---|---|
+| Önemli/detaylı görseller (logo, bitki, bong, joint seti, karakter, sera, shader) | Codex `gpt-6.2-astra` medium |
+| İkincil modeller, kasaba props, tekrarlayan kod | Codex `gpt-6.2-sol` medium |
+| Çekirdek sistemler, mini oyunlar, oyuncu/dünya kodu | Claude Opus 5.5 alt ajanları |
+| Orkestrasyon, entegrasyon, doğrulama | Ana Claude oturumu |
+
+## 3. Kod kuralları
+- Godot **4.7**, GDScript, **statik tipler zorunlu** (`var x: int = 0`, `func f(a: float) -> void`).
+- Tüm oyuncu metinleri `tr("ANAHTAR")`. Anahtarları `localization/parts/<alan>.csv` dosyasına ekle
+  (başlık satırı: `keys,tr`). Ana oturum bunları `localization/strings.csv` içinde birleştirir.
+  Anahtar biçimi: `ALAN_ACIKLAMA` (ör. `ROLL_STEP_GRIND`).
+- `project.godot` dosyasını **sadece ana oturum** düzenler. Yeni autoload/input gerekiyorsa raporunda belirt.
+- Bir autoload'u yalnızca **sahibi** düzenler (aşağıdaki tablo). Diğerleri sadece genel API'yi çağırır.
+- Sahneler `.tscn` metin biçiminde. Kodla sahne üretmek serbest (`tools/` altında `@tool` veya headless script).
+- Placeholder kullanacaksan model yolunu sabit tut; gerçek `.glb` sonra aynı yola gelir.
+- Mobil uyum: dokunmatik = fare (emulate_touch açık). Mini oyunlar sadece sürükle/tıkla/basılı tut kullanır.
+
+## 4. Autoload API sözleşmesi
+Sahip sütunu: dosyayı kim yazar. İmzalar sabittir, değiştirme.
+
+### EventBus (`autoload/event_bus.gd`) — ana oturum
+Sadece sinyaller:
+```
+signal interaction_prompt(text: String)            # "" = gizle
+signal minigame_requested(id: StringName, context: Dictionary)
+signal minigame_finished(id: StringName, result: Dictionary)
+signal notify(text: String, kind: StringName)      # kind: &"info", &"good", &"bad"
+signal plant_harvested(plant_id: int, item: Dictionary)
+signal sale_completed(amount: int, item: Dictionary, customer_type: StringName)
+signal inspection_finished(score: int, fine: int)
+signal dialogue_requested(dialogue_id: StringName)
+signal dialogue_finished(dialogue_id: StringName)
+signal player_customization_changed(data: Dictionary)
+signal ui_block_input(blocked: bool)               # mini oyun/diyalog açıkken oyuncu hareketi kilitlenir
+```
+
+### ContentFlags — ana oturum
+`var consumption: bool = true` (içme sahneleri), `var is_mobile: bool`, `var is_demo: bool`, `const DEMO_DAY_LIMIT := 7`.
+
+### Settings — ana oturum
+`day_length_minutes: float = 14.0`, `master_volume`, `music_volume`, `sfx_volume`, `graphics_quality: int (0..2)`, `save()`, `load_settings()`.
+
+### InputSetup — ana oturum
+Kodla tanımlanan aksiyonlar: `move_forward, move_back, move_left, move_right, sprint, interact, inventory, build_mode, pause, jump, camera_zoom_in, camera_zoom_out`.
+
+### GameClock — Ajan A (sistemler)
+```
+signal minute_passed(total_minutes: int)
+signal hour_passed(hour: int)
+signal phase_changed(phase: StringName)   # &"morning", &"noon", &"evening", &"night"
+signal day_started(day: int)
+signal season_changed(season: StringName) # &"spring", &"summer", &"autumn", &"winter"
+var day: int; var hour: int; var minute: int; var season: StringName; var paused: bool; var time_scale: float
+func get_time_string() -> String
+func get_day_fraction() -> float          # 0..1, 0 = gece yarısı
+func sleep_until_morning() -> void
+func advance_minutes(m: int) -> void
+```
+
+### Weather — Ajan A
+```
+signal weather_changed(weather: StringName)  # &"sunny", &"cloudy", &"foggy", &"rainy", &"storm", &"snow"
+var current: StringName; var tomorrow: StringName
+func get_customer_multiplier() -> float
+func is_power_out() -> bool
+```
+
+### Economy — Ajan A
+```
+signal money_changed(money: int)
+var money: int
+func add(amount: int, reason: String) -> void
+func spend(amount: int, reason: String) -> bool   # yetersizse false
+func get_day_report() -> Dictionary
+```
+
+### Reputation — Ajan A
+```
+signal reputation_changed(value: float)
+signal license_level_changed(level: int)
+var reputation: float; var license_level: int; var compliance: float
+func add_reputation(v: float) -> void
+func record_id_check(done: bool) -> void
+```
+
+### Inventory — Ajan A
+Eşya = Dictionary: `{ "id": StringName, "kind": StringName, "strain": StringName, "quality": int, "grams": float, "count": int }`
+kind: `&"seed", &"wet_bud", &"dry_bud", &"jar", &"preroll", &"paper", &"filter", &"nutrient", &"tool"`
+```
+signal changed()
+func add_item(item: Dictionary) -> void
+func remove_item(id: StringName, count: int = 1) -> bool
+func count_of(id: StringName) -> int
+func get_items(kind: StringName = &"") -> Array[Dictionary]
+```
+
+### QuestManager — Ajan C
+```
+signal quest_started(id: StringName); signal quest_completed(id: StringName)
+func start(id: StringName) -> void; func complete(id: StringName) -> void
+func is_active(id: StringName) -> bool; func get_active() -> Array[StringName]
+func notify_event(event: StringName, data: Dictionary = {}) -> void   # görev hedefi ilerletme
+```
+
+### SaveSystem — Ajan A
+Her autoload `func get_save_data() -> Dictionary` ve `func load_save_data(d: Dictionary) -> void` sağlar.
+Sahnedeki kalıcı düğümler `persist` grubunda ve aynı iki fonksiyonu sağlar (`get_save_id() -> String` de).
+```
+func save_game() -> void; func load_game() -> bool; func has_save() -> bool; func new_game() -> void
+```
+Kayıt yolu: `user://save_1.json`.
+
+### Effects — Ajan B (mini oyunlar)
+```
+signal gafti_mode_changed(active: bool, strength: float)
+var gafti_active: bool; var gafti_strength: float   # 0..1
+func start_gafti(strength: float, duration_game_minutes: int) -> void
+func get_move_multiplier() -> float                 # Gaftî'de 0.85
+func get_customer_patience_multiplier() -> float    # Gaftî'de 1.3
+func get_rolling_bonus() -> int                     # Gaftî'de +10
+func get_water_jitter() -> float                    # Gaftî'de ±0.2
+```
+
+### AudioManager — Ajan C
+`func play_sfx(id: StringName, pos: Variant = null) -> void`, `func play_music(id: StringName) -> void`, `func set_ambience(id: StringName) -> void`.
+Eksik ses dosyasında sessizce geç (hata verme).
+
+## 5. Etkileşim sözleşmesi
+- Etkileşilebilir her nesne `interactable` grubunda, bir `Area3D` (layer 4) içerir ve şu fonksiyonları sağlar:
+  `func get_interact_text() -> String` ve `func interact(player: Node) -> void`.
+- Oyuncu: `scenes/player/player.tscn`, kök `CharacterBody3D`, `player` grubunda.
+- Mini oyun sahneleri `CanvasLayer` + `SubViewport` ya da kendi `Camera3D` ile yakın çekim. Mini oyunu
+  `scenes/minigames/minigame_host.gd` açar: `EventBus.minigame_requested` dinler, sahneyi yükler, bitince
+  `EventBus.minigame_finished` yayar.
+- Mini oyun id'leri: `&"rolling"`, `&"gravity_bong"`, `&"care"`, `&"id_check"`, `&"customize"`.
+
+## 6. Sahiplik
+| Alan | Sahip |
+|---|---|
+| `autoload/game_clock, weather, economy, reputation, inventory, save_system` + `scripts/systems/` (bitki, genetik, işleme) + `scenes/plants/` + `data/strains,items` | Ajan A (Opus) |
+| `autoload/effects` + `scenes/minigames/` + `shaders/gafti_post.gdshader` | Ajan B (Opus) |
+| `autoload/quest_manager, audio_manager` + `scenes/player/` + `scenes/npc/` + `scenes/shop/` + `scenes/ui/` + `data/customers,quests,dialogue` | Ajan C (Opus) |
+| `scenes/world/` (vadi montajı) | Ana oturum (+ Codex sol yardım) |
+| `assets/models/hero/`, `assets/logo/`, `shaders/` (toon, foliage, fog) | Codex astra |
+| `assets/models/props/`, `assets/models/town/`, `assets/models/characters/npc_*` | Codex sol |
+
+## 7. Model dosya sözleşmesi (Blender → .glb)
+- Ölçek: 1 birim = 1 metre, +Y yukarı (glTF), orijin tabanın ortasında.
+- Script: `tools/blender/<ad>.py` → çıktı `assets/models/<klasör>/<ad>.glb`. Script tekrar çalıştırılabilir olmalı.
+- Stil: detaylı stilize; yumuşak bevel, abartılı oranlar, el boyaması hissi veren vertex color/basit dokular, düşük üçgen sayısı.
+- Bütçe: bitki aşaması ≤4k üçgen, prop ≤2k, karakter ≤12k, bina ≤8k.
+- Animasyonlu modellerde aksiyon isimleri: `idle, walk, run, interact, sit` vb. (küçük harf).
+
+## 8. Model listesi (dosya adları sabit)
+Mesh düğüm adları önemli: kod bunlara göre materyal/görünürlük ayarlar.
+
+### Codex astra → `assets/models/hero/`
+| Dosya | İçerik / düğüm adları |
+|---|---|
+| `plant_germ.glb`, `plant_seedling.glb`, `plant_veg.glb`, `plant_flower.glb`, `plant_harvest.glb` | Saksısız bitki. Düğümler: `Stem`, `Leaves`, `Buds` (germ/seedling'de Buds yok). Vertex color + yaprak maskesi (UV.y = kökten uca 0..1, rüzgâr için). Boylar: 0.08 / 0.25 / 0.7 / 1.1 / 1.2 m |
+| `bong_bucket.glb` | Kova + su yüzeyi. Düğümler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet şişe + kapak-kase. Düğümler: `Bottle`, `Cap`, `Bowl`. Orijin şişenin altı |
+| `lighter.glb` | Çakmak. Düğümler: `Body`, `Wheel` |
+| `grinder.glb` | Düğümler: `Base`, `Lid` (Lid kendi ekseninde döner, orijini merkezde) |
+| `rolling_paper.glb` | Düz kağıt, `Paper` (sarılma için ≥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | Bitmiş joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. Armatür `Armature`, gövde `Body`. Seçmeli parçalar aynı armatüre bağlı: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boş), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | Ahşap + cam yayla serası, iç ölçü ~12×6 m, kapı +Z yönünde. İçeride saksı tezgahları. `Glass` düğümü ayrı (şeffaf materyal) |
+| `house.glb` | Dedenin ahşap Karadeniz evi (dış + basit iç: yatak, ayna, kanepe) |
+
+### Codex sol → `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTİ dükkanı, girilebilir, iç ~8×6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleşimi (Godot koordinatları, metre, Y yukarı)
+Arazi 260×260 m, merkez (0,0,0). Düz alanlar (pad) arazide bu noktalarda olmalı:
+| Bölge | Merkez (x, z) | Yükseklik y | Pad yarıçapı |
+|---|---|---|---|
+| Oyuncu başlangıcı / ev önü | (-62, 28) | 2 | — |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynı pad) |
+| Dış tarla | (-45, 48) | 2 | (aynı pad) |
+| Kurutma ambarı | (-78, 22) | 2 | (aynı pad) |
+| Kasaba meydanı | (60, 0) | 0 | 22 |
+| GAFTİ Dükkanı | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| Muhtarlık | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| Hırdavatçı | (42, -10) | 0 | (meydan) |
+| Minibüs durağı | (72, 48) | 0 | 6 |
+| Köprü & dere | (5, -45) | -1 | dere x yönünde değil, (−130,−60)→(130,−35) boyunca akar |
+| Ladin ormanı | (-45, -70) çevresi | — | ağaçlar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) → (0, 10) → meydan (40, 0); meydandan durağa (72, 48); meydandan köprüye (5,-45) → tepeye patika.
+Arazide yol düğümü `Road` (ayrı materyal), zemin `Ground`, dere yatağı `Creek`. Arazi kenarları dağlarla kapalı (oyuncu çıkamaz).
+
+
+ succeeded in 1099ms:
+param([Parameter(Mandatory=$true)][string]$Script, [string[]]$ScriptArgs = @())
+# Blender'i (Microsoft Store surumu) arka planda bir Python scriptiyle calistirir.
+$launcher = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\blender-launcher.exe"
+$argList = @("--background", "--factory-startup", "--python", "`"$Script`"")
+if ($ScriptArgs.Count -gt 0) { $argList += "--"; $argList += $ScriptArgs }
+$p = Start-Process -FilePath $launcher -ArgumentList $argList -PassThru -Wait -NoNewWindow
+exit $p.ExitCode
+
+
+ succeeded in 1294ms:
+# GAFTİ — Oyun Tasarım Dokümanı (GDD) v1.0
+
+> Karadeniz yaylasında lisanslı kenevir serası + dükkan işletme oyunu. Komedi tonlu, cozy ama sonuçlu.
+> Motor: Godot 4.7 · Platform: PC (Steam) + Mobil (Play Store) · Dil: Türkçe (çeviriye hazır) · Derecelendirme: 18+
+
+---
+
+## 1. Özet
+
+Şehirde her işi batırmış karakterimiz, kimsenin istemediği yayla serasını devralır ve **Pusludere**
+yaylasına taşınır. Sisli sabahlarda bitkilerine bakar, öğlen hasadını kurutup joint sarar, akşam kasaba
+meydanındaki dükkanında köylülere ve turistlere satış yapar. Gece serada kova bongla günü kapatır.
+Kasabanın tuhaf insanları, absürt görevleri ve kesintisiz bir yayla mizahı oyunu taşır.
+
+**Üç sütun:**
+1. **Dokunsal ustalık:** Bakım, sarma ve bong anları elle hissedilen mini oyunlardır.
+2. **Atmosfer:** Sis, yağmur, mevsimler, ahşap ve yeşil. Oyunun asıl hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeç. Ciddi bir ana hikâye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | İçerik |
+|---|---|
+| **Hikâye (Komedi)** | Ana hikâye yok; birbirine bağlı **komik görev zinciri** (NPC skeçleri). Oyunu öğretir, lisans seviyelerini açar. ~4 mevsim (28 gün). |
+| **Serbest** | Hikâye bittikten sonra ya da baştan: sonsuz işletme, tüm sistemler açık. |
+
+**Zorluk:** Cozy ama sonuçlu. Bitki ölebilir, para eksiye düşebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandırıcı) borç alınır.
+
+---
+
+## 3. Dünya: Pusludere Yaylası
+
+### 3.1 Harita (küçük açık vadi, yüklemesiz)
+```
+                 ⛰  KEKLİKTEPE (manzara, hikâye finali)
+                      │ patika
+        🌲 LADİN ORMANI ── 🌉 KÖPRÜ & DERE (su deposu dolumu)
+              │                      │
+ [DEDENİN SERASI + EV] ── çay bahçeli yol ── [KASABA MEYDANI]
+   ├ Sera (saksılar)                          ├ GAFTİ Dükkanı
+   ├ Dış tarla (mevsimsel)                    ├ Fadime'nin Kahvehanesi
+   ├ Kurutma ambarı                           ├ Muhtarlık
+   ├ Sarma masası                             ├ Lisans & Denetim Ofisi
+   └ Kova bong köşesi                         └ Hırdavatçı (ekipman/tohum)
+                                                   │
+                                          🚐 MİNİBÜS DURAĞI
+                                       (turistler, toptan siparişler)
+```
+- Sera → dükkan yürüme süresi ~40 sn; ilerleyen oyunda **eski motosiklet** (sürüş, ~15 sn).
+- Mobil: bölgeler `VisibilityRange` + streaming ile parça parça yüklenir; oyuncu yükleme ekranı görmez.
+
+### 3.2 Atmosfer
+- **Görsel stil:** Detaylı stilize. El boyaması hissi veren toon shading, yumuşak kenar ışığı, doygun yeşiller,
+  ahşap/taş dokuları, rüzgârla sallanan bitki shader'ı, katmanlı sis.
+- **Renk paleti:** Ladin yeşili, çay yeşili, ıslak taş grisi, ahşap kahvesi, sıcak lamba turuncusu (sera ışıkları).
+- **Ses:** Yağmurun çatıya vuruşu, dere, kuşlar, uzaktan inek çanı, kahvehanede tavla sesi. Müzik: lo-fi + kemençe
+  dokunuşlu sakin parçalar (CC0). Gece daha sakin bir müzik çalar, fırtınada müzik kısılır.
+
+### 3.3 Mevsimler & Hava
+1 yıl = 4 mevsim × 7 gün = 28 gün.
+
+| Mevsim | Etki |
+|---|---|
+| İlkbahar | Ekim bonusu (+%15 çimlenme), sık yağmur (dış tarla kendiliğinden sulanır) |
+| Yaz | Dış tarla en verimli, turist sayısı ×2, sıcaklık stresi |
+| Sonbahar | Hasat bonusu (+kalite), fırtına ihtimali |
+| Kış | Dış tarla kapalı, kar, sera ısıtma gideri; müşteri az ama fiyat yüksek |
+
+| Hava | Etki |
+|---|---|
+| Güneşli | Dış ışık +, su tüketimi + |
+| Bulutlu | Nötr |
+| Sisli | Görüş düşük, atmosfer max; müşteri biraz az |
+| Yağmurlu | Dış tarla otomatik sulanır, müşteri −%20 |
+| Fırtına | Dış bitkilere hasar riski, **elektrik kesintisi** (jeneratör yükseltmesi çözer) |
+| Kar | Kışa özel, sera ısı ihtiyacı + |
+
+Ertesi günün hava tahmini akşamları kahvehane radyosundan duyulur.
+
+---
+
+## 4. Çekirdek Döngü
+
+```
+SABAH  (06–11)  Sera & tarla: sula, besle, ışık ayarla, buda, zararlı temizle, hasat et
+ÖĞLE   (11–16)  İşleme: kurut, kürle, paketle, joint sar (pre-roll)
+AKŞAM  (16–22)  Dükkan: rafları diz, fiyat koy, kimlik kontrol et, sat
+GECE   (22–02)  Planla: yükselt, çaprazla, inşa et · Kova bong · Uyu (kayıt)
+```
+- 1 oyun günü ≈ 14 dk gerçek zaman (ayarlardan 10–20 dk).
+- Fazlar öneridir; dükkan sadece 16–22 arası açıktır.
+- 02:00'da uyumazsan karakter bayılır: ertesi sabah geç uyanır, −%10 para (bayıldığı yerden eve "taşıma ücreti").
+
+---
+
+## 5. Sistemler
+
+### 5.1 Bitki
+| Aşama | Gün | Etkileşim |
+|---|---|---|
+| Çimlenme | 1 | Ekim, nem |
+| Fide | 2 | Sulama, hafif ışık |
+| Vejetatif | 3–5 | Besin, budama, saksı büyütme |
+| Çiçeklenme | 4–6 | Işık döngüsü, pH, zararlı kontrolü |
+| Hasat | — | Zamanlama: erken = az verim, geç = kalite düşer |
+
+- **Değişkenler:** Su, Işık, Besin, pH, Sıcaklık, Nem, Sağlık.
+- Türün ideal aralığında geçen süre → **Kalite (0–100)**. Sağlık 0 → bitki ölür (kompost olur, gübre verir).
+- **Zararlılar:** Yaprak biti, küf (nem yüksekse). Elle temizlenir ya da ilaçlanır.
+- Görsel: Her aşamanın ayrı bir modeli var. Kalite, sağlık ve susuzluk yaprak rengine ve duruşuna yansır.
+
+### 5.2 Genetik / Çaprazlama
+- Özellikler: **Verim, Hız, Dayanıklılık, Aroma, Kalite Potansiyeli**, ayrıca görsel özellikler (yaprak tonu, boy).
+- Çaprazlama: yavru özelliği ebeveyn ortalaması ± sapma; %5 mutasyon (nadir özellik).
+- Başlangıçta 3 tür: **Pusu Kuşu**, **Ladin Duman**, **Çay Yaprağı**. Hikâye ödülü: **GAFTİ** türü.
+- Yeni türlere oyuncu isim verir; **Tohum Defteri** koleksiyonu.
+
+### 5.3 İşleme
+Kurutma (3–7 saat, nem dengesi) → Kürleme (opsiyonel, 1–3 gün, +kalite) → Ürün:
+- **Kavanoz** (gram satış)
+- **Pre-roll** (joint sarma mini oyunu, ×1.6 değer)
+
+### 5.4 Joint Sarma Mini Oyunu (yakın çekim, dokunsal)
+| Adım | Etkileşim (fare / dokunmatik) | Kaliteye etkisi |
+|---|---|---|
+| 1. Öğüt | Grinder kapağını dairesel çevir | Az çevirirsen iri tane, çok çevirirsen toz olur |
+| 2. Filtre | Kartonu zikzak katla (3 sürükleme) | Düzgün filtre olursa çekiş iyi olur |
+| 3. Dağıt | Kağıda sürükleyerek serp | Eşit dağılım için ısı haritası göstergesi |
+| 4. Sar | Yukarı-aşağı ritmik kaydırma, basınç çubuğu | Gevşek sararsan söner, sıkı sararsan çekmez |
+| 5. Yapıştır | Kenar boyunca sürükle (yala) | Eksik bırakırsan açılır |
+| 6. Bük | Ucu döndür | Bitiş |
+
+- Sonuç **Sarma Skoru (0–100)**; ürün kalitesiyle çarpılır. Beceri arttıkça yardım çubukları azalır.
+- Komedi: Çok kötü sarımlar "Muhtar'ın Kağıdı", "Kibrit Çöpü" gibi komik isimler alır ama yine satılabilir (ucuza).
+
+### 5.5 Kova Bong Mini Oyunu (gravity bong, yakın çekim)
+| Adım | Etkileşim |
+|---|---|
+| 1. Hazırla | Kesik pet şişeyi su dolu kovaya batır |
+| 2. Doldur | Kaseyi doldur (miktar seçimi: az / orta / bol) |
+| 3. Yak | Çakmağı çak (basılı tut) |
+| 4. Kaldır | Şişeyi **yavaşça** yukarı kaldır; hızlı kaldırırsan duman kaçar |
+| 5. Çek | Kaseyi çıkar, nefes çubuğunu doğru anda bırak |
+
+- **Etki: "Gaftî Modu"** (süre miktara bağlı, 1–3 oyun saati):
+  - Ekran: renk doygunluğu artar, hafif dalga efekti, yumuşak bulanıklık, müzik yavaşlar ve filtrelenir.
+  - **Artı:** Müşteri sabrı +%30, bakım mini oyunlarında "sakin el" (sarma skoru +10).
+  - **Eksi:** Hareket −%15, sulama miktarı rastgele ±%20 kayar, NPC diyalogları absürtleşir.
+  - "Bol" doz: komik bayılma ihtimali (kanepede uyanırsın, 2 saat kaybedersin).
+- Seradaki bong yükseltilebilir (kova → bidon → "Muhtar'ın Kazanı" süs görünümleri).
+
+### 5.6 Dükkan
+- Raf ve vitrin grid yerleşimi, ürün başına fiyat, gün sonu raporu.
+- **Müşteri tipleri:**
+  | Tip | Tercih | Bütçe |
+  |---|---|---|
+  | Yayla Köylüsü | Ucuz, kavanoz | Düşük |
+  | Turist | Pre-roll, şık paket | Yüksek |
+  | Tıbbi Hasta (Hayri Hoca vb.) | Yüksek kalite, aroma | Orta |
+  | Uzman (şehirli) | Nadir tür, mutasyon | Çok yüksek |
+- **Kimlik kontrolü:** Her müşteride hızlı kart kontrolü yapılır. Atlarsan denetimde ceza gelir. Komik sahte kimlikler de çıkar.
+- Memnuniyet → **İtibar** → müşteri sayısı ve kalitesi.
+
+### 5.7 Lisans & Denetim
+- Kurgusal "Yayla Kenevir Lisansı", 5 seviye. Her seviye yeni saksı sayısı, ekipman, tür ve dükkan alanı açar.
+- **Denetçi Nevzat Bey** habersiz gelir: kayıt defteri, etiket, kimlik kontrol geçmişi ve hijyen puanlanır.
+- Düşük puan → para cezası; üst üste düşük puan → 1 gün dükkan kapalı.
+
+### 5.8 İnşa & Yükseltme
+Grid yerleşim: saksılar, LED lambalar, damla sulama, nemlendirici, ısıtıcı, jeneratör, kurutma rafı, dükkan rafları.
+Otomasyon orta seviyede gelir; zevkli işler (sarma, bong, hasat) hiç otomatikleşmez.
+
+### 5.9 Ekonomi (başlangıç dengesi)
+- Başlangıç: 2.000 ₺, 6 saksı, 3 tohum türü × 2.
+- Giderler: elektrik (günlük, lamba sayısına bağlı), su (dere deposu bedava ama taşıma gerekir), kış ısıtma, tohum, ekipman.
+- Hedef: 3. günde kâra geçmek, 7. günde ilk lisans yükseltmesi.
+
+### 5.10 Karakter Özelleştirme
+Ten tonu (6), saç (6 model × renk), sakal/bıyık (5), Karadeniz giyimi: yağmurluk, örgü kazak, kasket,
+lastik çizme (renkler). Ayna/dolap ile her zaman değiştirilebilir.
+
+---
+
+## 6. Karakterler & Komedi Görevleri
+
+| NPC | Rol | Komedi |
+|---|---|---|
+| **Muhtar Rüstem** | Hikâye görevleri, borç | Her şeye "hallederuk" der, hiçbir şeyi halletmez |
+| **Fadime Abla** | Kahvehane, hava tahmini, dedikodu | Radyo hava tahminleri hep tersi çıkar |
+| **Hayri Hoca** | Emekli öğretmen, tıbbi müşteri | Her alışverişte ders verir |
+| **Cemil** | Komşu, absürt görevler | İneği için "rahatlatıcı" ister (vermezsin) |
+| **Hans** | Alman turist | Yaylaya yerleşmek ister, Türkçesi felaket |
+| **Nevzat Bey** | Denetçi | Ciddi; Gaftî Modu'nda çok komik konuşur |
+
+**Görev zinciri (örnek ilk hafta):** Serayı temizle → İlk hasat → Muhtar'a "numune" → Dükkanı aç →
+Hans'ın ilk siparişi → İlk denetim → Lisans 2. Her görev 1–3 dk'lık bir skeçle biter.
+
+---
+
+## 7. Kamera & Kontroller
+
+**Vadide:** 3. şahıs omuz üstü kamera. **Mini oyunlarda:** sabit yakın çekim kameraya yumuşak geçiş.
+
+| Eylem | PC | Mobil |
+|---|---|---|
+| Hareket | WASD | Sol sanal joystick |
+| Kamera | Fare | Sağ yarı ekran sürükleme |
+| Etkileşim | E / Sol tık | Bağlamsal etkileşim butonu |
+| Koş | Shift | Joystick'i sonuna kadar it |
+| Envanter | Tab | Çanta ikonu |
+| İnşa modu | B | Menü butonu |
+| Mini oyun | Fare sürükle/çevir | Parmakla aynı hareketler |
+
+---
+
+## 8. Mağaza, Gelir & Derecelendirme
+
+- **Gelir:** PC'de Steam ücretli + ayrı demo. Mobilde ücretsiz demo (İlkbahar, 7 gün) + tek seferlik "Tam Sürüm" satın alımı (Play Billing).
+- **Derecelendirme:** 18+ (uyuşturucu kullanımı tasviri). IARC anketi dürüst doldurulacak.
+- **Risk notu:** İçme sahneleri her platformda açık; bu Play Store'da red riskini yükseltir. Teknik sigorta olarak
+  tüm içme içeriği tek bir `content_flags.consumption` bayrağına bağlıdır (varsayılan: açık). Red gelirse
+  mobil derlemede bu bayrak kapatılıp joint "satılık pre-roll", bong "dekor" moduna düşer, ek iş gerekmez.
+- Reklam yok. Gerçek marka/dispanser yok.
+
+---
+
+## 9. Teknik Mimari (Godot 4.7)
+
+- **Renderer:** Mobile (PC'de "Yüksek" grafik ayarında ekstra sis/gölge kalitesi).
+- **Dil:** GDScript, statik tipli. Tüm metinler `tr()` + `localization/strings.csv`.
+
+**Autoload'lar:**
+| Ad | Görev |
+|---|---|
+| `EventBus` | Sistemler arası sinyaller |
+| `GameClock` | Saat, gün, faz, mevsim |
+| `Weather` | Günlük hava, tahmin, ortam efektleri |
+| `Economy` | Para, işlemler, gün sonu raporu |
+| `Reputation` | İtibar, lisans seviyesi, uyum puanı |
+| `Inventory` | Eşyalar, ürünler |
+| `QuestManager` | Komedi görev zinciri, diyalog tetikleri |
+| `SaveSystem` | Kayıt/yükleme (uyuyunca otomatik) |
+| `Settings` | Grafik, ses, kontrol, gün süresi |
+| `ContentFlags` | Platform/içerik bayrakları |
+| `Effects` | Gaftî Modu ekran efektleri, post-process |
+
+**Veri (Resource):** `StrainData`, `PlantState`, `ItemData`, `CustomerProfile`, `QuestData`, `DialogueData`, `BuildableData`.
+
+**Klasör yapısı:**
+```
+res://
+├── autoload/
+├── data/            strains/ items/ customers/ quests/ dialogue/ buildables/
+├── scenes/
+│   ├── world/       valley.tscn, greenhouse/, town/, zones/
+│   ├── player/      player.tscn, camera_rig.tscn, customization/
+│   ├── plants/
+│   ├── npc/
+│   ├── minigames/   rolling/, gravity_bong/, care/, id_check/
+│   ├── shop/
+│   └── ui/          hud/, menus/, mobile_controls/, dialogue/
+├── scripts/         systems/ components/
+├── shaders/         toon.gdshader, foliage_wind, fog_layer, gafti_post
+├── assets/          models/ textures/ audio/ fonts/ logo/
+├── localization/
+└── tests/
+```
+
+**Performans bütçesi (mobil, orta segment Android):** 60 FPS hedef (min 30), ekranda ≤150 draw call,
+≤300k üçgen, bitki modelleri LOD0 ≤4k / LOD1 ≤1k üçgen, doku atlasları 2K.
+
+---
+
+## 10. Sanat Listesi (öncelik + üretici)
+
+| Varlık | Detay | Üretici |
+|---|---|---|
+| **GAFTİ logosu** | Çizgi film tarzı, kalın yuvarlak harfler, İ noktası yaprak/duman; yeşil + sıcak turuncu. SVG + PNG + uygulama ikonu | Codex astra |
+| **Bitki** | 5 aşama × sağlık varyasyonu, rüzgâr shader'ı | Codex astra |
+| **Kova bong seti** | Kova, kesik şişe, kase, su, duman | Codex astra |
+| **Joint seti** | Grinder, kağıt, filtre, joint (sarım aşamaları) | Codex astra |
+| **Oyuncu karakteri** | Gövde + özelleştirme parçaları + temel animasyonlar | Codex astra |
+| **Shader'lar** | Toon, foliage wind, sis katmanları, Gaftî post-process | Codex astra |
+| Sera yapısı, ev | Ahşap/cam yayla serası | Codex astra |
+| NPC'ler (6) | Karakter tabanından türetilmiş | Codex sol |
+| Kasaba binaları, props | Kahvehane, muhtarlık, raflar, saksı, lamba, çit, ağaç | Codex sol |
+| UI teması | İkonlar, paneller, font seçimi | Codex astra (yön) + sol (uygulama) |
+
+---
+
+## 11. MVP Kapsamı (bu geliştirme turunda)
+Vadinin tamamı (blockout + ana modeller), 3. şahıs kontrol (PC + mobil), sera + dış tarla, bitki sistemi,
+çaprazlama, kurutma, **joint sarma**, **kova bong + Gaftî Modu**, dükkan + 4 müşteri tipi + kimlik kontrolü,
+gün/gece + mevsim + hava, lisans 1–3 + denetim, karakter özelleştirme, ilk hafta komedi görevleri (6 NPC),
+kayıt/yükleme, ayarlar, logo + ana menü, CC0 sesler.
+
+**MVP dışı (sonra):** Lisans 4–5, motosiklet, İngilizce, Steam/Play entegrasyonu, satın alma, tam 28 günlük görev zinciri.
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem tools/blender,assets/models/hero,tools/previews -Name -ErrorAction SilentlyContinue
+Test-Path "$env:LOCALAPPDATA'"\\Microsoft\\WindowsApps\\blender-launcher.exe\"" in C:\Users\31\Documents\we2
+ succeeded in 1030ms:
+run_blender.ps1
+True
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Build Pusludere's shared character rig, wardrobe and studio portraits.\"\"\"
+from pathlib import Path
+from math import sin, cos, pi, radians
+import json
+import struct
+
+import bpy
+from mathutils import Vector, Euler, Quaternion
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / \"assets/models/hero/character_base.glb\"
+PREVIEW = ROOT / \"tools/previews\"
+OUT.parent.mkdir(parents=True, exist_ok=True)
+PREVIEW.mkdir(parents=True, exist_ok=True)
+bpy.ops.wm.read_factory_settings(use_empty=True)
+scene = bpy.context.scene
+scene.render.fps = 30
+
+def paint(name, hex_color):
+    rgb = [int(hex_color[i:i+2], 16) / 255 for i in (0, 2, 4)]
+    rgba = [((c+.055)/1.055)**2.4 if c>.04045 else c/12.92 for c in rgb] + [1]
+    mat = bpy.data.materials.new(name)
+    mat.diffuse_color = rgba
+    mat.use_nodes = True
+    shader = mat.node_tree.nodes.get(\"Principled BSDF\")
+    shader.inputs[\"Base Color\"].default_value = rgba
+    shader.inputs[\"Roughness\"].default_value = .78
+    return mat
+
+skin = paint(\"Skin\", \"DC986F\")
+hair = paint(\"Hair\", \"51332D\")
+ink = paint(\"Lash\", \"30262C\")
+ivory = paint(\"Oat\", \"FAE9CB\")
+iris = paint(\"Hazel\", \"506A50\")
+lip = paint(\"Smile\", \"964F46\")
+top = paint(\"Cloth_Top\", \"E6AB38\")
+knit = paint(\"Cloth_Knit\", \"356E62\")
+linen = paint(\"Cloth_Linen\", \"BE7055\")
+pants = paint(\"Cloth_Pants\", \"42566A\")
+boot = paint(\"Boots\", \"304D47\")
+trim = paint(\"Leather\", \"68493A\")
+brass = paint(\"Brass\", \"E4B15E\")
+band = paint(\"Pine\", \"224E49\")
+# Geometry is authored in Blender metres, facing -Y (glTF +Z).
+arm = bpy.data.armatures.new(\"CharacterSkeleton\")
+rig = bpy.data.objects.new(\"Armature\", arm)
+scene.collection.objects.link(rig)
+bpy.context.view_layer.objects.active = rig
+rig.select_set(True)
+bpy.ops.object.mode_set(mode='EDIT')
+def bone(name, a, b, parent=None):
+    eb = arm.edit_bones.new(name)
+    eb.head, eb.tail = a,b
+    if parent:
+        eb.parent = arm.edit_bones[parent]
+bone(\"hips\",(0,0,.71),(0,0,.85))
+bone(\"spine\",(0,0,.85),(0,0,1.02),\"hips\")
+bone(\"chest\",(0,0,1.02),(0,0,1.19),\"spine\")
+bone(\"neck\",(0,0,1.19),(0,0,1.31),\"chest\")
+bone(\"head\",(0,0,1.31),(0,0,1.72),\"neck\")
+for s, side in [(1,\".L\"),(-1,\".R\")]:
+    for names, pts, parent in [
+        ([\"shoulder\",\"upper_arm\",\"forearm\",\"hand\"],[(0,0,1.16),(.192,0,1.15),(.286,0,.965),(.326,-.029,.793),(.345,-.045,.68)],\"chest\"),
+        ([\"thigh\",\"shin\",\"foot\"],[(.102,0,.75),(.112,-.012,.425),(.۱۲ if False else .12,0,.14),(.12,-.12,.055)],\"hips\")]:
+        for i,name in enumerate(names):
+            bone(name+side, (s*pts[i][0],*pts[i][1:]),(s*pts[i+1][0],*pts[i+1][1:]),parent)
+            parent = name+side
+bpy.ops.object.mode_set(mode='OBJECT')
+
+class Part:
+    def __init__(self,name):
+        self.name=name
+        self.verts=[]; self.faces=[]; self.slots=[]; self.weights=[]; self.indices=[]
+    def surface(self, rings, material, weights, smooth=True):
+        n=len(rings[0]); base=len(self.verts)
+        if material not in self.slots: self.slots.append(material)
+        for ring,w in zip(rings,weights):
+            self.verts.extend(ring); self.weights.extend([w]*n)
+        faces=[tuple(base+i for i in reversed(range(n)))]
+        for j in range(len(rings)-1):
+            for i in range(n):
+                a=base+j*n+i; b=base+j*n+(i+1)%n
+                faces.append((a,b,b+n,a+n))
+        faces.append(tuple(base+(len(rings)-1)*n+i for i in range(n)))
+        self.faces.extend(faces); self.indices.extend([self.slots.index(material)]*len(faces))
+    def loft(self,rows,mat,w,n=12):
+        rings=[[(x+rx*cos(i*2*pi/n),y+ry*sin(i*2*pi/n),z) for i in range(n)] for x,y,z,rx,ry in rows]
+        self.surface(rings,mat,[w]*len(rows) if isinstance(w,str) else w)
+    def oval(self,center,radii,mat,w,n=10,k=5,angle=0):
+        x,y,z=center; a,b,c=radii; rings=[]
+        for j in range(k+1):
+            v=-pi/2+.035+(pi-.07)*j/k
+            ring=[]
+            for i in range(n):
+                t=2*pi*i/n; dx=a*cos(v)*cos(t); dz=c*sin(v)
+                ring.append((x+dx*cos(angle)-dz*sin(angle),y+b*cos(v)*sin(t),z+dx*sin(angle)+dz*cos(angle)))
+            rings.append(ring)
+        self.surface(rings,mat,[w]*len(rings))
+    def stroke(self,points,radii,mat,w,n=6):
+        p=list(map(Vector,points)); rings=[]
+        for i,(v,r) in enumerate(zip(p,radii)):
+            tangent=(p[min(i+1,len(p)-1)]-p[max(0,i-1)]).normalized()
+            ref=Vector((0,1,0)) if abs(tangent.y)<.9 else Vector((1,0,0))
+            u=tangent.cross(ref).normalized(); q=tangent.cross(u)
+            rings.append([tuple(v+r*(u*cos(2*pi*j/n)+q*sin(2*pi*j/n))) for j in range(n)])
+        self.surface(rings,mat,[w]*len(p))
+    def finish(self):
+        mesh=bpy.data.meshes.new(self.name)
+        mesh.from_pydata(self.verts,[],self.faces); mesh.update()
+        obj=bpy.data.objects.new(self.name,mesh); scene.collection.objects.link(obj)
+        for m in self.slots: mesh.materials.append(m)
+        for f,idx in zip(mesh.polygons,self.indices): f.material_index=idx; f.use_smooth=True
+        for i,w in enumerate(self.weights):
+            for key,value in ({w:1} if isinstance(w,str) else w).items():
+                group=obj.vertex_groups.get(key) or obj.vertex_groups.new(name=key)
+                group.add([i],value,'REPLACE')
+        obj.parent=rig; mod=obj.modifiers.new(\"Skinning\",'ARMATURE'); mod.object=rig
+        return obj
+
+def torso(part,profile,mat,weights,n=16):
+    part.loft([(0,0,z,x,y) for z,x,y in profile],mat,weights,n)
+
+body=Part(\"Body\")
+torso(body,[(.68,.12,.10),(.78,.16,.11),(.91,.143,.103),(1.07,.182,.115),(1.14,.187,.11),(1.19,.09,.075),(1.31,.075,.07)],skin,[\"hips\",\"hips\",\"spine\",\"chest\",\"chest\",\"neck\",\"neck\"])
+torso(body,[(1.24,.055,.075),(1.27,.115,.12),(1.32,.163,.১৫ if False else .15),(1.40,.198,.173),(1.49,.202,.182),(1.59,.196,.177),(1.67,.16,.145),(1.714,.082,.095),(1.72,.025,.028)],skin,\"head\",24)
+for s,side in [(1,\".L\"),(-1,\".R\")]:
+    body.oval((s*.194,.001,1.432),(.042,.032,.062),skin,\"head\",12)
+    body.oval((s*.212,-.025,1.432),(.016,.009,.027),lip,\"head\",8,4)
+    body.oval((s*.081,-.158,1.489),(.049,.027,.045),ivory,\"head\",14,6,s*.06)
+    body.oval((s*.079,-.18,1.488),(.025,.012,.031),iris,\"head\",12)
+    body.oval((s*.079,-.19,1.49),(.014,.006,.022),ink,\"head\",10)
+    body.oval((s*.079-.006,-.195,1.501),(.006,.004,.007),ivory,\"head\",8,3)
+    body.stroke([(s*.033,-.177,1.৫০ if False else 1.50),(s*.06,-.182,1.526),(s*.089,-.179,1.531),(s*.118,-.１６ if False else -.16,1.517),(s*.133,-.146,1.50)],[.002,.005,.006,.005,.002],ink,\"head\")
+    body.stroke([(s*.033,-.175,1.548),(s*.067,-.174,1.562),(s*.099,-.162,1.564),(s*.137,-.14,1.548)],[.005,.012,.012,.003],hair,\"head\")
+    for i in range(3):
+        body.oval((s*(.109+i*.011),-.149+i*.009,1.432+.004*(i%2)),(.003,.003,.003),lip,\"head\",5,2)
+    body.loft([(s*x,y,z,a,b) for x,y,z,a,b in [(.335,-.03,.75,.035,.04),(.325,-.025,.80,.04,.044),(.307,-.012,.875,.049,.052),(.286,0,.965,.05,.055),(.२५ if False else .25,0,1.055,.06,.064),(.194,0,1.15,.071,.069)]],skin,[\"hand\"+side,\"forearm\"+side,\"forearm\"+side,{\"upper_arm\"+side:.5,\"forearm\"+side:.5},\"upper_arm\"+side,\"upper_arm\"+side])
+    body.oval((s*.337,-.035,.737),(.054,.055,.077),skin,\"hand\"+side,12,5)
+    body.oval((s*.302,-.074,.746),(.023,.023,.042),skin,\"hand\"+side,8,4,-s*.24)
+    body.loft([(s*.12,0,.10,.042,.051),(s*.115,0,.42,.059,.061),(s*.10,0,.74,.075,.075)],skin,[\"shin\"+side,{\"shin\"+side:.5,\"thigh\"+side:.5},\"thigh\"+side])
+body.oval((0,-.182,1.436),(.043,.055,.045),skin,\"head\",14,6)
+body.stroke([(-.061,-.159,1.385),(-.041,-.169,1.376),(0,-.175,1.371),(.036,-.17,1.376),(.06,-.159,1.386)],[.002,.005,.006,.005,.002],lip,\"head\",8)
+body.finish()
+
+# Sculpted hairlines wrap high across the forehead and low over the nape.
+def scalp(part,style):
+    rings=[]
+    for j in range(6):
+        ring=[]
+        for i in range(20):
+            a=2*pi*i/20; front=max(0,-sin(a))
+            edge=-.52+1.05*front+.06*cos(3*a+style)
+            v=edge+(1.54-edge)*j/5
+            ring.append((.211*cos(v)*cos(a),.005+.196*cos(v)*sin(a),1.494+.247*sin(v)))
+        rings.append(ring)
+    part.surface(rings,hair,[\"head\"]*6)
+
+for style in range(1,7):
+    h=Part(f\"Hair_{style:02}\")
+    if style==4:
+        for s in (-1,1): h.oval((s*.181,.016,1.481),(.032,.112,.10),hair,\"head\",12,5)
+        h.oval((0,.146,1.49),(.164,.044,.087),hair,\"head\")
+    else:
+        scalp(h,style)
+        if style in (1,5):
+            for i in range(4):
+                h.oval((-.12+i*.065,-.118+.018*abs(i-1.5),1.615+.017*i),(.055,.077,.086 if style==5 else .062),hair,\"head\",10,4,-.68)
+            if style==5:
+                for s in (-1,1): h.oval((s*.179,.016,1.45),(.05,.14,.127),hair,\"head\",12,5,s*.18)
+        elif style==2:
+            for i in range(12):
+                a=2*pi*i/12
+                h.oval((.166*cos(a),.149*sin(a),1.616+.034*(-sin(a))),(.067,.067,.066),hair,\"head\",8,4)
+        elif style==3:
+            h.oval((0,.171,1.534),(.067,.076,.059),brass,\"head\")
+            h.oval((0,.194,1.421),(.081,.085,.146),hair,\"head\",12,5)
+        else:
+            h.oval((0,.145,1.652),(.080,.079,.082),brass,\"head\")
+            h.oval((0,.167,1.68),(.102,.09,.099),hair,\"head\",12,6)
+    h.finish()
+
+for style in range(5):
+    b=Part(f\"Beard_{style:02}\")
+    if style==0: b.oval((0,0,1.45),(.001,)*3,hair,\"head\",3,2)
+    if style in (1,2,4):
+        for s in (-1,1):
+            b.stroke([(s*.003,-.19,1.407),(s*.031,-.１９ if False else -.19,1.412),(s*.059,-.১৭ if False else -.17,1.401),(s*.085,-.155,1.395),(s*(.126 if style==2 else .09),-.144,1.42 if style==2 else 1.391)],[.008,.018,.019,.012,.002],hair,\"head\",8)
+    if style in (3,4):
+        for i in range(15):
+            a=pi*i/14
+            x=.151*cos(a); y=-.049-.103*sin(a); z=1.354-.048*sin(a)
+            if style==4: b.oval((x,y,z),(.052,.038,.056),hair,\"head\",8,4)
+            else:
+                for k in range(2): b.stroke([(x,y-.009,z+k*.014),(x+.003,y-.012,z+.008+k*.014)],[.002,.0025],hair,\"head\",4)
+    b.finish()
+hat=Part(\"Hat_Kasket\")
+hat.loft([(0,0,1.６ if False else 1.60,.201,.189),(0,0,1.63,.213,.196),(0,-.013,1.66,.۲۲ if False else .22,.206),(.008,0,1.708,.206,.189),(.014,.026,1.754,.147,.139),(.014,.035,1.771,.042,.042)],knit,\"head\",20)
+hat.oval((0,-.145,1.624),(.187,.115,.022),band,\"head\",18,4)
+hat.oval((.014,.036,1.774),(.019,.02,.009),trim,\"head\")
+hat.finish()
+'@ | Set-Content -Encoding utf8 tools/blender/character.py
+"'$p='"'tools/blender/character.py'
+"'$t=Get-Content -Raw $p
+$t=[regex]::Replace($t,'"'-?\\.["'^'"\\x00-\\x7F]+ if False else ','')
+Set-Content -Encoding utf8 "'$p $t' in C:\Users\31\Documents\we2
+ succeeded in 216ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+for label,mat in [(\"Raincoat\",top),(\"Sweater\",knit),(\"Shirt\",linen)]:
+    g=Part(\"Top_\"+label)
+    rain=label==\"Raincoat\"; sweater=label==\"Sweater\"
+    low=.671 if rain else .759
+    profile=[(low,.219 if rain else .183,.148 if rain else .128),(low+.028,.223 if rain else .188,.15 if rain else .132),(.91,.191,.136),(1.052,.204,.144),(1.134,.219,.۱۳ if False else .13),(1.166,.17,.11),(1.198,.089,.085)]
+    torso(g,profile,mat,[\"hips\",\"hips\",\"spine\",\"chest\",\"chest\",\"chest\",\"neck\"])
+    torso(g,[(1.178,.10,.09),(1.206,.099,.093),(1.217,.085,.082)],band if sweater else mat,\"neck\",16)
+    for s,side in [(1,\".L\"),(-1,\".R\")]:
+        arm_profile=[(.326,-.026,.795,.052,.057),(.323,-.025,.823,.058,.061),(.301,-.01,.905,.063,.069),(.284,0,.973,.071,.074),(.256,0,1.045,.077,.084),(.219,0,1.119,.088,.088),(.191,0,1.159,.072,.070)]
+        groups=[\"forearm\"+side]*3+[{\"upper_arm\"+side:.5,\"forearm\"+side:.5}]+[\"upper_arm\"+side]*3
+        g.loft([(s*x,y,z,a,b) for x,y,z,a,b in arm_profile],mat,groups,12)
+        g.loft([(s*.326,-.025,.788,.053,.057),(s*.323,-.024,.818,.058,.061)],band if sweater else mat,\"forearm\"+side)
+        if rain:
+            # Slanted patch-pocket welt follows the chest contour.
+            g.stroke([(s*.086,-.13,.841),(s*.116,-.12,.852),(s*.154,-.099,.872)],[.009,.011,.009],trim,\"spine\")
+        if label==\"Shirt\":
+            g.stroke([(s*.086,-.022,1.192),(s*.075,-.081,1.163),(s*.042,-.十二 if False else -.121,1.126),(s*.016,-.115,1.166)],[.009,.021,.012,.007],ivory,\"chest\",5)
+    if sweater:
+        # Fair Isle diamonds follow the elliptical yoke, including its reverse.
+        for i in range(18):
+            a=2*pi*i/18; rings=[]
+            for da,dz in [(0,-.024),(.118,0),(0,.024),(-.118,0)]:
+                rings.append((.211*cos(a+da),.146*sin(a+da),1.053+dz))
+            mid=tuple(sum(p[k] for p in rings)/4 for k in range(3))
+            idx=len(g.verts); g.verts.extend(rings+[mid]); g.weights.extend([\"chest\"]*5)
+            if ivory not in g.slots: g.slots.append(ivory)
+            for k in range(4):
+                g.faces.append((idx+k,idx+4,idx+(k+1)%4)); g.indices.append(g.slots.index(ivory))
+        for z in [1.009,1.095]:
+            torso(g,[(z,.207,.144),(z+.009,.208,.144)],brass,\"chest\",24)
+    else:
+        for i in range(5):
+            z=.801+i*.078; y=-.144 if rain else -.139
+            g.oval((0,y,z),(.009,.007,.009),brass if rain else ivory,\"chest\" if z>1 else \"spine\",8,3)
+        if rain:
+            g.oval((0,.095,1.101),(.161,.091,.109),top,\"chest\",14,6)
+    g.finish()
+
+p=Part(\"Pants_01\")
+torso(p,[(.686,.166,.106),(.76,.177,.118),(.812,.169,.113)],pants,\"hips\")
+torso(p,[(.786,.174,.119),(.815,.173,.118)],trim,\"hips\")
+for s,side in [(1,\".L\"),(-1,\".R\")]:
+    p.loft([(s*x,y,z,a,b) for x,y,z,a,b in [(.12,0,.177,.061,.069),(.12,0,.29,.072,.076),(.115,0,.395,.075,.08),(.111,-.009,.45,.083,.089),(.101,0,.597,.091,.097),(.093,0,.744,.095,.104)]],pants,[\"shin\"+side,\"shin\"+side,\"shin\"+side,{\"shin\"+side:.45,\"thigh\"+side:.55},\"thigh\"+side,\"thigh\"+side])
+p.finish()
+b=Part(\"Boots_Rubber\")
+for s,side in [(1,\".L\"),(-1,\".R\")]:
+    b.loft([(s*.12,y,z,a,d) for y,z,a,d in [(-.04,.018,.083,.14),(-.042,.044,.088,.146),(-.047,.072,.086,.14),(-.039,.099,.079,.127),(-.014,.129,.07,.088),(0,.161,.068,.077),(0,.269,.079,.084),(0,.298,.078,.083)]],boot,[\"foot\"+side]*4+[{\"foot\"+side:.55,\"shin\"+side:.45}]+[\"shin\"+side]*3,16)
+    b.loft([(s*.12,-.043,z,a,d) for z,a,d in [(0,.08,.135),(.009,.089,.146),(.031,.09,.148),(.039,.086,.143)]],band,\"foot\"+side,16)
+    b.loft([(s*.12,0,.277,.08,.086),(s*.12,0,.302,.082,.087)],brass,\"shin\"+side)
+b.finish()
+
+# Rotations are expressed around character-space axes then converted to each
+# bone's rest basis. Hips shifts are applied in metres in the same space.
+def make_action(name,frames):
+    rig.animation_data_create()
+    act=bpy.data.actions.new(name); rig.animation_data.action=act
+    for frame,rots,shift in frames:
+        for pb in rig.pose.bones:
+            basis=pb.bone.matrix_local.to_quaternion()
+            angles=rots.get(pb.name,(0,0,0))
+            q=Euler([radians(v) for v in angles]).to_quaternion()
+            pb.rotation_quaternion=basis.inverted() @ q @ basis
+            pb.keyframe_insert(data_path=\"rotation_quaternion\",frame=frame,group=pb.name)
+        hips=rig.pose.bones[\"hips\"]
+        hips.location=hips.bone.matrix_local.to_quaternion().inverted() @ Vector(shift)
+        hips.keyframe_insert(data_path=\"location\",frame=frame,group=\"hips\")
+    act.use_fake_user=True
+    rig.animation_data.action=None
+    for pb in rig.pose.bones: pb.matrix_basis.identity()
+    return act
+
+def row(frame,rot=None,z=0):
+    return (frame,rot or {},(0,0,z))
+make_action(\"idle\",[row(1),row(31,{\"chest\":(-2,0,1),\"head\":(1,-2,-2),\"upper_arm.L\":(-2,0,0)},.008),row(61)])
+for name,period,swing in [(\"walk\",30,26),(\"run\",20,47)]:
+    rows=[]
+    for i in range(9):
+        phase=i*pi/4
+        d={\"chest\":(13 if name==\"run\" else 4,0,4*sin(phase)),\"head\":(-4,0,-3*sin(phase))}
+        for s,suffix in [(1,\".L\"),(-1,\".R\")]:
+            stride=s*sin(phase); lift=max(0,s*cos(phase))
+            d[\"thigh\"+suffix]=(-swing*stride,0,0)
+            d[\"shin\"+suffix]=((48 if name==\"run\" else 30)*lift,0,0)
+            d[\"foot\"+suffix]=(swing*.36*stride-19*lift,0,0)
+            d[\"upper_arm\"+suffix]=(swing*.79*stride,0,0)
+            d[\"forearm\"+suffix]=(-48 if name==\"run\" else -13,0,0)
+        rows.append(row(1+round(i*period/8),d,.024*(1-cos(2*phase))/2))
+    make_action(name,rows)
+reach={\"chest\":(14,0,4),\"upper_arm.R\":(-48,-10,5),\"forearm.R\":(-30,0,0),\"head\":(8,0,0)}
+make_action(\"interact\",[row(1),row(11,reach),row(19,{**reach,\"hand.R\":(-16,5,0)}),row(32)])
+seated={\"thigh.L\":(-85,0,0),\"thigh.R\":(-85,0,0),\"shin.L\":(85,0,0),\"shin.R\":(85,0,0),\"upper_arm.L\":(-20,0,0),\"upper_arm.R\":(-20,0,0),\"forearm.L\":(-60,0,0),\"forearm.R\":(-60,0,0),\"chest\":(7,0,0)}
+make_action(\"sit\",[row(1),row(18,seated,-.285),row(51,seated,-.285)])
+rolling={\"head\":(16,0,0),\"chest\":(10,0,0)}
+for s,side in [(1,\".L\"),(-1,\".R\")]:
+    rolling[\"upper_arm\"+side]=(-28,s*18,0)
+    rolling[\"forearm\"+side]=(-65,0,-s*28)
+rows=[row(1)]
+for i in range(5):
+    rows.append(row(12+6*i,{**rolling,\"hand.L\":(12*(-1)**i,0,7),\"hand.R\":(-12*(-1)**i,0,-7)}))
+make_action(\"roll\",rows+[row(48)])
+inhale={\"upper_arm.R\":(-40,-22,0),\"forearm.R\":(-110,0,28),\"head\":(5,0,-8)}
+make_action(\"smoke\",[row(1),row(19,inhale),row(35,{**inhale,\"head\":(-4,0,-6)},.009),row(54)])
+make_action(\"faint\",[row(1),row(14,{\"chest\":(-12,-12,0),\"head\":(-20,8,0)}),row(26,{\"hips\":(-48,0,0),\"thigh.L\":(-22,0,0),\"shin.R\":(30,0,0)},-.24),row(36,{\"hips\":(-89,0,0),\"head\":(7,0,10)},-.52),row(51,{\"hips\":(-89,0,0),\"head\":(7,0,10)},-.52)])
+wave={\"upper_arm.L\":(-15,-74,0),\"forearm.L\":(-12,-72,0),\"head\":(0,6,0)}
+make_action(\"wave\",[row(1)]+[row(12+7*i,{**wave,\"hand.L\":(0,20*(-1)**i,0)}) for i in range(5)]+[row(52)])
+
+# Store garment palettes as vertex tints on a shared, recolourable material.
+fabric=paint(\"FabricBase\",\"FFFFFF\")
+top.name=\"OilskinPalette\"; fabric.name=\"Cloth_Top\"
+for obj in list(rig.children):
+    if not obj.name.startswith(\"Top_\"): continue
+    colors=obj.data.color_attributes.new(name=\"Color\",type=\"FLOAT_COLOR\",domain=\"CORNER\")
+    fabric_slots=[i for i,m in enumerate(obj.data.materials) if m in (top,linen,knit)]
+    for poly in obj.data.polygons:
+        color=obj.data.materials[poly.material_index].diffuse_color if poly.material_index in fabric_slots else (1,1,1,1)
+        for idx in poly.loop_indices: colors.data[idx].color=color
+    obj[\"fabric_slots\"]=fabric_slots
+    for i in fabric_slots: obj.data.materials[i]=fabric
+node=fabric.node_tree.nodes.new(\"ShaderNodeVertexColor\"); node.layer_name=\"Color\"
+fabric.node_tree.links.new(node.outputs[\"Color\"],fabric.node_tree.nodes.get(\"Principled BSDF\").inputs[\"Base Color\"])
+scene.frame_set(1)
+bpy.ops.export_scene.gltf(filepath=str(OUT),export_format=\"GLB\",export_animation_mode=\"ACTIONS\",export_force_sampling=True,export_yup=True,export_extras=False)
+raw=OUT.read_bytes(); size=struct.unpack_from(\"<I\",raw,12)[0]; doc=json.loads(raw[20:20+size])
+triangles=sum(doc[\"accessors\"][p[\"indices\"]][\"count\"]//3 for m in doc[\"meshes\"] for p in m[\"primitives\"])
+assert triangles<=12000,triangles
+assert {a[\"name\"] for a in doc[\"animations\"]}=={\"idle\",\"walk\",\"run\",\"interact\",\"sit\",\"roll\",\"smoke\",\"faint\",\"wave\"}
+assert all(\"skin\" in n for n in doc[\"nodes\"] if \"mesh\" in n)
+print(\"CHARACTER VERIFIED\",triangles,\"triangles\",flush=True)
+
+# Workbench uses diffuse swatches for studio lighting.
+for obj in rig.children:
+    if obj.name.startswith(\"Top_\"):
+        for idx in obj[\"fabric_slots\"]: obj.data.materials[idx]={\"Top_Raincoat\":top,\"Top_Sweater\":knit,\"Top_Shirt\":linen}[obj.name]
+scene.render.engine='BLENDER_WORKBENCH'
+sh=scene.display.shading
+sh.light='STUDIO'; sh.studio_light='paint.sl'; sh.color_type='MATERIAL'
+sh.show_shadows=True; sh.show_cavity=True; sh.cavity_type='WORLD'; sh.cavity_ridge_factor=1.1
+sh.background_type='WORLD'
+scene.world=bpy.data.worlds.new(\"Studio\"); scene.world.color=(.075,.112,.11)
+scene.view_settings.view_transform='Standard'
+scene.render.resolution_x=scene.render.resolution_y=512; scene.render.resolution_percentage=100
+bpy.ops.object.camera_add()
+cam=bpy.context.object; cam.data.type='ORTHO'; cam.data.ortho_scale=2.06; scene.camera=cam
+looks=[(\"raincoat\",\"Hair_01\",\"Beard_02\",\"Top_Raincoat\",True,.86),(\"sweater\",\"Hair_02\",\"Beard_04\",\"Top_Sweater\",False,-.83),(\"shirt\",\"Hair_06\",\"Beard_00\",\"Top_Shirt\",False,1.15)]
+for label,h,b,t,cap,cx in looks:
+    visible={\"Body\",\"Pants_01\",\"Boots_Rubber\",h,b,t}
+    if cap: visible.add(\"Hat_Kasket\")
+    for ob in rig.children: ob.hide_render=ob.name not in visible
+    cam.location=(cx,-3.9,1.75); cam.rotation_euler=(Vector((0,0,.88))-cam.location).to_track_quat('-Z','Y').to_euler()
+    scene.render.filepath=str(PREVIEW/f\"character_{label}.png\")
+    bpy.ops.render.render(write_still=True)
+'@ | Add-Content -Encoding utf8 tools/blender/character.py
+"'$p='"'tools/blender/character.py'
+"'$t=Get-Content -Raw $p
+$t=[regex]::Replace($t,'"'-?\\.["'^'"\\x00-\\x7F]+ if False else ','')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)' in C:\Users\31\Documents\we2
+ succeeded in 7063ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem assets/models/hero,tools/previews -Filter 'character*'
+Get-Process *blender* -ErrorAction SilentlyContinue | Select-Object Name,Id,StartTime
+python -c \"import ast,pathlib; ast.parse(pathlib.Path('tools/blender/character.py').read_text(encoding='utf-8-sig'))\"" in C:\Users\31\Documents\we2
+ succeeded in 537ms:
+
+
+    Directory: C:\Users\31\Documents\we2\assets\models\hero
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:25         617948 character_base.glb                                                   
+
+Name      : blender
+Id        : 21172
+StartTime : 24.11.2026 12:03:07
+
+
+Name      : mcp-for-blender
+Id        : 2420
+StartTime : 24.11.2026 12:22:10
+
+
+Name      : mcp-for-blender
+Id        : 6088
+StartTime : 24.11.2026 12:22:21
+
+
+Name      : mcp-for-blender
+Id        : 15100
+StartTime : 24.11.2026 12:22:16
+
+
+Name      : mcp-for-blender
+Id        : 24392
+StartTime : 24.11.2026 12:22:09
+
+
+Name      : mcp-for-blender
+Id        : 24692
+StartTime : 24.11.2026 12:22:12
+
+
+Name      : mcp-for-blender
+Id        : 28596
+StartTime : 24.11.2026 12:22:09
+
+
+Name      : mcp-for-blender
+Id        : 31104
+StartTime : 24.11.2026 11:56:12
+
+
+Name      : mcp-for-blender
+Id        : 33816
+StartTime : 24.11.2026 12:22:24
+
+
+Name      : mcp-for-blender
+Id        : 34364
+StartTime : 24.11.2026 12:22:29
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "python -c \"import json,pathlib,struct;b=pathlib.Path('assets/models/hero/character_base.glb').read_bytes();d=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]]);print([a['name'] for a in d['animations']]);print([(m['name'],sum(d['accessors'][p['indices']]['count']//3 for p in m['primitives'])) for m in d['meshes']]);print(sum(d['accessors'][p['indices']]['count']//3 for m in d['meshes'] for p in m['primitives']))\"" in C:\Users\31\Documents\we2
+ succeeded in 1253ms:
+['faint', 'idle', 'interact', 'roll', 'run', 'sit', 'smoke', 'walk', 'wave']
+[('Beard_00', 14), ('Beard_01', 152), ('Beard_02', 152), ('Beard_03', 360), ('Beard_04', 1292), ('Body', 3568), ('Boots_Rubber', 840), ('Hair_01', 620), ('Hair_02', 1148), ('Hair_03', 492), ('Hair_04', 396), ('Hair_05', 900), ('Hair_06', 516), ('Hat_Kasket', 528), ('Pants_01', 432), ('Top_Raincoat', 1284), ('Top_Shirt', 1100), ('Top_Sweater', 984)]
+14778
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'x,y,z=center; a,b,c=radii; rings=[]','n=max(3,round(n*.83)); k=max(2,k-1)
+        x,y,z=center; a,b,c=radii; rings=[]').Replace('for pb in rig.pose.bones: pb.matrix_basis.identity()','for pb in rig.pose.bones:
+        pb.location=(0,0,0)
+        pb.rotation_quaternion=(1,0,0,0)')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+Get-ChildItem tools/previews -Filter '"'character*'" in C:\Users\31\Documents\we2
+ succeeded in 7080ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "python -c \"import json,pathlib,struct;b=pathlib.Path('assets/models/hero/character_base.glb').read_bytes();d=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]]);print(sum(d['accessors'][p['indices']]['count']//3 for m in d['meshes'] for p in m['primitives']));print([(n['name'],n.get('skin')) for n in d['nodes'] if 'mesh' in n])\"" in C:\Users\31\Documents\we2
+ succeeded in 486ms:
+12406
+[('Beard_00', 0), ('Beard_01', 0), ('Beard_02', 0), ('Beard_03', 0), ('Beard_04', 0), ('Body', 0), ('Boots_Rubber', 0), ('Hair_01', 0), ('Hair_02', 0), ('Hair_03', 0), ('Hair_04', 0), ('Hair_05', 0), ('Hair_06', 0), ('Hat_Kasket', 0), ('Pants_01', 0), ('Top_Raincoat', 0), ('Top_Shirt', 0), ('Top_Sweater', 0)]
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'for j in range(6):','for j in range(5):').Replace('for i in range(20):','for i in range(16):').Replace('a=2*pi*i/20','a=2*pi*i/16').Replace('(1.54-edge)*j/5','(1.54-edge)*j/4').Replace('[\"head\"]*6','[\"head\"]*5')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+Get-ChildItem tools/previews -Filter '"'character*'" in C:\Users\31\Documents\we2
+ succeeded in 5913ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "python -c \"import json,pathlib,struct;b=pathlib.Path('assets/models/hero/character_base.glb').read_bytes();d=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]]);print(sum(d['accessors'][p['indices']]['count']//3 for m in d['meshes'] for p in m['primitives']))\"
+Get-ChildItem tools/previews -Filter 'character*'" in C:\Users\31\Documents\we2
+ succeeded in 250ms:
+12006
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'for i in range(15):','for i in range(13):').Replace('a=pi*i/14','a=pi*i/12')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+Get-ChildItem tools/previews -Filter '"'character*'" in C:\Users\31\Documents\we2
+ succeeded in 5564ms:
+
+
+    Directory: C:\Users\31\Documents\we2\tools\previews
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:26         292907 character_raincoat.png                                               
+-a----        24.11.2026     12:26         291123 character_shirt.png                                                  
+-a----        24.11.2026     12:26         291723 character_sweater.png                                                
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Select-String -Path tools/blender/character.py -Pattern '1[0-9]{2}|,1[0-9]["'^a-z]|False else|scalp|range'"\\(5\\)|\\.211'" in C:\Users\31\Documents\we2
+ succeeded in 229ms:
+
+tools\blender\character.py:31:hair = paint("Hair", "51332D")
+tools\blender\character.py:63:        (["shoulder","upper_arm","forearm","hand"],[(0,0,1.16),(.192,0,1.15),(.286,0,.965
+),(.326,-.029,.793),(.345,-.045,.68)],"chest"),
+tools\blender\character.py:64:        (["thigh","shin","foot"],[(.102,0,.75),(.112,-.012,.425),(.12,0,.14),(.12,-.12,.0
+55)],"hips")]:
+tools\blender\character.py:125:torso(body,[(.68,.12,.10),(.78,.16,.11),(.91,.143,.103),(1.07,.182,.115),(1.14,.187,.11)
+,(1.19,.09,.075),(1.31,.075,.07)],skin,["hips","hips","spine","chest","chest","neck","neck"])
+tools\blender\character.py:126:torso(body,[(1.24,.055,.075),(1.27,.115,.12),(1.32,.163,.15),(1.40,.198,.173),(1.49,.202
+,.182),(1.59,.196,.177),(1.67,.16,.145),(1.714,.082,.095),(1.72,.025,.028)],skin,"head",24)
+tools\blender\character.py:128:    body.oval((s*.194,.001,1.432),(.042,.032,.062),skin,"head",12)
+tools\blender\character.py:130:    body.oval((s*.081,-.158,1.489),(.049,.027,.045),ivory,"head",14,6,s*.06)
+tools\blender\character.py:131:    body.oval((s*.079,-.18,1.488),(.025,.012,.031),iris,"head",12)
+tools\blender\character.py:132:    body.oval((s*.079,-.19,1.49),(.014,.006,.022),ink,"head",10)
+tools\blender\character.py:133:    body.oval((s*.079-.006,-.195,1.501),(.006,.004,.007),ivory,"head",8,3)
+tools\blender\character.py:134:    body.stroke([(s*.033,-.177,11.50),(s*.06,-.182,1.526),(s*.089,-.179,1.531),(s*.118,-
+.16,1.517),(s*.133,-.146,1.50)],[.002,.005,.006,.005,.002],ink,"head")
+tools\blender\character.py:135:    body.stroke([(s*.033,-.175,1.548),(s*.067,-.174,1.562),(s*.099,-.162,1.564),(s*.137,
+-.14,1.548)],[.005,.012,.012,.003],hair,"head")
+tools\blender\character.py:137:        body.oval((s*(.109+i*.011),-.149+i*.009,1.432+.004*(i%2)),(.003,.003,.003),lip,"
+head",5,2)
+tools\blender\character.py:138:    body.loft([(s*x,y,z,a,b) for x,y,z,a,b in [(.335,-.03,.75,.035,.04),(.325,-.025,.80,
+.04,.044),(.307,-.012,.875,.049,.052),(.286,0,.965,.05,.055),(.25,0,1.055,.06,.064),(.194,0,1.15,.071,.069)]],skin,["ha
+nd"+side,"forearm"+side,"forearm"+side,{"upper_arm"+side:.5,"forearm"+side:.5},"upper_arm"+side,"upper_arm"+side])
+tools\blender\character.py:139:    body.oval((s*.337,-.035,.737),(.054,.055,.077),skin,"hand"+side,12,5)
+tools\blender\character.py:141:    body.loft([(s*.12,0,.10,.042,.051),(s*.115,0,.42,.059,.061),(s*.10,0,.74,.075,.075)]
+,skin,["shin"+side,{"shin"+side:.5,"thigh"+side:.5},"thigh"+side])
+tools\blender\character.py:142:body.oval((0,-.182,1.436),(.043,.055,.045),skin,"head",14,6)
+tools\blender\character.py:143:body.stroke([(-.061,-.159,1.385),(-.041,-.169,1.376),(0,-.175,1.371),(.036,-.17,1.376),(
+.06,-.159,1.386)],[.002,.005,.006,.005,.002],lip,"head",8)
+tools\blender\character.py:147:def scalp(part,style):
+tools\blender\character.py:149:    for j in range(5):
+tools\blender\character.py:155:            ring.append((.211*cos(v)*cos(a),.005+.196*cos(v)*sin(a),1.494+.247*sin(v)))
+tools\blender\character.py:162:        for s in (-1,1): h.oval((s*.181,.016,1.481),(.032,.112,.10),hair,"head",12,5)
+tools\blender\character.py:163:        h.oval((0,.146,1.49),(.164,.044,.087),hair,"head")
+tools\blender\character.py:165:        scalp(h,style)
+tools\blender\character.py:168:                h.oval((-.12+i*.065,-.118+.018*abs(i-1.5),1.615+.017*i),(.055,.077,.086 
+if style==5 else .062),hair,"head",10,4,-.68)
+tools\blender\character.py:170:                for s in (-1,1): h.oval((s*.179,.016,1.45),(.05,.14,.127),hair,"head",12
+,5,s*.18)
+tools\blender\character.py:174:                h.oval((.166*cos(a),.149*sin(a),1.616+.034*(-sin(a))),(.067,.067,.066),h
+air,"head",8,4)
+tools\blender\character.py:176:            h.oval((0,.171,1.534),(.067,.076,.059),brass,"head")
+tools\blender\character.py:177:            h.oval((0,.194,1.421),(.081,.085,.146),hair,"head",12,5)
+tools\blender\character.py:179:            h.oval((0,.145,1.652),(.080,.079,.082),brass,"head")
+tools\blender\character.py:180:            h.oval((0,.167,1.68),(.102,.09,.099),hair,"head",12,6)
+tools\blender\character.py:183:for style in range(5):
+tools\blender\character.py:188:            b.stroke([(s*.003,-.19,1.407),(s*.031,-.19,1.412),(s*.059,-.17,1.401),(s*.08
+5,-.155,1.395),(s*(.126 if style==2 else .09),-.144,1.42 if style==2 else 1.391)],[.008,.018,.019,.012,.002],hair,"head
+",8)
+tools\blender\character.py:192:            x=.151*cos(a); y=-.049-.103*sin(a); z=1.354-.048*sin(a)
+tools\blender\character.py:198:hat.loft([(0,0,11.60,.201,.189),(0,0,1.63,.213,.196),(0,-.013,1.66,.22,.206),(.008,0,1.7
+08,.206,.189),(.014,.026,1.754,.147,.139),(.014,.035,1.771,.042,.042)],knit,"head",20)
+tools\blender\character.py:199:hat.oval((0,-.145,1.624),(.187,.115,.022),band,"head",18,4)
+tools\blender\character.py:207:    profile=[(low,.219 if rain else .183,.148 if rain else .128),(low+.028,.223 if rain 
+else .188,.15 if rain else .132),(.91,.191,.136),(1.052,.204,.144),(1.134,.219,.13),(1.166,.17,.11),(1.198,.089,.085)]
+tools\blender\character.py:209:    torso(g,[(1.178,.10,.09),(1.206,.099,.093),(1.217,.085,.082)],band if sweater else m
+at,"neck",16)
+tools\blender\character.py:211:        arm_profile=[(.326,-.026,.795,.052,.057),(.323,-.025,.823,.058,.061),(.301,-.01,
+.905,.063,.069),(.284,0,.973,.071,.074),(.256,0,1.045,.077,.084),(.219,0,1.119,.088,.088),(.191,0,1.159,.072,.070)]
+tools\blender\character.py:213:        g.loft([(s*x,y,z,a,b) for x,y,z,a,b in arm_profile],mat,groups,12)
+tools\blender\character.py:217:            g.stroke([(s*.086,-.13,.841),(s*.116,-.12,.852),(s*.154,-.099,.872)],[.009,.
+011,.009],trim,"spine")
+tools\blender\character.py:219:            g.stroke([(s*.086,-.022,1.192),(s*.075,-.081,1.163),(s*.042,-.121,1.126),(s*
+.016,-.115,1.166)],[.009,.021,.012,.007],ivory,"chest",5)
+tools\blender\character.py:224:            for da,dz in [(0,-.024),(.118,0),(0,.024),(-.118,0)]:
+tools\blender\character.py:225:                rings.append((.211*cos(a+da),.146*sin(a+da),1.053+dz))
+tools\blender\character.py:232:            torso(g,[(z,.207,.144),(z+.009,.208,.144)],brass,"chest",24)
+tools\blender\character.py:234:        for i in range(5):
+tools\blender\character.py:235:            z=.801+i*.078; y=-.144 if rain else -.139
+tools\blender\character.py:238:            g.oval((0,.095,1.101),(.161,.091,.109),top,"chest",14,6)
+tools\blender\character.py:242:torso(p,[(.686,.166,.106),(.76,.177,.118),(.812,.169,.113)],pants,"hips")
+tools\blender\character.py:243:torso(p,[(.786,.174,.119),(.815,.173,.118)],trim,"hips")
+tools\blender\character.py:245:    p.loft([(s*x,y,z,a,b) for x,y,z,a,b in [(.12,0,.177,.061,.069),(.12,0,.29,.072,.076)
+,(.115,0,.395,.075,.08),(.111,-.009,.45,.083,.089),(.101,0,.597,.091,.097),(.093,0,.744,.095,.104)]],pants,["shin"+side
+,"shin"+side,"shin"+side,{"shin"+side:.45,"thigh"+side:.55},"thigh"+side,"thigh"+side])
+tools\blender\character.py:249:    b.loft([(s*.12,y,z,a,d) for y,z,a,d in [(-.04,.018,.083,.14),(-.042,.044,.088,.146),
+(-.047,.072,.086,.14),(-.039,.099,.079,.127),(-.014,.129,.07,.088),(0,.161,.068,.077),(0,.269,.079,.084),(0,.298,.078,.
+083)]],boot,["foot"+side]*4+[{"foot"+side:.55,"shin"+side:.45}]+["shin"+side]*3,16)
+tools\blender\character.py:250:    b.loft([(s*.12,-.043,z,a,d) for z,a,d in [(0,.08,.135),(.009,.089,.146),(.031,.09,.1
+48),(.039,.086,.143)]],band,"foot"+side,16)
+tools\blender\character.py:302:for i in range(5):
+tools\blender\character.py:305:inhale={"upper_arm.R":(-40,-22,0),"forearm.R":(-110,0,28),"head":(5,0,-8)}
+tools\blender\character.py:307:make_action("faint",[row(1),row(14,{"chest":(-12,-12,0),"head":(-20,8,0)}),row(26,{"hips
+":(-48,0,0),"thigh.L":(-22,0,0),"shin.R":(30,0,0)},-.24),row(36,{"hips":(-89,0,0),"head":(7,0,10)},-.52),row(51,{"hips"
+:(-89,0,0),"head":(7,0,10)},-.52)])
+tools\blender\character.py:309:make_action("wave",[row(1)]+[row(12+7*i,{**wave,"hand.L":(0,20*(-1)**i,0)}) for i in ran
+ge(5)]+[row(52)])
+tools\blender\character.py:327:raw=OUT.read_bytes(); size=struct.unpack_from("<I",raw,12)[0]; doc=json.loads(raw[20:20+
+size])
+tools\blender\character.py:329:assert triangles<=12000,triangles
+tools\blender\character.py:343:scene.world=bpy.data.worlds.new("Studio"); scene.world.color=(.075,.112,.11)
+tools\blender\character.py:345:scene.render.resolution_x=scene.render.resolution_y=512; scene.render.resolution_percent
+age=100
+
+
+
+codex
+GLB’de 18 mesh’in aynı iskelete bağlı olduğunu ve dokuz animasyonun adlarını doğruladım. İlk önizlemelerde kasket ve göz kapağında kadraj dışına uzanan geometri, saç çizgisinde de tenle kesişme gördüm. Bunları düzelterek üç görünümü yeniden render ediyorum.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'11.50','1.50').Replace('11.60','1.60').Replace('.211*cos(v)*cos(a),.005+.196*cos(v)*sin(a),1.494+.247*sin(v)', '.227*cos(v)*cos(a),.002+.209*cos(v)*sin(a),1.514+.239*sin(v)').Replace('(.686,.166,.106)','(.672,.136,.105)').Replace('(.093,0,.744,.095,.104)','(.087,0,.744,.103,.109)').Replace('sh.show_shadows=True','sh.show_shadows=True; sh.show_specular_highlight=False').Replace('sh.cavity_ridge_factor=1.1','sh.cavity_ridge_factor=.65')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+Get-ChildItem assets/models/hero -Filter '"'character*'
+Test-Path C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe" in C:\Users\31\Documents\we2
+ succeeded in 5587ms:
+
+
+    Directory: C:\Users\31\Documents\we2\assets\models\hero
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:26         534376 character_base.glb                                                   
+True
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$checkDir=Join-Path $env:TEMP ("gafti-character-"+[guid]::NewGuid().ToString("N"))
+New-Item -ItemType Directory $checkDir | Out-Null
+Set-Content -Encoding ascii -LiteralPath (Join-Path $checkDir '"'project.godot') -Value 'config_version=5'
+Copy-Item assets/models/hero/character_base.glb "'$checkDir
+& C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe --headless --path $checkDir --import | Out-String
+Get-Content (Join-Path $checkDir '"'character_base.glb.import')
+"'$checkDir' in C:\Users\31\Documents\we2
+ succeeded in 6656ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Started Projenin ilk başlatılması (5 steps)[39m[0m
+[   0% ] [90m[1mfirst_scan_filesystem[22m | Dosya yapısı taranıyor...[39m[0m
+[  16% ] [90m[1mfirst_scan_filesystem[22m | Genel sınıf isimleri yükleniyor...[39m[0m
+[  33% ] [90m[1mfirst_scan_filesystem[22m | GDExtension'lar doğrulanıyor...[39m[0m
+[  50% ] [90m[1mfirst_scan_filesystem[22m | Otomatik yükleme betikleri oluşturuluyor...[39m[0m
+[  66% ] [90m[1mfirst_scan_filesystem[22m | Eklentiler başlatılıyor...[39m[0m
+[  83% ] [90m[1mfirst_scan_filesystem[22m | Dosya taraması başlatılıyor...[39m[0m
+[92m[ DONE ][39m [1mfirst_scan_filesystem[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started Varlıklar (Yeniden)İçe Aktarılıyor (1 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Dosyalar, yeniden içe aktarma için hazırlanıyor...[39m[0m
+[   0% ] [90m[1mreimport[22m | Yeniden içe aktarma öncesi işlemler yürütülüyor...[39m[0m
+[   0% ] [90m[1mreimport[22m | character_base.glb[39m[0m
+[   0% ] [90m[1mimport[22m | Started Sahneyi İçe Aktar (104 steps)[39m[0m
+[   0% ] [90m[1mimport[22m | Sahne İçe Aktarılıyor...[39m[0m
+[   1% ] [90m[1mimport[22m | Özel Betik Çalıştırılıyor...[39m[0m
+[  99% ] [90m[1mimport[22m | Kaydediliyor...[39m[0m
+[92m[ DONE ][39m [1mimport[22m
+[0m
+[  50% ] [90m[1mreimport[22m | Varlık İçe Aktarımı Tamamlanıyor...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mreimport[22m | Started Varlıklar (Yeniden)İçe Aktarılıyor (1 steps)[39m[0m
+[   0% ] [90m[1mreimport[22m | Yeniden içe aktarma sonrası işlemler yürütülüyor...[39m[0m
+[92m[ DONE ][39m [1mreimport[22m
+[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Started Düzenleyici yükleniyor (5 steps)[39m[0m
+[   0% ] [90m[1mloading_editor_layout[22m | Düzenleyici yerleşim düzeni yükleniyor...[39m[0m
+[  16% ] [90m[1mloading_editor_layout[22m | Yuvalar yükleniyor...[39m[0m
+[92m[ DONE ][39m [1mloading_editor_layout[22m
+[0m
+
+[remap]
+
+importer="scene"
+importer_version=1
+type="PackedScene"
+uid="uid://dnxpfpf2vkwnh"
+path="res://.godot/imported/character_base.glb-aeac2d20098002b13d1ccab68bdaebe5.scn"
+
+[deps]
+
+source_file="res://character_base.glb"
+dest_files=["res://.godot/imported/character_base.glb-aeac2d20098002b13d1ccab68bdaebe5.scn"]
+
+[params]
+
+nodes/root_type=""
+nodes/root_name=""
+nodes/root_script=null
+mesh_library/use_node_names_as_mesh_names=false
+array_mesh/deduplicate_surfaces=true
+nodes/apply_root_scale=true
+nodes/root_scale=1.0
+nodes/import_as_skeleton_bones=false
+nodes/use_name_suffixes=true
+nodes/use_node_type_suffixes=true
+meshes/ensure_tangents=true
+meshes/generate_lods=true
+meshes/create_shadow_meshes=true
+meshes/light_baking=1
+meshes/lightmap_texel_size=0.2
+meshes/force_disable_compression=false
+skins/use_named_skins=true
+animation/import=true
+animation/fps=30
+animation/trimming=false
+animation/remove_immutable_tracks=true
+animation/import_rest_as_RESET=false
+import_script/path=""
+materials/extract=0
+materials/extract_format=0
+materials/extract_path=""
+_subresources={}
+gltf/naming_version=2
+gltf/embedded_image_handling=1
+gltf/texture_map_mode=1
+C:\Users\31\AppData\Local\Temp\gafti-character-12d7ca2771aa4af9a9cb36dd0d486d79
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'(.191,0,1.159,.072,.070)','(.188,0,1.154,.071,.070),(.174,0,1.165,.052,.056),(.157,0,1.169,.032,.033)').Replace('[\"upper_arm\"+side]*3','[\"upper_arm\"+side]*5').Replace('y=-.144 if rain else -.139','y=-.149 if rain else -.145').Replace('(s*.042,-.121,1.126)','(s*.047,-.139,1.126)').Replace('(s*.016,-.115,1.166)','(s*.016,-.119,1.166)').Replace('(.672,.136,.105),(.76,.177,.118)','(.669,.053,.069),(.69,.134,.093),(.76,.177,.118)')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+python -c "import json,pathlib,struct;b=pathlib.Path('"'assets/models/hero/character_base.glb').read_bytes();d=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]]);print(sum(d['accessors'][p['indices']]['count']//3 for m in d['meshes'] for p in m['primitives']))\"" in C:\Users\31\Documents\we2
+ succeeded in 4621ms:
+12174
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'mat,groups,12','mat,groups,10').Replace('brass,\"chest\",24','brass,\"chest\",18')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+$dir=Join-Path $env:TEMP '"'gafti-character-12d7ca2771aa4af9a9cb36dd0d486d79'
+"'$assetDir=Join-Path $dir '"'assets/models/hero'
+New-Item -ItemType Directory -Force "'$assetDir | Out-Null
+Copy-Item assets/models/hero/character_base.glb $assetDir
+& C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe --headless --path $dir --import | Out-Null
+$imp=Join-Path $assetDir '"'character_base.glb.import'
+(Get-Content -Raw "'$imp).Replace('"'_subresources={}','_subresources={\"animations\": {\"idle\": {\"settings/loop_mode\": 1}, \"walk\": {\"settings/loop_mode\": 1}, \"run\": {\"settings/loop_mode\": 1}}}') | Set-Content -Encoding utf8 "'$imp
+(Get-Item (Join-Path $assetDir '"'character_base.glb')).LastWriteTime = Get-Date
+& C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe --headless --path "'$dir --import | Out-Null
+@'"'
+extends SceneTree
+func _initialize() -> void:
+    var scene: Node = load(\"res://assets/models/hero/character_base.glb\").instantiate()
+    var player: AnimationPlayer = scene.find_children(\"*\", \"AnimationPlayer\", true, false)[0]
+    for clip: StringName in player.get_animation_list():
+        var a: Animation = player.get_animation(clip)
+        print(clip, \" tracks=\", a.get_track_count(), \" loop=\", a.loop_mode)
+    scene.print_tree()
+    scene.free()
+    quit()
+'@ | Set-Content -Encoding utf8 (Join-Path "'$dir '"'check.gd')
+& C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe --headless --path "'$dir --script res://check.gd | Out-String
+Copy-Item $imp assets/models/hero/character_base.glb.import' in C:\Users\31\Documents\we2
+ succeeded in 21926ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+faint tracks=18 loop=0
+idle tracks=18 loop=1
+interact tracks=18 loop=0
+roll tracks=18 loop=0
+run tracks=18 loop=1
+sit tracks=18 loop=0
+smoke tracks=18 loop=0
+walk tracks=18 loop=1
+wave tracks=18 loop=0
+.
+Armature
+Armature/Skeleton3D
+Armature/Skeleton3D/Beard_00
+Armature/Skeleton3D/Beard_01
+Armature/Skeleton3D/Beard_02
+Armature/Skeleton3D/Beard_03
+Armature/Skeleton3D/Beard_04
+Armature/Skeleton3D/Body
+Armature/Skeleton3D/Boots_Rubber
+Armature/Skeleton3D/Hair_01
+Armature/Skeleton3D/Hair_02
+Armature/Skeleton3D/Hair_03
+Armature/Skeleton3D/Hair_04
+Armature/Skeleton3D/Hair_05
+Armature/Skeleton3D/Hair_06
+Armature/Skeleton3D/Hat_Kasket
+Armature/Skeleton3D/Pants_01
+Armature/Skeleton3D/Top_Raincoat
+Armature/Skeleton3D/Top_Shirt
+Armature/Skeleton3D/Top_Sweater
+AnimationPlayer
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$p='"'tools/blender/character.py'
+"'$t=(Get-Content -Raw $p).Replace('"'(.68,.12,.10)','(.704,.103,.085)').Replace('(.194,0,1.15,.071,.069)','(.19,0,1.143,.055,.053)').Replace('(.669,.053,.069),(.69,.134,.093)','(.663,.045,.067),(.69,.134,.105)')
+Set-Content -Encoding utf8 "'$p $t
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script (Resolve-Path $p)
+python -c "import json,pathlib,struct;b=pathlib.Path('"'assets/models/hero/character_base.glb').read_bytes();d=json.loads(b[20:20+struct.unpack_from('<I',b,12)[0]]);print(sum(d['accessors'][p['indices']]['count']//3 for m in d['meshes'] for p in m['primitives']),len(d['skins'][0]['joints']));print([m['name'] for m in d['materials']])\"
+"'$dir=Join-Path $env:TEMP '"'gafti-character-12d7ca2771aa4af9a9cb36dd0d486d79'
+Copy-Item assets/models/hero/character_base.glb (Join-Path "'$dir '"'assets/models/hero/character_base.glb') -Force
+& C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe --headless --path "'$dir --import | Out-Null
+& C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe --headless --path $dir --script res://check.gd | Out-String' in C:\Users\31\Documents\we2
+ succeeded in 14753ms:
+11910 19
+['Hair', 'Skin', 'Smile', 'Oat', 'Hazel', 'Lash', 'Boots', 'Pine', 'Brass', 'Cloth_Knit', 'Leather', 'Cloth_Pants', 'Cloth_Top']
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+faint tracks=18 loop=0
+idle tracks=18 loop=1
+interact tracks=18 loop=0
+roll tracks=18 loop=0
+run tracks=18 loop=1
+sit tracks=18 loop=0
+smoke tracks=18 loop=0
+walk tracks=18 loop=1
+wave tracks=18 loop=0
+.
+Armature
+Armature/Skeleton3D
+Armature/Skeleton3D/Beard_00
+Armature/Skeleton3D/Beard_01
+Armature/Skeleton3D/Beard_02
+Armature/Skeleton3D/Beard_03
+Armature/Skeleton3D/Beard_04
+Armature/Skeleton3D/Body
+Armature/Skeleton3D/Boots_Rubber
+Armature/Skeleton3D/Hair_01
+Armature/Skeleton3D/Hair_02
+Armature/Skeleton3D/Hair_03
+Armature/Skeleton3D/Hair_04
+Armature/Skeleton3D/Hair_05
+Armature/Skeleton3D/Hair_06
+Armature/Skeleton3D/Hat_Kasket
+Armature/Skeleton3D/Pants_01
+Armature/Skeleton3D/Top_Raincoat
+Armature/Skeleton3D/Top_Shirt
+Armature/Skeleton3D/Top_Sweater
+AnimationPlayer
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "New-Item -ItemType Directory -Force tools/codex_logs | Out-Null
+@'
+# GAFTİ oyuncu ve NPC karakter tabanı
+
+Karakter tüm seçeneklerle birlikte 11.910 üçgendir. Tek skin, 19 kemik ve 18 mesh içerir. Orijin iki çizmenin arasında, taban yüksekliğindedir. GLB +Y yukarı, +Z ileri bakar. Godot hareket kodu −Z ileri kabul ediyorsa görsel kökü Y ekseninde 180° döndürün. Boy saç ve başlığa göre yaklaşık 1,72–1,78 m arasındadır.
+
+## Dosyalar
+
+| Dosya | İçerik |
+|---|---|
+| tools/blender/character.py | Model, iskelet, kostümler, animasyonlar ve Workbench önizlemelerinin üreticisi |
+| assets/models/hero/character_base.glb | Ortak oyuncu ve NPC tabanı |
+| assets/models/hero/character_base.glb.import | Godot içe aktarma ayarları ve hareket döngüleri |
+| tools/previews/character_raincoat.png | Kasket, kısa saç, palabıyık ve sarı yağmurluk |
+| tools/previews/character_sweater.png | Kıvırcık saç, gür sakal ve yayla desenli kazak |
+| tools/previews/character_shirt.png | Topuz, tıraşlı yüz ve kiremit tonunda gömlek |
+| tools/codex_logs/astra_character_report.md | Teslim ve entegrasyon notları |
+
+## Düğümler ve özelleştirme
+
+Godot 4.7.2 içe aktarımında mesh’ler Armature/Skeleton3D altında, AnimationPlayer ise sahne kökünün altındadır.
+
+| Düğüm | İçerik |
+|---|---|
+| Body | Gövde, yüz, gözler, kaşlar ve eller tek mesh |
+| Hair_01, Hair_02, Hair_03, Hair_04, Hair_05, Hair_06 | Sırasıyla kısa, kıvırcık, at kuyruğu, kel ve yanlar, dalgalı, topuz |
+| Beard_00, Beard_01, Beard_02, Beard_03, Beard_04 | Sırasıyla kafa içine gizlenmiş küçük mesh, bıyık, palabıyık, kirli sakal ve gür sakal |
+| Hat_Kasket | Ayrı açılıp kapanabilen kasket |
+| Top_Raincoat, Top_Sweater, Top_Shirt | Sarı kapüşonlu yağmurluk, desenli örgü kazak ve yakalı gömlek |
+| Pants_01, Boots_Rubber | Pantolon ve lastik çizmeler |
+
+İskeletin merkez zinciri hips, spine, chest, neck ve head kemiklerinden oluşur. Her iki yanda shoulder, upper_arm, forearm, hand, thigh, shin ve foot kemikleri .L ve .R sonekleriyle adlandırılmıştır.
+
+Ten, saç, üst giyim, pantolon ve çizme için materyal adları sırasıyla Skin, Hair, Cloth_Top, Cloth_Pants ve Boots. Üst giysilerde başlangıç kumaş rengini vertex renkleri verir. Bir NPC’yi diğerlerinden bağımsız renklendirmek için materyal örneğini çoğaltıp ilgili yüzeye atayın.
+
+## Animasyon ve doğrulama
+
+İzole bir Godot 4.7.2 projesinde son GLB içe aktarıldı ve sahne örneklendi. AnimationPlayer dokuz klibi okudu. idle, walk ve run doğrusal döngü modunda, interact, sit, roll, smoke, faint ve wave tek oynatımlı. Yürüme ve koşma yerinde oynar. roll sarma masasındaki iki el hareketini temsil eder. sit oturma, faint yatma pozunda biter.
+
+Üç kombinasyon Blender Workbench ile 512 × 512 render edildi ve tek tek incelendi. Kasket ve göz kapağındaki taşma, saç derisindeki kesişme ve pantolonun altında görünen ten düzeltildi.
+
+## Entegrasyon sınırları
+
+GLB tüm seçenekleri içerir. Oyuncu veya NPC oluşturulurken birer saç, sakal ve üst giysiyi görünür bırakın. Kasket isteğe bağlıdır. Hacimli saçlarda kasketle kesişme olabilir. Üç görsel kontrol dinlenme pozuna aittir. Animasyonların oyun kamerasındaki görünümü ve her kostümün her animasyon karesindeki deformasyonu test edilmedi.
+'@ | Set-Content -Encoding utf8 tools/codex_logs/astra_character_report.md" in C:\Users\31\Documents\we2
+ succeeded in 449ms:
+codex
+[Karakter modeli](C:/Users/31/Documents/we2/assets/models/hero/character_base.glb) hazır. Gövde ve 17 özelleştirme parçası aynı 19 kemikli iskelete bağlı. Tüm parçalar birlikte **11.910 üçgen** tutuyor.
+
+Godot 4.7.2’de modeli içe aktarıp dokuz animasyonu doğruladım. `idle`, `walk` ve `run` döngüsel oynuyor. Model **+Z ileri** bakıyor. Oyuncu denetleyicisi −Z ileri kullanıyorsa görsel kökü Y ekseninde 180° döndürmek gerekiyor.
+
+Üç kombinasyonun 512 × 512 Blender önizlemelerini inceledim. Görsel kontrol dinlenme pozunu kapsıyor. [Yağmurluk ve kasket](C:/Users/31/Documents/we2/tools/previews/character_raincoat.png) · [Örgü kazak](C:/Users/31/Documents/we2/tools/previews/character_sweater.png) · [Gömlek ve topuz](C:/Users/31/Documents/we2/tools/previews/character_shirt.png)
+
+[Blender üretim betiği](C:/Users/31/Documents/we2/tools/blender/character.py) · [Düğüm listesi, entegrasyon notları ve bilinen eksikler](C:/Users/31/Documents/we2/tools/codex_logs/astra_character_report.md)
+tokens used
+48.781
+[Karakter modeli](C:/Users/31/Documents/we2/assets/models/hero/character_base.glb) hazır. Gövde ve 17 özelleştirme parçası aynı 19 kemikli iskelete bağlı. Tüm parçalar birlikte **11.910 üçgen** tutuyor.
+
+Godot 4.7.2’de modeli içe aktarıp dokuz animasyonu doğruladım. `idle`, `walk` ve `run` döngüsel oynuyor. Model **+Z ileri** bakıyor. Oyuncu denetleyicisi −Z ileri kullanıyorsa görsel kökü Y ekseninde 180° döndürmek gerekiyor.
+
+Üç kombinasyonun 512 × 512 Blender önizlemelerini inceledim. Görsel kontrol dinlenme pozunu kapsıyor. [Yağmurluk ve kasket](C:/Users/31/Documents/we2/tools/previews/character_raincoat.png) · [Örgü kazak](C:/Users/31/Documents/we2/tools/previews/character_sweater.png) · [Gömlek ve topuz](C:/Users/31/Documents/we2/tools/previews/character_shirt.png)
+
+[Blender üretim betiği](C:/Users/31/Documents/we2/tools/blender/character.py) · [Düğüm listesi, entegrasyon notları ve bilinen eksikler](C:/Users/31/Documents/we2/tools/codex_logs/astra_character_report.md)

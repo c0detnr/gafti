@@ -1,0 +1,2 @@
+GOREV=sol_props
+İŞ: AGENTS.md §8'deki props listesinin TAMAMI → tools\blender\props.py → assets\models\props\*.glb. Her prop ≤2k üçgen, stilize, PBR materyal, orijin tabanın ortasında, gerçek ölçülerde (tezgah ~0.9 m, raf ~1.8 m, saksı ~0.3 m çap). grow_lamp sıcak emissive ampul (Bulb düğümü). jar.glb cam kavanoz + mantar kapak (Glass, Lid). Büyük nesnelere (raf, tezgah, kanepe, yatak, jeneratör, su deposu, çit, kaya, ağaç gövdesi) "-col" son ekli basit çarpışma mesh'i ekle. Tümünün kontak sayfası önizlemesini tools\previews\props_sheet.png olarak render et.

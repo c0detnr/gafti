@@ -1,0 +1,6 @@
+GOREV=astra_character
+İŞ: Rigli, animasyonlu, özelleştirilebilir oyuncu karakteri (NPC'ler de aynı tabanı kullanacak).
+1. tools\blender\character.py → assets\models\hero\character_base.glb. Stilize, sevimli oranlar (biraz büyük kafa, büyük eller), ~1.75 m, +Z ileri bakar (Godot'ta -Z'ye döndürülecekse raporda belirt). İskelet "Armature": hips, spine, chest, neck, head, shoulder/upper_arm/forearm/hand (.L/.R), thigh/shin/foot (.L/.R). Body tek mesh; ten materyalinin adı "Skin" (Godot'ta renk değişecek). Yüz: basit sevimli gözler/kaşlar (doku ya da geometri).
+2. Seçmeli parçalar aynı armatüre skin'li ayrı mesh'ler: Hair_01..Hair_06 (kısa, kıvırcık, at kuyruğu, kel+yanlar, dalgalı, topuz), Beard_00 (görünmez küçük mesh), Beard_01..Beard_04 (bıyık, Karadeniz palabıyık, kirli sakal, gür sakal), Hat_Kasket, Top_Raincoat (sarı yağmurluk), Top_Sweater (örgü kazak), Top_Shirt, Pants_01, Boots_Rubber. Saç/kıyafet materyalleri ayrı adlı (Hair, Cloth_Top, Cloth_Pants, Boots) ki renklendirilebilsin.
+3. Animasyonlar (glTF action; idle/walk/run döngüsel): idle, walk, run, interact, sit, roll, smoke, faint, wave. Abartılı ve sevimli.
+4. Bütçe ≤12k üçgen. Önizlemede 3 farklı kombinasyonu render et (tools\previews\character_*.png).

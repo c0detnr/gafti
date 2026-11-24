@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/stations/water_tank_station.gd" id="1"]
+
+[node name="WaterTankStation" type="Node3D"]
+script = ExtResource("1")
+body_size = Vector3(1, 1.4, 1)
+interact_size = Vector3(1.8, 1.8, 1.8)

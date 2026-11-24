@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/minigames/id_check/id_check.gd" id="1_idc"]
+
+[node name="IdCheck" type="CanvasLayer"]
+layer = 61
+script = ExtResource("1_idc")

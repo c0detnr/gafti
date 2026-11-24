@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StrainData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/strain_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pusu_kusu"
+name_key = "STRAIN_PUSU_KUSU"
+description_key = "STRAIN_PUSU_KUSU_DESC"
+yield_trait = 50.0
+speed = 60.0
+hardiness = 55.0
+aroma = 50.0
+quality_potential = 65.0
+leaf_tint = Color(0.32, 0.62, 0.42, 1)
+height_scale = 1.0
+ideal_temp_min = 18.0
+ideal_temp_max = 27.0
+ideal_humidity_min = 0.5
+ideal_humidity_max = 0.8
+light_need = 0.45
+seed_price = 50
+price_multiplier = 1.0
+rare_traits = Array[StringName]([])

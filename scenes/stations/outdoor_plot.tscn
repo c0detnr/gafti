@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/stations/pot_station.gd" id="1"]
+
+[node name="OutdoorPlot" type="Node3D"]
+script = ExtResource("1")
+outdoor = true
+interact_size = Vector3(1.6, 1.6, 1.6)
+body_size = Vector3(0.9, 0.15, 0.9)

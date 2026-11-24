@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/buildable_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pot"
+name_key = "BUILD_POT"
+description_key = "BUILD_POT_DESC"
+price = 80
+scene_path = "res://scenes/stations/pot_station.tscn"
+model_path = ""
+size = Vector3(0.5, 0.45, 0.5)
+color = Color(0.55, 0.32, 0.18, 1)
+footprint = 0.35
+effect = &""
+effect_radius = 0.0
+power_cost_per_day = 0
+min_license = 1

@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StrainData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/strain_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"gafti"
+name_key = "STRAIN_GAFTI"
+description_key = "STRAIN_GAFTI_DESC"
+yield_trait = 75.0
+speed = 65.0
+hardiness = 70.0
+aroma = 90.0
+quality_potential = 90.0
+leaf_tint = Color(0.45, 0.35, 0.6, 1)
+height_scale = 1.1
+ideal_temp_min = 18.0
+ideal_temp_max = 28.0
+ideal_humidity_min = 0.4
+ideal_humidity_max = 0.75
+light_need = 0.45
+seed_price = 250
+price_multiplier = 1.6
+rare_traits = Array[StringName]([&"citrus"])

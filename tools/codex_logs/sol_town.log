@@ -1,0 +1,3650 @@
+OpenAI Codex v0.172.0
+--------
+workdir: C:\Users\31\Documents\we2
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a20cdd-119d-7ec1-bf15-8d4d34a155e8
+--------
+user
+Sen GAFTİ adlı Godot 4.7 oyun projesinde çalışan bir alt ajansın. Proje kökü: C:\Users\31\Documents\we2
+ÖNCE AGENTS.md ve GDD.md dosyalarını oku; oradaki sözleşmeye (dosya adları, düğüm adları, ölçek, bütçe, Blender sarmalayıcısı tools\blender\run_blender.ps1) birebir uy.
+Windows 11 + PowerShell kullan. Kullanıcıya soru sorma, onay bekleme, iş bitene kadar çalış. project.godot dosyasını DÜZENLEME. Sana verilmeyen alanlardaki dosyalara dokunma.
+Görsel kaliteyi kontrol et: ürettiğin her modeli Blender ile (Eevee ya da Workbench) 512px önizleme olarak tools\previews\<ad>.png dosyasına render et, görüntüyü kendin incele ve iyi görünmüyorsa düzelt.
+Stil: "detaylı stilize" — Karadeniz yaylası, el boyaması hissi, yumuşak bevel, sıcak ve sevimli, abartılı ama okunaklı oranlar. Doygun yeşiller, ahşap kahvesi, ıslak taş grisi, sıcak turuncu.
+Bitince tools\codex_logs\<GOREV>_report.md dosyasına üretilen dosyaları, düğüm adlarını ve bilinen eksikleri yaz.
+
+GOREV=sol_town
+İŞ: Kasaba binaları + vadi arazisi.
+1. tools\blender\town.py → assets\models\town\: shop_building.glb (GAFTİ dükkanı; girilebilir, iç ~8×6 m, kapı +Z yönünde, iç zemin düz ve boş — raflar ayrı eklenecek), kahvehane.glb, muhtarlik.glb, hardware_store.glb, inspection_office.glb, bus_stop.glb, minibus.glb (eski yeşil-beyaz köy minibüsü), drying_barn.glb, bridge.glb (taş kemer köprü ~10 m, X yönünde değil Z yönünde geçilir). Karadeniz mimarisi: taş zemin kat, ahşap üst, geniş saçak, teneke çatı. Orijin bina tabanı ortası. "-col" son ekli basit çarpışma mesh'leri (girilebilir binalarda kapı boşluğu açık kalsın). Her bina ≤8k üçgen.
+2. tools\blender\terrain.py → assets\models\town\terrain.glb: AGENTS.md §9 yerleşimine BİREBİR uyan 260×260 m arazi (glTF +Y yukarı; Blender'da export ederken eksen dönüşümünü doğrula: Godot'taki (x, z) = Blender'daki (x, -y)). Pad'ler belirtilen yüksekliklerde düz; yollar Road (toprak/çakıl), zemin Ground (vertex color ile çimen/toprak/taş), dere yatağı Creek, ayrı düz su mesh'i Water, kenarlarda oyuncuyu kapatan dağ sırtları, kuzeyde Keklik Tepe. Çarpışma için düşük çözünürlüklü "Ground-col" mesh'i. ≤60k üçgen.
+Kuşbakışı önizleme render et (tools\previews\terrain_top.png), pad konumlarını işaretleyip kontrol et.
+
+codex
+Önce AGENTS.md ve GDD.md dosyalarını, Blender sarmalayıcısını ve mevcut kasaba varlıklarını inceleyeceğim. Ardından modelleri üretip çarpışmaları, arazi koordinatlarını, üçgen bütçelerini ve 512 px önizlemeleri doğrulayacağım.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content AGENTS.md; Get-Content GDD.md' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'git status --short; Get-ChildItem tools -Force; Get-ChildItem tools/blender -Force; Get-ChildItem assets/models/town -Force; Get-Content tools/blender/run_blender.ps1' in C:\Users\31\Documents\we2
+ succeeded in 1322ms:
+fatal: not a git repository (or any of the parent directories): .git
+
+
+    Directory: C:\Users\31\Documents\we2\tools
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        24.11.2026     12:17                blender                                                              
+d-----        24.11.2026     12:22                codex_logs                                                           
+d-----        24.11.2026     12:21                codex_prompts                                                        
+
+
+    Directory: C:\Users\31\Documents\we2\tools\blender
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:16            508 run_blender.ps1                                                      
+param([Parameter(Mandatory=$true)][string]$Script, [string[]]$ScriptArgs = @())
+# Blender'i (Microsoft Store surumu) arka planda bir Python scriptiyle calistirir.
+$launcher = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\blender-launcher.exe"
+$argList = @("--background", "--factory-startup", "--python", "`"$Script`"")
+if ($ScriptArgs.Count -gt 0) { $argList += "--"; $argList += $ScriptArgs }
+$p = Start-Process -FilePath $launcher -ArgumentList $argList -PassThru -Wait -NoNewWindow
+exit $p.ExitCode
+
+
+
+ succeeded in 2877ms:
+# GAFTÄ° â€” Ajan KurallarÄ± ve Mimari SÃ¶zleÅŸmesi
+
+Bu dosya her ajan (Claude, Codex) iÃ§in baÄŸlayÄ±cÄ±dÄ±r. TasarÄ±m: `GDD.md`.
+
+## 1. Ortam (ZORUNLU)
+- Ä°ÅŸletim sistemi **Windows 11**. KullanÄ±cÄ±ya **asla Linux/bash komutu Ã¶nerme** (`ls`, `cat`, `rm`, `grep`, `sed`...).
+  KullanÄ±cÄ±ya gÃ¶sterilen her komut **PowerShell** olmalÄ± (`Get-ChildItem`, `Get-Content`, `Remove-Item`, `Select-String`).
+- Kendi Ã§alÄ±ÅŸtÄ±rdÄ±ÄŸÄ±n komutlar iÃ§in de PowerShell tercih et. Yollar: `C:\Users\31\Documents\we2\...`
+- Godot: `C:\Users\31\Desktop\Godot_v4.7.2-stable_win64.exe`
+  - Ä°Ã§e aktarma: `& $godot --headless --path C:\Users\31\Documents\we2 --import`
+  - Hata kontrolÃ¼: `& $godot --headless --path C:\Users\31\Documents\we2 --quit-after 120`
+- Blender 5.3 (Store sÃ¼rÃ¼mÃ¼, doÄŸrudan exe Ã§alÄ±ÅŸmaz). Sadece ÅŸu sarmalayÄ±cÄ±yÄ± kullan:
+  `powershell -ExecutionPolicy Bypass -File C:\Users\31\Documents\we2\tools\blender\run_blender.ps1 -Script <script.py> [-ScriptArgs a,b]`
+- KullanÄ±cÄ±dan onay isteme; etkileÅŸimli komut Ã§alÄ±ÅŸtÄ±rma.
+
+## 2. Model/ajan daÄŸÄ±lÄ±mÄ±
+| Ä°ÅŸ | Kim |
+|---|---|
+| Ã–nemli/detaylÄ± gÃ¶rseller (logo, bitki, bong, joint seti, karakter, sera, shader) | Codex `gpt-6.2-astra` medium |
+| Ä°kincil modeller, kasaba props, tekrarlayan kod | Codex `gpt-6.2-sol` medium |
+| Ã‡ekirdek sistemler, mini oyunlar, oyuncu/dÃ¼nya kodu | Claude Opus 5.5 alt ajanlarÄ± |
+| Orkestrasyon, entegrasyon, doÄŸrulama | Ana Claude oturumu |
+
+## 3. Kod kurallarÄ±
+- Godot **4.7**, GDScript, **statik tipler zorunlu** (`var x: int = 0`, `func f(a: float) -> void`).
+- TÃ¼m oyuncu metinleri `tr("ANAHTAR")`. AnahtarlarÄ± `localization/parts/<alan>.csv` dosyasÄ±na ekle
+  (baÅŸlÄ±k satÄ±rÄ±: `keys,tr`). Ana oturum bunlarÄ± `localization/strings.csv` iÃ§inde birleÅŸtirir.
+  Anahtar biÃ§imi: `ALAN_ACIKLAMA` (Ã¶r. `ROLL_STEP_GRIND`).
+- `project.godot` dosyasÄ±nÄ± **sadece ana oturum** dÃ¼zenler. Yeni autoload/input gerekiyorsa raporunda belirt.
+- Bir autoload'u yalnÄ±zca **sahibi** dÃ¼zenler (aÅŸaÄŸÄ±daki tablo). DiÄŸerleri sadece genel API'yi Ã§aÄŸÄ±rÄ±r.
+- Sahneler `.tscn` metin biÃ§iminde. Kodla sahne Ã¼retmek serbest (`tools/` altÄ±nda `@tool` veya headless script).
+- Placeholder kullanacaksan model yolunu sabit tut; gerÃ§ek `.glb` sonra aynÄ± yola gelir.
+- Mobil uyum: dokunmatik = fare (emulate_touch aÃ§Ä±k). Mini oyunlar sadece sÃ¼rÃ¼kle/tÄ±kla/basÄ±lÄ± tut kullanÄ±r.
+
+## 4. Autoload API sÃ¶zleÅŸmesi
+Sahip sÃ¼tunu: dosyayÄ± kim yazar. Ä°mzalar sabittir, deÄŸiÅŸtirme.
+
+### EventBus (`autoload/event_bus.gd`) â€” ana oturum
+Sadece sinyaller:
+```
+signal interaction_prompt(text: String)            # "" = gizle
+signal minigame_requested(id: StringName, context: Dictionary)
+signal minigame_finished(id: StringName, result: Dictionary)
+signal notify(text: String, kind: StringName)      # kind: &"info", &"good", &"bad"
+signal plant_harvested(plant_id: int, item: Dictionary)
+signal sale_completed(amount: int, item: Dictionary, customer_type: StringName)
+signal inspection_finished(score: int, fine: int)
+signal dialogue_requested(dialogue_id: StringName)
+signal dialogue_finished(dialogue_id: StringName)
+signal player_customization_changed(data: Dictionary)
+signal ui_block_input(blocked: bool)               # mini oyun/diyalog aÃ§Ä±kken oyuncu hareketi kilitlenir
+```
+
+### ContentFlags â€” ana oturum
+`var consumption: bool = true` (iÃ§me sahneleri), `var is_mobile: bool`, `var is_demo: bool`, `const DEMO_DAY_LIMIT := 7`.
+
+### Settings â€” ana oturum
+`day_length_minutes: float = 14.0`, `master_volume`, `music_volume`, `sfx_volume`, `graphics_quality: int (0..2)`, `save()`, `load_settings()`.
+
+### InputSetup â€” ana oturum
+Kodla tanÄ±mlanan aksiyonlar: `move_forward, move_back, move_left, move_right, sprint, interact, inventory, build_mode, pause, jump, camera_zoom_in, camera_zoom_out`.
+
+### GameClock â€” Ajan A (sistemler)
+```
+signal minute_passed(total_minutes: int)
+signal hour_passed(hour: int)
+signal phase_changed(phase: StringName)   # &"morning", &"noon", &"evening", &"night"
+signal day_started(day: int)
+signal season_changed(season: StringName) # &"spring", &"summer", &"autumn", &"winter"
+var day: int; var hour: int; var minute: int; var season: StringName; var paused: bool; var time_scale: float
+func get_time_string() -> String
+func get_day_fraction() -> float          # 0..1, 0 = gece yarÄ±sÄ±
+func sleep_until_morning() -> void
+func advance_minutes(m: int) -> void
+```
+
+### Weather â€” Ajan A
+```
+signal weather_changed(weather: StringName)  # &"sunny", &"cloudy", &"foggy", &"rainy", &"storm", &"snow"
+var current: StringName; var tomorrow: StringName
+func get_customer_multiplier() -> float
+func is_power_out() -> bool
+```
+
+### Economy â€” Ajan A
+```
+signal money_changed(money: int)
+var money: int
+func add(amount: int, reason: String) -> void
+func spend(amount: int, reason: String) -> bool   # yetersizse false
+func get_day_report() -> Dictionary
+```
+
+### Reputation â€” Ajan A
+```
+signal reputation_changed(value: float)
+signal license_level_changed(level: int)
+var reputation: float; var license_level: int; var compliance: float
+func add_reputation(v: float) -> void
+func record_id_check(done: bool) -> void
+```
+
+### Inventory â€” Ajan A
+EÅŸya = Dictionary: `{ "id": StringName, "kind": StringName, "strain": StringName, "quality": int, "grams": float, "count": int }`
+kind: `&"seed", &"wet_bud", &"dry_bud", &"jar", &"preroll", &"paper", &"filter", &"nutrient", &"tool"`
+```
+signal changed()
+func add_item(item: Dictionary) -> void
+func remove_item(id: StringName, count: int = 1) -> bool
+func count_of(id: StringName) -> int
+func get_items(kind: StringName = &"") -> Array[Dictionary]
+```
+
+### QuestManager â€” Ajan C
+```
+signal quest_started(id: StringName); signal quest_completed(id: StringName)
+func start(id: StringName) -> void; func complete(id: StringName) -> void
+func is_active(id: StringName) -> bool; func get_active() -> Array[StringName]
+func notify_event(event: StringName, data: Dictionary = {}) -> void   # gÃ¶rev hedefi ilerletme
+```
+
+### SaveSystem â€” Ajan A
+Her autoload `func get_save_data() -> Dictionary` ve `func load_save_data(d: Dictionary) -> void` saÄŸlar.
+Sahnedeki kalÄ±cÄ± dÃ¼ÄŸÃ¼mler `persist` grubunda ve aynÄ± iki fonksiyonu saÄŸlar (`get_save_id() -> String` de).
+```
+func save_game() -> void; func load_game() -> bool; func has_save() -> bool; func new_game() -> void
+```
+KayÄ±t yolu: `user://save_1.json`.
+
+### Effects â€” Ajan B (mini oyunlar)
+```
+signal gafti_mode_changed(active: bool, strength: float)
+var gafti_active: bool; var gafti_strength: float   # 0..1
+func start_gafti(strength: float, duration_game_minutes: int) -> void
+func get_move_multiplier() -> float                 # GaftÃ®'de 0.85
+func get_customer_patience_multiplier() -> float    # GaftÃ®'de 1.3
+func get_rolling_bonus() -> int                     # GaftÃ®'de +10
+func get_water_jitter() -> float                    # GaftÃ®'de Â±0.2
+```
+
+### AudioManager â€” Ajan C
+`func play_sfx(id: StringName, pos: Variant = null) -> void`, `func play_music(id: StringName) -> void`, `func set_ambience(id: StringName) -> void`.
+Eksik ses dosyasÄ±nda sessizce geÃ§ (hata verme).
+
+## 5. EtkileÅŸim sÃ¶zleÅŸmesi
+- EtkileÅŸilebilir her nesne `interactable` grubunda, bir `Area3D` (layer 4) iÃ§erir ve ÅŸu fonksiyonlarÄ± saÄŸlar:
+  `func get_interact_text() -> String` ve `func interact(player: Node) -> void`.
+- Oyuncu: `scenes/player/player.tscn`, kÃ¶k `CharacterBody3D`, `player` grubunda.
+- Mini oyun sahneleri `CanvasLayer` + `SubViewport` ya da kendi `Camera3D` ile yakÄ±n Ã§ekim. Mini oyunu
+  `scenes/minigames/minigame_host.gd` aÃ§ar: `EventBus.minigame_requested` dinler, sahneyi yÃ¼kler, bitince
+  `EventBus.minigame_finished` yayar.
+- Mini oyun id'leri: `&"rolling"`, `&"gravity_bong"`, `&"care"`, `&"id_check"`, `&"customize"`.
+
+## 6. Sahiplik
+| Alan | Sahip |
+|---|---|
+| `autoload/game_clock, weather, economy, reputation, inventory, save_system` + `scripts/systems/` (bitki, genetik, iÅŸleme) + `scenes/plants/` + `data/strains,items` | Ajan A (Opus) |
+| `autoload/effects` + `scenes/minigames/` + `shaders/gafti_post.gdshader` | Ajan B (Opus) |
+| `autoload/quest_manager, audio_manager` + `scenes/player/` + `scenes/npc/` + `scenes/shop/` + `scenes/ui/` + `data/customers,quests,dialogue` | Ajan C (Opus) |
+| `scenes/world/` (vadi montajÄ±) | Ana oturum (+ Codex sol yardÄ±m) |
+| `assets/models/hero/`, `assets/logo/`, `shaders/` (toon, foliage, fog) | Codex astra |
+| `assets/models/props/`, `assets/models/town/`, `assets/models/characters/npc_*` | Codex sol |
+
+## 7. Model dosya sÃ¶zleÅŸmesi (Blender â†’ .glb)
+- Ã–lÃ§ek: 1 birim = 1 metre, +Y yukarÄ± (glTF), orijin tabanÄ±n ortasÄ±nda.
+- Script: `tools/blender/<ad>.py` â†’ Ã§Ä±ktÄ± `assets/models/<klasÃ¶r>/<ad>.glb`. Script tekrar Ã§alÄ±ÅŸtÄ±rÄ±labilir olmalÄ±.
+- Stil: detaylÄ± stilize; yumuÅŸak bevel, abartÄ±lÄ± oranlar, el boyamasÄ± hissi veren vertex color/basit dokular, dÃ¼ÅŸÃ¼k Ã¼Ã§gen sayÄ±sÄ±.
+- BÃ¼tÃ§e: bitki aÅŸamasÄ± â‰¤4k Ã¼Ã§gen, prop â‰¤2k, karakter â‰¤12k, bina â‰¤8k.
+- Animasyonlu modellerde aksiyon isimleri: `idle, walk, run, interact, sit` vb. (kÃ¼Ã§Ã¼k harf).
+
+## 8. Model listesi (dosya adlarÄ± sabit)
+Mesh dÃ¼ÄŸÃ¼m adlarÄ± Ã¶nemli: kod bunlara gÃ¶re materyal/gÃ¶rÃ¼nÃ¼rlÃ¼k ayarlar.
+
+### Codex astra â†’ `assets/models/hero/`
+| Dosya | Ä°Ã§erik / dÃ¼ÄŸÃ¼m adlarÄ± |
+|---|---|
+| `plant_germ.glb`, `plant_seedling.glb`, `plant_veg.glb`, `plant_flower.glb`, `plant_harvest.glb` | SaksÄ±sÄ±z bitki. DÃ¼ÄŸÃ¼mler: `Stem`, `Leaves`, `Buds` (germ/seedling'de Buds yok). Vertex color + yaprak maskesi (UV.y = kÃ¶kten uca 0..1, rÃ¼zgÃ¢r iÃ§in). Boylar: 0.08 / 0.25 / 0.7 / 1.1 / 1.2 m |
+| `bong_bucket.glb` | Kova + su yÃ¼zeyi. DÃ¼ÄŸÃ¼mler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet ÅŸiÅŸe + kapak-kase. DÃ¼ÄŸÃ¼mler: `Bottle`, `Cap`, `Bowl`. Orijin ÅŸiÅŸenin altÄ± |
+| `lighter.glb` | Ã‡akmak. DÃ¼ÄŸÃ¼mler: `Body`, `Wheel` |
+| `grinder.glb` | DÃ¼ÄŸÃ¼mler: `Base`, `Lid` (Lid kendi ekseninde dÃ¶ner, orijini merkezde) |
+| `rolling_paper.glb` | DÃ¼z kaÄŸÄ±t, `Paper` (sarÄ±lma iÃ§in â‰¥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | BitmiÅŸ joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. ArmatÃ¼r `Armature`, gÃ¶vde `Body`. SeÃ§meli parÃ§alar aynÄ± armatÃ¼re baÄŸlÄ±: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boÅŸ), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | AhÅŸap + cam yayla serasÄ±, iÃ§ Ã¶lÃ§Ã¼ ~12Ã—6 m, kapÄ± +Z yÃ¶nÃ¼nde. Ä°Ã§eride saksÄ± tezgahlarÄ±. `Glass` dÃ¼ÄŸÃ¼mÃ¼ ayrÄ± (ÅŸeffaf materyal) |
+| `house.glb` | Dedenin ahÅŸap Karadeniz evi (dÄ±ÅŸ + basit iÃ§: yatak, ayna, kanepe) |
+
+### Codex sol â†’ `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTÄ° dÃ¼kkanÄ±, girilebilir, iÃ§ ~8Ã—6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleÅŸimi (Godot koordinatlarÄ±, metre, Y yukarÄ±)
+Arazi 260Ã—260 m, merkez (0,0,0). DÃ¼z alanlar (pad) arazide bu noktalarda olmalÄ±:
+| BÃ¶lge | Merkez (x, z) | YÃ¼kseklik y | Pad yarÄ±Ã§apÄ± |
+|---|---|---|---|
+| Oyuncu baÅŸlangÄ±cÄ± / ev Ã¶nÃ¼ | (-62, 28) | 2 | â€” |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynÄ± pad) |
+| DÄ±ÅŸ tarla | (-45, 48) | 2 | (aynÄ± pad) |
+| Kurutma ambarÄ± | (-78, 22) | 2 | (aynÄ± pad) |
+| Kasaba meydanÄ± | (60, 0) | 0 | 22 |
+| GAFTÄ° DÃ¼kkanÄ± | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| MuhtarlÄ±k | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| HÄ±rdavatÃ§Ä± | (42, -10) | 0 | (meydan) |
+| MinibÃ¼s duraÄŸÄ± | (72, 48) | 0 | 6 |
+| KÃ¶prÃ¼ & dere | (5, -45) | -1 | dere x yÃ¶nÃ¼nde deÄŸil, (âˆ’130,âˆ’60)â†’(130,âˆ’35) boyunca akar |
+| Ladin ormanÄ± | (-45, -70) Ã§evresi | â€” | aÄŸaÃ§lar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) â†’ (0, 10) â†’ meydan (40, 0); meydandan duraÄŸa (72, 48); meydandan kÃ¶prÃ¼ye (5,-45) â†’ tepeye patika.
+Arazide yol dÃ¼ÄŸÃ¼mÃ¼ `Road` (ayrÄ± materyal), zemin `Ground`, dere yataÄŸÄ± `Creek`. Arazi kenarlarÄ± daÄŸlarla kapalÄ± (oyuncu Ã§Ä±kamaz).
+# GAFTÄ° â€” Oyun TasarÄ±m DokÃ¼manÄ± (GDD) v1.0
+
+> Karadeniz yaylasÄ±nda lisanslÄ± kenevir serasÄ± + dÃ¼kkan iÅŸletme oyunu. Komedi tonlu, cozy ama sonuÃ§lu.
+> Motor: Godot 4.7 Â· Platform: PC (Steam) + Mobil (Play Store) Â· Dil: TÃ¼rkÃ§e (Ã§eviriye hazÄ±r) Â· Derecelendirme: 18+
+
+---
+
+## 1. Ã–zet
+
+Åehirde her iÅŸi batÄ±rmÄ±ÅŸ karakterimiz, kimsenin istemediÄŸi yayla serasÄ±nÄ± devralÄ±r ve **Pusludere**
+yaylasÄ±na taÅŸÄ±nÄ±r. Sisli sabahlarda bitkilerine bakar, Ã¶ÄŸlen hasadÄ±nÄ± kurutup joint sarar, akÅŸam kasaba
+meydanÄ±ndaki dÃ¼kkanÄ±nda kÃ¶ylÃ¼lere ve turistlere satÄ±ÅŸ yapar. Gece serada kova bongla gÃ¼nÃ¼ kapatÄ±r.
+KasabanÄ±n tuhaf insanlarÄ±, absÃ¼rt gÃ¶revleri ve kesintisiz bir yayla mizahÄ± oyunu taÅŸÄ±r.
+
+**ÃœÃ§ sÃ¼tun:**
+1. **Dokunsal ustalÄ±k:** BakÄ±m, sarma ve bong anlarÄ± elle hissedilen mini oyunlardÄ±r.
+2. **Atmosfer:** Sis, yaÄŸmur, mevsimler, ahÅŸap ve yeÅŸil. Oyunun asÄ±l hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeÃ§. Ciddi bir ana hikÃ¢ye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | Ä°Ã§erik |
+|---|---|
+| **HikÃ¢ye (Komedi)** | Ana hikÃ¢ye yok; birbirine baÄŸlÄ± **komik gÃ¶rev zinciri** (NPC skeÃ§leri). Oyunu Ã¶ÄŸretir, lisans seviyelerini aÃ§ar. ~4 mevsim (28 gÃ¼n). |
+| **Serbest** | HikÃ¢ye bittikten sonra ya da baÅŸtan: sonsuz iÅŸletme, tÃ¼m sistemler aÃ§Ä±k. |
+
+**Zorluk:** Cozy ama sonuÃ§lu. Bitki Ã¶lebilir, para eksiye dÃ¼ÅŸebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandÄ±rÄ±cÄ±) borÃ§ alÄ±nÄ±r.
+
+---
+
+## 3. DÃ¼nya: Pusludere YaylasÄ±
+
+### 3.1 Harita (kÃ¼Ã§Ã¼k aÃ§Ä±k vadi, yÃ¼klemesiz)
+```
+                 â›°  KEKLÄ°KTEPE (manzara, hikÃ¢ye finali)
+                      â”‚ patika
+        ğŸŒ² LADÄ°N ORMANI â”€â”€ ğŸŒ‰ KÃ–PRÃœ & DERE (su deposu dolumu)
+              â”‚                      â”‚
+ [DEDENÄ°N SERASI + EV] â”€â”€ Ã§ay bahÃ§eli yol â”€â”€ [KASABA MEYDANI]
+   â”œ Sera (saksÄ±lar)                          â”œ GAFTÄ° DÃ¼kkanÄ±
+   â”œ DÄ±ÅŸ tarla (mevsimsel)                    â”œ Fadime'nin Kahvehanesi
+   â”œ Kurutma ambarÄ±                           â”œ MuhtarlÄ±k
+   â”œ Sarma masasÄ±                             â”œ Lisans & Denetim Ofisi
+   â”” Kova bong kÃ¶ÅŸesi                         â”” HÄ±rdavatÃ§Ä± (ekipman/tohum)
+                                                   â”‚
+                                          ğŸš MÄ°NÄ°BÃœS DURAÄI
+                                       (turistler, toptan sipariÅŸler)
+```
+- Sera â†’ dÃ¼kkan yÃ¼rÃ¼me sÃ¼resi ~40 sn; ilerleyen oyunda **eski motosiklet** (sÃ¼rÃ¼ÅŸ, ~15 sn).
+- Mobil: bÃ¶lgeler `VisibilityRange` + streaming ile parÃ§a parÃ§a yÃ¼klenir; oyuncu yÃ¼kleme ekranÄ± gÃ¶rmez.
+
+### 3.2 Atmosfer
+- **GÃ¶rsel stil:** DetaylÄ± stilize. El boyamasÄ± hissi veren toon shading, yumuÅŸak kenar Ä±ÅŸÄ±ÄŸÄ±, doygun yeÅŸiller,
+  ahÅŸap/taÅŸ dokularÄ±, rÃ¼zgÃ¢rla sallanan bitki shader'Ä±, katmanlÄ± sis.
+- **Renk paleti:** Ladin yeÅŸili, Ã§ay yeÅŸili, Ä±slak taÅŸ grisi, ahÅŸap kahvesi, sÄ±cak lamba turuncusu (sera Ä±ÅŸÄ±klarÄ±).
+- **Ses:** YaÄŸmurun Ã§atÄ±ya vuruÅŸu, dere, kuÅŸlar, uzaktan inek Ã§anÄ±, kahvehanede tavla sesi. MÃ¼zik: lo-fi + kemenÃ§e
+  dokunuÅŸlu sakin parÃ§alar (CC0). Gece daha sakin bir mÃ¼zik Ã§alar, fÄ±rtÄ±nada mÃ¼zik kÄ±sÄ±lÄ±r.
+
+### 3.3 Mevsimler & Hava
+1 yÄ±l = 4 mevsim Ã— 7 gÃ¼n = 28 gÃ¼n.
+
+| Mevsim | Etki |
+|---|---|
+| Ä°lkbahar | Ekim bonusu (+%15 Ã§imlenme), sÄ±k yaÄŸmur (dÄ±ÅŸ tarla kendiliÄŸinden sulanÄ±r) |
+| Yaz | DÄ±ÅŸ tarla en verimli, turist sayÄ±sÄ± Ã—2, sÄ±caklÄ±k stresi |
+| Sonbahar | Hasat bonusu (+kalite), fÄ±rtÄ±na ihtimali |
+| KÄ±ÅŸ | DÄ±ÅŸ tarla kapalÄ±, kar, sera Ä±sÄ±tma gideri; mÃ¼ÅŸteri az ama fiyat yÃ¼ksek |
+
+| Hava | Etki |
+|---|---|
+| GÃ¼neÅŸli | DÄ±ÅŸ Ä±ÅŸÄ±k +, su tÃ¼ketimi + |
+| Bulutlu | NÃ¶tr |
+| Sisli | GÃ¶rÃ¼ÅŸ dÃ¼ÅŸÃ¼k, atmosfer max; mÃ¼ÅŸteri biraz az |
+| YaÄŸmurlu | DÄ±ÅŸ tarla otomatik sulanÄ±r, mÃ¼ÅŸteri âˆ’%20 |
+| FÄ±rtÄ±na | DÄ±ÅŸ bitkilere hasar riski, **elektrik kesintisi** (jeneratÃ¶r yÃ¼kseltmesi Ã§Ã¶zer) |
+| Kar | KÄ±ÅŸa Ã¶zel, sera Ä±sÄ± ihtiyacÄ± + |
+
+Ertesi gÃ¼nÃ¼n hava tahmini akÅŸamlarÄ± kahvehane radyosundan duyulur.
+
+---
+
+## 4. Ã‡ekirdek DÃ¶ngÃ¼
+
+```
+SABAH  (06â€“11)  Sera & tarla: sula, besle, Ä±ÅŸÄ±k ayarla, buda, zararlÄ± temizle, hasat et
+Ã–ÄLE   (11â€“16)  Ä°ÅŸleme: kurut, kÃ¼rle, paketle, joint sar (pre-roll)
+AKÅAM  (16â€“22)  DÃ¼kkan: raflarÄ± diz, fiyat koy, kimlik kontrol et, sat
+GECE   (22â€“02)  Planla: yÃ¼kselt, Ã§aprazla, inÅŸa et Â· Kova bong Â· Uyu (kayÄ±t)
+```
+- 1 oyun gÃ¼nÃ¼ â‰ˆ 14 dk gerÃ§ek zaman (ayarlardan 10â€“20 dk).
+- Fazlar Ã¶neridir; dÃ¼kkan sadece 16â€“22 arasÄ± aÃ§Ä±ktÄ±r.
+- 02:00'da uyumazsan karakter bayÄ±lÄ±r: ertesi sabah geÃ§ uyanÄ±r, âˆ’%10 para (bayÄ±ldÄ±ÄŸÄ± yerden eve "taÅŸÄ±ma Ã¼creti").
+
+---
+
+## 5. Sistemler
+
+### 5.1 Bitki
+| AÅŸama | GÃ¼n | EtkileÅŸim |
+|---|---|---|
+| Ã‡imlenme | 1 | Ekim, nem |
+| Fide | 2 | Sulama, hafif Ä±ÅŸÄ±k |
+| Vejetatif | 3â€“5 | Besin, budama, saksÄ± bÃ¼yÃ¼tme |
+| Ã‡iÃ§eklenme | 4â€“6 | IÅŸÄ±k dÃ¶ngÃ¼sÃ¼, pH, zararlÄ± kontrolÃ¼ |
+| Hasat | â€” | Zamanlama: erken = az verim, geÃ§ = kalite dÃ¼ÅŸer |
+
+- **DeÄŸiÅŸkenler:** Su, IÅŸÄ±k, Besin, pH, SÄ±caklÄ±k, Nem, SaÄŸlÄ±k.
+- TÃ¼rÃ¼n ideal aralÄ±ÄŸÄ±nda geÃ§en sÃ¼re â†’ **Kalite (0â€“100)**. SaÄŸlÄ±k 0 â†’ bitki Ã¶lÃ¼r (kompost olur, gÃ¼bre verir).
+- **ZararlÄ±lar:** Yaprak biti, kÃ¼f (nem yÃ¼ksekse). Elle temizlenir ya da ilaÃ§lanÄ±r.
+- GÃ¶rsel: Her aÅŸamanÄ±n ayrÄ± bir modeli var. Kalite, saÄŸlÄ±k ve susuzluk yaprak rengine ve duruÅŸuna yansÄ±r.
+
+### 5.2 Genetik / Ã‡aprazlama
+- Ã–zellikler: **Verim, HÄ±z, DayanÄ±klÄ±lÄ±k, Aroma, Kalite Potansiyeli**, ayrÄ±ca gÃ¶rsel Ã¶zellikler (yaprak tonu, boy).
+- Ã‡aprazlama: yavru Ã¶zelliÄŸi ebeveyn ortalamasÄ± Â± sapma; %5 mutasyon (nadir Ã¶zellik).
+- BaÅŸlangÄ±Ã§ta 3 tÃ¼r: **Pusu KuÅŸu**, **Ladin Duman**, **Ã‡ay YapraÄŸÄ±**. HikÃ¢ye Ã¶dÃ¼lÃ¼: **GAFTÄ°** tÃ¼rÃ¼.
+- Yeni tÃ¼rlere oyuncu isim verir; **Tohum Defteri** koleksiyonu.
+
+### 5.3 Ä°ÅŸleme
+Kurutma (3â€“7 saat, nem dengesi) â†’ KÃ¼rleme (opsiyonel, 1â€“3 gÃ¼n, +kalite) â†’ ÃœrÃ¼n:
+- **Kavanoz** (gram satÄ±ÅŸ)
+- **Pre-roll** (joint sarma mini oyunu, Ã—1.6 deÄŸer)
+
+### 5.4 Joint Sarma Mini Oyunu (yakÄ±n Ã§ekim, dokunsal)
+| AdÄ±m | EtkileÅŸim (fare / dokunmatik) | Kaliteye etkisi |
+|---|---|---|
+| 1. Ã–ÄŸÃ¼t | Grinder kapaÄŸÄ±nÄ± dairesel Ã§evir | Az Ã§evirirsen iri tane, Ã§ok Ã§evirirsen toz olur |
+| 2. Filtre | Kartonu zikzak katla (3 sÃ¼rÃ¼kleme) | DÃ¼zgÃ¼n filtre olursa Ã§ekiÅŸ iyi olur |
+| 3. DaÄŸÄ±t | KaÄŸÄ±da sÃ¼rÃ¼kleyerek serp | EÅŸit daÄŸÄ±lÄ±m iÃ§in Ä±sÄ± haritasÄ± gÃ¶stergesi |
+| 4. Sar | YukarÄ±-aÅŸaÄŸÄ± ritmik kaydÄ±rma, basÄ±nÃ§ Ã§ubuÄŸu | GevÅŸek sararsan sÃ¶ner, sÄ±kÄ± sararsan Ã§ekmez |
+| 5. YapÄ±ÅŸtÄ±r | Kenar boyunca sÃ¼rÃ¼kle (yala) | Eksik bÄ±rakÄ±rsan aÃ§Ä±lÄ±r |
+| 6. BÃ¼k | Ucu dÃ¶ndÃ¼r | BitiÅŸ |
+
+- SonuÃ§ **Sarma Skoru (0â€“100)**; Ã¼rÃ¼n kalitesiyle Ã§arpÄ±lÄ±r. Beceri arttÄ±kÃ§a yardÄ±m Ã§ubuklarÄ± azalÄ±r.
+- Komedi: Ã‡ok kÃ¶tÃ¼ sarÄ±mlar "Muhtar'Ä±n KaÄŸÄ±dÄ±", "Kibrit Ã‡Ã¶pÃ¼" gibi komik isimler alÄ±r ama yine satÄ±labilir (ucuza).
+
+### 5.5 Kova Bong Mini Oyunu (gravity bong, yakÄ±n Ã§ekim)
+| AdÄ±m | EtkileÅŸim |
+|---|---|
+| 1. HazÄ±rla | Kesik pet ÅŸiÅŸeyi su dolu kovaya batÄ±r |
+| 2. Doldur | Kaseyi doldur (miktar seÃ§imi: az / orta / bol) |
+| 3. Yak | Ã‡akmaÄŸÄ± Ã§ak (basÄ±lÄ± tut) |
+| 4. KaldÄ±r | ÅiÅŸeyi **yavaÅŸÃ§a** yukarÄ± kaldÄ±r; hÄ±zlÄ± kaldÄ±rÄ±rsan duman kaÃ§ar |
+| 5. Ã‡ek | Kaseyi Ã§Ä±kar, nefes Ã§ubuÄŸunu doÄŸru anda bÄ±rak |
+
+- **Etki: "GaftÃ® Modu"** (sÃ¼re miktara baÄŸlÄ±, 1â€“3 oyun saati):
+  - Ekran: renk doygunluÄŸu artar, hafif dalga efekti, yumuÅŸak bulanÄ±klÄ±k, mÃ¼zik yavaÅŸlar ve filtrelenir.
+  - **ArtÄ±:** MÃ¼ÅŸteri sabrÄ± +%30, bakÄ±m mini oyunlarÄ±nda "sakin el" (sarma skoru +10).
+  - **Eksi:** Hareket âˆ’%15, sulama miktarÄ± rastgele Â±%20 kayar, NPC diyaloglarÄ± absÃ¼rtleÅŸir.
+  - "Bol" doz: komik bayÄ±lma ihtimali (kanepede uyanÄ±rsÄ±n, 2 saat kaybedersin).
+- Seradaki bong yÃ¼kseltilebilir (kova â†’ bidon â†’ "Muhtar'Ä±n KazanÄ±" sÃ¼s gÃ¶rÃ¼nÃ¼mleri).
+
+### 5.6 DÃ¼kkan
+- Raf ve vitrin grid yerleÅŸimi, Ã¼rÃ¼n baÅŸÄ±na fiyat, gÃ¼n sonu raporu.
+- **MÃ¼ÅŸteri tipleri:**
+  | Tip | Tercih | BÃ¼tÃ§e |
+  |---|---|---|
+  | Yayla KÃ¶ylÃ¼sÃ¼ | Ucuz, kavanoz | DÃ¼ÅŸÃ¼k |
+  | Turist | Pre-roll, ÅŸÄ±k paket | YÃ¼ksek |
+  | TÄ±bbi Hasta (Hayri Hoca vb.) | YÃ¼ksek kalite, aroma | Orta |
+  | Uzman (ÅŸehirli) | Nadir tÃ¼r, mutasyon | Ã‡ok yÃ¼ksek |
+- **Kimlik kontrolÃ¼:** Her mÃ¼ÅŸteride hÄ±zlÄ± kart kontrolÃ¼ yapÄ±lÄ±r. Atlarsan denetimde ceza gelir. Komik sahte kimlikler de Ã§Ä±kar.
+- Memnuniyet â†’ **Ä°tibar** â†’ mÃ¼ÅŸteri sayÄ±sÄ± ve kalitesi.
+
+### 5.7 Lisans & Denetim
+- Kurgusal "Yayla Kenevir LisansÄ±", 5 seviye. Her seviye yeni saksÄ± sayÄ±sÄ±, ekipman, tÃ¼r ve dÃ¼kkan alanÄ± aÃ§ar.
+- **DenetÃ§i Nevzat Bey** habersiz gelir: kayÄ±t defteri, etiket, kimlik kontrol geÃ§miÅŸi ve hijyen puanlanÄ±r.
+- DÃ¼ÅŸÃ¼k puan â†’ para cezasÄ±; Ã¼st Ã¼ste dÃ¼ÅŸÃ¼k puan â†’ 1 gÃ¼n dÃ¼kkan kapalÄ±.
+
+### 5.8 Ä°nÅŸa & YÃ¼kseltme
+Grid yerleÅŸim: saksÄ±lar, LED lambalar, damla sulama, nemlendirici, Ä±sÄ±tÄ±cÄ±, jeneratÃ¶r, kurutma rafÄ±, dÃ¼kkan raflarÄ±.
+Otomasyon orta seviyede gelir; zevkli iÅŸler (sarma, bong, hasat) hiÃ§ otomatikleÅŸmez.
+
+### 5.9 Ekonomi (baÅŸlangÄ±Ã§ dengesi)
+- BaÅŸlangÄ±Ã§: 2.000 â‚º, 6 saksÄ±, 3 tohum tÃ¼rÃ¼ Ã— 2.
+- Giderler: elektrik (gÃ¼nlÃ¼k, lamba sayÄ±sÄ±na baÄŸlÄ±), su (dere deposu bedava ama taÅŸÄ±ma gerekir), kÄ±ÅŸ Ä±sÄ±tma, tohum, ekipman.
+- Hedef: 3. gÃ¼nde kÃ¢ra geÃ§mek, 7. gÃ¼nde ilk lisans yÃ¼kseltmesi.
+
+### 5.10 Karakter Ã–zelleÅŸtirme
+Ten tonu (6), saÃ§ (6 model Ã— renk), sakal/bÄ±yÄ±k (5), Karadeniz giyimi: yaÄŸmurluk, Ã¶rgÃ¼ kazak, kasket,
+lastik Ã§izme (renkler). Ayna/dolap ile her zaman deÄŸiÅŸtirilebilir.
+
+---
+
+## 6. Karakterler & Komedi GÃ¶revleri
+
+| NPC | Rol | Komedi |
+|---|---|---|
+| **Muhtar RÃ¼stem** | HikÃ¢ye gÃ¶revleri, borÃ§ | Her ÅŸeye "hallederuk" der, hiÃ§bir ÅŸeyi halletmez |
+| **Fadime Abla** | Kahvehane, hava tahmini, dedikodu | Radyo hava tahminleri hep tersi Ã§Ä±kar |
+| **Hayri Hoca** | Emekli Ã¶ÄŸretmen, tÄ±bbi mÃ¼ÅŸteri | Her alÄ±ÅŸveriÅŸte ders verir |
+| **Cemil** | KomÅŸu, absÃ¼rt gÃ¶revler | Ä°neÄŸi iÃ§in "rahatlatÄ±cÄ±" ister (vermezsin) |
+| **Hans** | Alman turist | Yaylaya yerleÅŸmek ister, TÃ¼rkÃ§esi felaket |
+| **Nevzat Bey** | DenetÃ§i | Ciddi; GaftÃ® Modu'nda Ã§ok komik konuÅŸur |
+
+**GÃ¶rev zinciri (Ã¶rnek ilk hafta):** SerayÄ± temizle â†’ Ä°lk hasat â†’ Muhtar'a "numune" â†’ DÃ¼kkanÄ± aÃ§ â†’
+Hans'Ä±n ilk sipariÅŸi â†’ Ä°lk denetim â†’ Lisans 2. Her gÃ¶rev 1â€“3 dk'lÄ±k bir skeÃ§le biter.
+
+---
+
+## 7. Kamera & Kontroller
+
+**Vadide:** 3. ÅŸahÄ±s omuz Ã¼stÃ¼ kamera. **Mini oyunlarda:** sabit yakÄ±n Ã§ekim kameraya yumuÅŸak geÃ§iÅŸ.
+
+| Eylem | PC | Mobil |
+|---|---|---|
+| Hareket | WASD | Sol sanal joystick |
+| Kamera | Fare | SaÄŸ yarÄ± ekran sÃ¼rÃ¼kleme |
+| EtkileÅŸim | E / Sol tÄ±k | BaÄŸlamsal etkileÅŸim butonu |
+| KoÅŸ | Shift | Joystick'i sonuna kadar it |
+| Envanter | Tab | Ã‡anta ikonu |
+| Ä°nÅŸa modu | B | MenÃ¼ butonu |
+| Mini oyun | Fare sÃ¼rÃ¼kle/Ã§evir | Parmakla aynÄ± hareketler |
+
+---
+
+## 8. MaÄŸaza, Gelir & Derecelendirme
+
+- **Gelir:** PC'de Steam Ã¼cretli + ayrÄ± demo. Mobilde Ã¼cretsiz demo (Ä°lkbahar, 7 gÃ¼n) + tek seferlik "Tam SÃ¼rÃ¼m" satÄ±n alÄ±mÄ± (Play Billing).
+- **Derecelendirme:** 18+ (uyuÅŸturucu kullanÄ±mÄ± tasviri). IARC anketi dÃ¼rÃ¼st doldurulacak.
+- **Risk notu:** Ä°Ã§me sahneleri her platformda aÃ§Ä±k; bu Play Store'da red riskini yÃ¼kseltir. Teknik sigorta olarak
+  tÃ¼m iÃ§me iÃ§eriÄŸi tek bir `content_flags.consumption` bayraÄŸÄ±na baÄŸlÄ±dÄ±r (varsayÄ±lan: aÃ§Ä±k). Red gelirse
+  mobil derlemede bu bayrak kapatÄ±lÄ±p joint "satÄ±lÄ±k pre-roll", bong "dekor" moduna dÃ¼ÅŸer, ek iÅŸ gerekmez.
+- Reklam yok. GerÃ§ek marka/dispanser yok.
+
+---
+
+## 9. Teknik Mimari (Godot 4.7)
+
+- **Renderer:** Mobile (PC'de "YÃ¼ksek" grafik ayarÄ±nda ekstra sis/gÃ¶lge kalitesi).
+- **Dil:** GDScript, statik tipli. TÃ¼m metinler `tr()` + `localization/strings.csv`.
+
+**Autoload'lar:**
+| Ad | GÃ¶rev |
+|---|---|
+| `EventBus` | Sistemler arasÄ± sinyaller |
+| `GameClock` | Saat, gÃ¼n, faz, mevsim |
+| `Weather` | GÃ¼nlÃ¼k hava, tahmin, ortam efektleri |
+| `Economy` | Para, iÅŸlemler, gÃ¼n sonu raporu |
+| `Reputation` | Ä°tibar, lisans seviyesi, uyum puanÄ± |
+| `Inventory` | EÅŸyalar, Ã¼rÃ¼nler |
+| `QuestManager` | Komedi gÃ¶rev zinciri, diyalog tetikleri |
+| `SaveSystem` | KayÄ±t/yÃ¼kleme (uyuyunca otomatik) |
+| `Settings` | Grafik, ses, kontrol, gÃ¼n sÃ¼resi |
+| `ContentFlags` | Platform/iÃ§erik bayraklarÄ± |
+| `Effects` | GaftÃ® Modu ekran efektleri, post-process |
+
+**Veri (Resource):** `StrainData`, `PlantState`, `ItemData`, `CustomerProfile`, `QuestData`, `DialogueData`, `BuildableData`.
+
+**KlasÃ¶r yapÄ±sÄ±:**
+```
+res://
+â”œâ”€â”€ autoload/
+â”œâ”€â”€ data/            strains/ items/ customers/ quests/ dialogue/ buildables/
+â”œâ”€â”€ scenes/
+â”‚   â”œâ”€â”€ world/       valley.tscn, greenhouse/, town/, zones/
+â”‚   â”œâ”€â”€ player/      player.tscn, camera_rig.tscn, customization/
+â”‚   â”œâ”€â”€ plants/
+â”‚   â”œâ”€â”€ npc/
+â”‚   â”œâ”€â”€ minigames/   rolling/, gravity_bong/, care/, id_check/
+â”‚   â”œâ”€â”€ shop/
+â”‚   â””â”€â”€ ui/          hud/, menus/, mobile_controls/, dialogue/
+â”œâ”€â”€ scripts/         systems/ components/
+â”œâ”€â”€ shaders/         toon.gdshader, foliage_wind, fog_layer, gafti_post
+â”œâ”€â”€ assets/          models/ textures/ audio/ fonts/ logo/
+â”œâ”€â”€ localization/
+â””â”€â”€ tests/
+```
+
+**Performans bÃ¼tÃ§esi (mobil, orta segment Android):** 60 FPS hedef (min 30), ekranda â‰¤150 draw call,
+â‰¤300k Ã¼Ã§gen, bitki modelleri LOD0 â‰¤4k / LOD1 â‰¤1k Ã¼Ã§gen, doku atlaslarÄ± 2K.
+
+---
+
+## 10. Sanat Listesi (Ã¶ncelik + Ã¼retici)
+
+| VarlÄ±k | Detay | Ãœretici |
+|---|---|---|
+| **GAFTÄ° logosu** | Ã‡izgi film tarzÄ±, kalÄ±n yuvarlak harfler, Ä° noktasÄ± yaprak/duman; yeÅŸil + sÄ±cak turuncu. SVG + PNG + uygulama ikonu | Codex astra |
+| **Bitki** | 5 aÅŸama Ã— saÄŸlÄ±k varyasyonu, rÃ¼zgÃ¢r shader'Ä± | Codex astra |
+| **Kova bong seti** | Kova, kesik ÅŸiÅŸe, kase, su, duman | Codex astra |
+| **Joint seti** | Grinder, kaÄŸÄ±t, filtre, joint (sarÄ±m aÅŸamalarÄ±) | Codex astra |
+| **Oyuncu karakteri** | GÃ¶vde + Ã¶zelleÅŸtirme parÃ§alarÄ± + temel animasyonlar | Codex astra |
+| **Shader'lar** | Toon, foliage wind, sis katmanlarÄ±, GaftÃ® post-process | Codex astra |
+| Sera yapÄ±sÄ±, ev | AhÅŸap/cam yayla serasÄ± | Codex astra |
+| NPC'ler (6) | Karakter tabanÄ±ndan tÃ¼retilmiÅŸ | Codex sol |
+| Kasaba binalarÄ±, props | Kahvehane, muhtarlÄ±k, raflar, saksÄ±, lamba, Ã§it, aÄŸaÃ§ | Codex sol |
+| UI temasÄ± | Ä°konlar, paneller, font seÃ§imi | Codex astra (yÃ¶n) + sol (uygulama) |
+
+---
+
+## 11. MVP KapsamÄ± (bu geliÅŸtirme turunda)
+Vadinin tamamÄ± (blockout + ana modeller), 3. ÅŸahÄ±s kontrol (PC + mobil), sera + dÄ±ÅŸ tarla, bitki sistemi,
+Ã§aprazlama, kurutma, **joint sarma**, **kova bong + GaftÃ® Modu**, dÃ¼kkan + 4 mÃ¼ÅŸteri tipi + kimlik kontrolÃ¼,
+gÃ¼n/gece + mevsim + hava, lisans 1â€“3 + denetim, karakter Ã¶zelleÅŸtirme, ilk hafta komedi gÃ¶revleri (6 NPC),
+kayÄ±t/yÃ¼kleme, ayarlar, logo + ana menÃ¼, CC0 sesler.
+
+**MVP dÄ±ÅŸÄ± (sonra):** Lisans 4â€“5, motosiklet, Ä°ngilizce, Steam/Play entegrasyonu, satÄ±n alma, tam 28 gÃ¼nlÃ¼k gÃ¶rev zinciri.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '[Console]::OutputEncoding = [Text.UTF8Encoding]::new(); Get-Content AGENTS.md -Encoding UTF8 | Select-Object -Last 37; Get-Content GDD.md -Encoding UTF8 | Select-Object -First 60' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force; Get-ChildItem assets/models/town -Force; Get-ChildItem "$env:LOCALAPPDATA/Microsoft/WindowsApps" -Filter '"'*blender*'; Test-Path 'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'; Get-ChildItem scenes/world -Recurse -File | Select-Object -First 15 -ExpandProperty FullName" in C:\Users\31\Documents\we2
+ succeeded in 254ms:
+| `bong_bucket.glb` | Kova + su yüzeyi. Düğümler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet şişe + kapak-kase. Düğümler: `Bottle`, `Cap`, `Bowl`. Orijin şişenin altı |
+| `lighter.glb` | Çakmak. Düğümler: `Body`, `Wheel` |
+| `grinder.glb` | Düğümler: `Base`, `Lid` (Lid kendi ekseninde döner, orijini merkezde) |
+| `rolling_paper.glb` | Düz kağıt, `Paper` (sarılma için ≥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | Bitmiş joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. Armatür `Armature`, gövde `Body`. Seçmeli parçalar aynı armatüre bağlı: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boş), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | Ahşap + cam yayla serası, iç ölçü ~12×6 m, kapı +Z yönünde. İçeride saksı tezgahları. `Glass` düğümü ayrı (şeffaf materyal) |
+| `house.glb` | Dedenin ahşap Karadeniz evi (dış + basit iç: yatak, ayna, kanepe) |
+
+### Codex sol → `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTİ dükkanı, girilebilir, iç ~8×6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleşimi (Godot koordinatları, metre, Y yukarı)
+Arazi 260×260 m, merkez (0,0,0). Düz alanlar (pad) arazide bu noktalarda olmalı:
+| Bölge | Merkez (x, z) | Yükseklik y | Pad yarıçapı |
+|---|---|---|---|
+| Oyuncu başlangıcı / ev önü | (-62, 28) | 2 | — |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynı pad) |
+| Dış tarla | (-45, 48) | 2 | (aynı pad) |
+| Kurutma ambarı | (-78, 22) | 2 | (aynı pad) |
+| Kasaba meydanı | (60, 0) | 0 | 22 |
+| GAFTİ Dükkanı | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| Muhtarlık | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| Hırdavatçı | (42, -10) | 0 | (meydan) |
+| Minibüs durağı | (72, 48) | 0 | 6 |
+| Köprü & dere | (5, -45) | -1 | dere x yönünde değil, (−130,−60)→(130,−35) boyunca akar |
+| Ladin ormanı | (-45, -70) çevresi | — | ağaçlar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) → (0, 10) → meydan (40, 0); meydandan durağa (72, 48); meydandan köprüye (5,-45) → tepeye patika.
+Arazide yol düğümü `Road` (ayrı materyal), zemin `Ground`, dere yatağı `Creek`. Arazi kenarları dağlarla kapalı (oyuncu çıkamaz).
+# GAFTİ — Oyun Tasarım Dokümanı (GDD) v1.0
+
+> Karadeniz yaylasında lisanslı kenevir serası + dükkan işletme oyunu. Komedi tonlu, cozy ama sonuçlu.
+> Motor: Godot 4.7 · Platform: PC (Steam) + Mobil (Play Store) · Dil: Türkçe (çeviriye hazır) · Derecelendirme: 18+
+
+---
+
+## 1. Özet
+
+Şehirde her işi batırmış karakterimiz, kimsenin istemediği yayla serasını devralır ve **Pusludere**
+yaylasına taşınır. Sisli sabahlarda bitkilerine bakar, öğlen hasadını kurutup joint sarar, akşam kasaba
+meydanındaki dükkanında köylülere ve turistlere satış yapar. Gece serada kova bongla günü kapatır.
+Kasabanın tuhaf insanları, absürt görevleri ve kesintisiz bir yayla mizahı oyunu taşır.
+
+**Üç sütun:**
+1. **Dokunsal ustalık:** Bakım, sarma ve bong anları elle hissedilen mini oyunlardır.
+2. **Atmosfer:** Sis, yağmur, mevsimler, ahşap ve yeşil. Oyunun asıl hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeç. Ciddi bir ana hikâye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | İçerik |
+|---|---|
+| **Hikâye (Komedi)** | Ana hikâye yok; birbirine bağlı **komik görev zinciri** (NPC skeçleri). Oyunu öğretir, lisans seviyelerini açar. ~4 mevsim (28 gün). |
+| **Serbest** | Hikâye bittikten sonra ya da baştan: sonsuz işletme, tüm sistemler açık. |
+
+**Zorluk:** Cozy ama sonuçlu. Bitki ölebilir, para eksiye düşebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandırıcı) borç alınır.
+
+---
+
+## 3. Dünya: Pusludere Yaylası
+
+### 3.1 Harita (küçük açık vadi, yüklemesiz)
+```
+                 ⛰  KEKLİKTEPE (manzara, hikâye finali)
+                      │ patika
+        🌲 LADİN ORMANI ── 🌉 KÖPRÜ & DERE (su deposu dolumu)
+              │                      │
+ [DEDENİN SERASI + EV] ── çay bahçeli yol ── [KASABA MEYDANI]
+   ├ Sera (saksılar)                          ├ GAFTİ Dükkanı
+   ├ Dış tarla (mevsimsel)                    ├ Fadime'nin Kahvehanesi
+   ├ Kurutma ambarı                           ├ Muhtarlık
+   ├ Sarma masası                             ├ Lisans & Denetim Ofisi
+   └ Kova bong köşesi                         └ Hırdavatçı (ekipman/tohum)
+                                                   │
+                                          🚐 MİNİBÜS DURAĞI
+                                       (turistler, toptan siparişler)
+```
+- Sera → dükkan yürüme süresi ~40 sn; ilerleyen oyunda **eski motosiklet** (sürüş, ~15 sn).
+- Mobil: bölgeler `VisibilityRange` + streaming ile parça parça yüklenir; oyuncu yükleme ekranı görmez.
+
+### 3.2 Atmosfer
+- **Görsel stil:** Detaylı stilize. El boyaması hissi veren toon shading, yumuşak kenar ışığı, doygun yeşiller,
+  ahşap/taş dokuları, rüzgârla sallanan bitki shader'ı, katmanlı sis.
+- **Renk paleti:** Ladin yeşili, çay yeşili, ıslak taş grisi, ahşap kahvesi, sıcak lamba turuncusu (sera ışıkları).
+- **Ses:** Yağmurun çatıya vuruşu, dere, kuşlar, uzaktan inek çanı, kahvehanede tavla sesi. Müzik: lo-fi + kemençe
+  dokunuşlu sakin parçalar (CC0). Gece daha sakin bir müzik çalar, fırtınada müzik kısılır.
+
+ succeeded in 284ms:
+
+
+    Directory: C:\Users\31\Documents\we2
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        24.11.2026     12:22                assets                                                               
+d-----        24.11.2026     12:19                autoload                                                             
+d-----        24.11.2026     12:17                data                                                                 
+d-----        24.11.2026     12:17                localization                                                         
+d-----        24.11.2026     12:17                scenes                                                               
+d-----        24.11.2026     12:17                scripts                                                              
+d-----        24.11.2026     12:17                shaders                                                              
+d-----        24.11.2026     12:17                tests                                                                
+d-----        24.11.2026     12:22                tools                                                                
+-a----        24.11.2026     12:19          12663 AGENTS.md                                                            
+-a----        24.11.2026     12:18            718 CLAUDE.md                                                            
+-a----        24.11.2026     12:19            445 default_bus_layout.tres                                              
+-a----        24.11.2026     12:16          15142 GDD.md                                                               
+-a----        24.11.2026     12:17           1500 project.godot                                                        
+
+
+    Directory: C:\Users\31\AppData\Local\Microsoft\WindowsApps
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+d-----        12.11.2026     11:52                BlenderFoundation.Blender_ppwjx1n5r4v9t                              
+-a---l        12.11.2026     11:52              0 blender-launcher.exe                                                 
+True
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Build Pusludere's buildings, minibus, and bridge with matching GLB previews.\"\"\"
+
+from math import atan2, cos, pi, sin, sqrt
+from pathlib import Path
+from random import Random
+
+import bpy
+from mathutils import Vector
+
+ROOT = Path(__file__).resolve().parents[2]
+OUTPUT = ROOT / \"assets/models/town\"
+PREVIEWS = ROOT / \"tools/previews\"
+
+PALETTE = {
+    \"Stone\": (\"535959\", \"6E706A\", \"838078\", \"635C54\", \"92918A\"),
+    \"Cobbles\": (\"6D7470\", \"81857B\", \"777A73\", \"969185\"),
+    \"Timber\": (\"623C28\", \"764A30\", \"895338\", \"986543\", \"A3714D\"),
+    \"Gold wood\": (\"C18756\", \"A67045\", \"D29A66\"),
+    \"Dark\": (\"312D2A\",),
+    \"Cream\": (\"F3D9A9\",),
+    \"Window\": (\"305460\",),
+    \"Glint\": (\"618687\",),
+    \"Amber\": (\"FFB05B\",),
+    \"Copper\": (\"A5563A\", \"944630\", \"B46044\", \"AD553E\"),
+    \"Moss\": (\"426754\", \"395C50\", \"527763\", \"4C705B\"),
+    \"Blue\": (\"3E6875\", \"477684\", \"547B86\", \"40606C\"),
+    \"Zinc\": (\"626C71\", \"788185\", \"68777D\", \"899193\"),
+    \"Red\": (\"8F3E32\", \"A94732\", \"A7553A\"),
+    \"Ochre\": (\"BA793F\", \"C88949\", \"D89753\"),
+    \"Green\": (\"35754F\", \"428B5B\", \"3D7E53\"),
+    \"Lichen\": (\"758550\", \"96A35D\"),
+    \"Rubber\": (\"282E30\",),
+    \"Metal\": (\"ADAAA0\",),
+    \"Ivory\": (\"E8E0CA\",),
+}
+
+parts = {}
+materials = {}
+rng = Random(23)
+
+
+def linear_color(hex_code):
+    channels = (int(hex_code[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    return tuple(c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in channels)
+
+
+def material(name, color, roughness=.82):
+    mat = bpy.data.materials.new(name)
+    mat.diffuse_color = (*linear_color(color), 1)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get(\"Principled BSDF\")
+    bsdf.inputs[\"Base Color\"].default_value = mat.diffuse_color
+    bsdf.inputs[\"Roughness\"].default_value = roughness
+    return mat
+
+
+def swatch(group, index=None):
+    colors = PALETTE[group]
+    color = rng.choice(colors) if index is None else colors[index % len(colors)]
+    key = (group, color)
+    if key not in materials:
+        materials[key] = material(f\"{group} {color}\", color, .35 if group == \"Window\" else .82)
+    return materials[key]
+
+
+def reset_scene():
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    parts.clear()
+    materials.clear()
+    rng.seed(23)
+
+
+def mesh(name, vertices, faces, mat=None):
+    data = bpy.data.meshes.new(name)
+    data.from_pydata(vertices, [], faces)
+    data.update()
+    obj = bpy.data.objects.new(name, data)
+    bpy.context.collection.objects.link(obj)
+    if mat:
+        data.materials.append(mat)
+    return obj
+
+
+def add_part(obj, group):
+    parts.setdefault(group, []).append(obj)
+    return obj
+
+
+def bevel(obj, amount, segments=1):
+    modifier = obj.modifiers.new(\"Soft edges\", \"BEVEL\")
+    modifier.width = amount
+    modifier.segments = segments
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
+def box(group, loc, size, color=None, soft=0, rotation=0):
+    x, y, z = (axis / 2 for axis in size)
+    obj = mesh(group, [(-x, -y, -z), (x, -y, -z), (x, y, -z), (-x, y, -z),
+                       (-x, -y, z), (x, -y, z), (x, y, z), (-x, y, z)],
+               [(3, 2, 1, 0), (0, 1, 5, 4), (1, 2, 6, 5), (2, 3, 7, 6),
+                (3, 0, 4, 7), (4, 5, 6, 7)], swatch(color) if color else None)
+    obj.location = loc
+    obj.rotation_euler.y = rotation
+    if soft:
+        bevel(obj, soft)
+    return add_part(obj, group)
+
+
+def beam(group, a, b, width, depth, color, soft=0):
+    a, b = Vector(a), Vector(b)
+    obj = box(group, (a + b) * .5, (width, depth, (b - a).length), color, soft)
+    obj.rotation_euler = (b - a).to_track_quat(\"Z\", \"Y\").to_euler()
+    return obj
+
+
+def tube(group, loc, radius, depth, color, axis=\"Z\", segments=12, soft=0):
+    rotation = (0, pi / 2, 0) if axis == \"X\" else (pi / 2, 0, 0) if axis == \"Y\" else (0, 0, 0)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=segments, radius=radius, depth=depth,
+                                       location=loc, rotation=rotation)
+    obj = bpy.context.object
+    obj.data.materials.append(swatch(color))
+    if soft:
+        bevel(obj, soft)
+    return add_part(obj, group)
+
+
+def letters(body, x, y, z, size, color=\"Cream\"):
+    curve = bpy.data.curves.new(body, \"FONT\")
+    curve.body = body
+    curve.align_x = \"CENTER\"
+    curve.align_y = \"CENTER\"
+    curve.size = size
+    curve.resolution_u = 2
+    curve.extrude = .002
+    obj = bpy.data.objects.new(body, curve)
+    bpy.context.collection.objects.link(obj)
+    obj.location = (x, y, z)
+    obj.rotation_euler.x = pi / 2
+    curve.materials.append(swatch(color))
+    bpy.ops.object.select_all(action=\"DESELECT\")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.convert(target=\"MESH\")
+    add_part(bpy.context.object, \"Sign\")
+
+
+def combine():
+    bpy.context.scene.cursor.location = (0, 0, 0)
+    result = []
+    for name, objects in parts.items():
+        bpy.ops.object.select_all(action=\"DESELECT\")
+        for obj in objects:
+            obj.select_set(True)
+        bpy.context.view_layer.objects.active = objects[0]
+        if len(objects) > 1:
+            bpy.ops.object.join()
+        obj = bpy.context.object
+        obj.name = name
+        obj.data.name = name
+        bpy.ops.object.origin_set(type=\"ORIGIN_CURSOR\")
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        result.append(obj)
+    return result
+
+
+def export(name, objects, limit):
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    bpy.ops.object.select_all(action=\"DESELECT\")
+    counts = {}
+    for obj in objects:
+        obj.select_set(True)
+        obj.data.calc_loop_triangles()
+        counts[obj.name] = len(obj.data.loop_triangles)
+    if sum(counts.values()) > limit:
+        raise ValueError(f\"{name}: {sum(counts.values())} triangles exceeds {limit}: {counts}\")
+    path = OUTPUT / f\"{name}.glb\"
+    bpy.ops.export_scene.gltf(filepath=str(path), export_format=\"GLB\", use_selection=True,
+                              export_yup=True, export_materials=\"EXPORT\", export_animations=False)
+    print(f\"TOWN_ASSET {name} {sum(counts.values())} {counts}\", flush=True)
+
+
+def camera(location, target, scale):
+    data = bpy.data.cameras.new(\"Preview camera\")
+    cam = bpy.data.objects.new(\"Preview camera\", data)
+    bpy.context.collection.objects.link(cam)
+    cam.location = location
+    cam.rotation_euler = (Vector(target) - cam.location).to_track_quat(\"-Z\", \"Y\").to_euler()
+    data.type = \"ORTHO\"
+    data.ortho_scale = scale
+    data.clip_end = 1800
+    bpy.context.scene.camera = cam
+    return cam
+
+
+def light(name, kind, location, target, energy, color, size):
+    data = bpy.data.lights.new(name, kind)
+    data.energy = energy
+    data.color = color
+    if kind == \"AREA\":
+        data.shape = \"DISK\"
+        data.size = size
+    else:
+        data.angle = size
+    obj = bpy.data.objects.new(name, data)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    obj.rotation_euler = (Vector(target) - obj.location).to_track_quat(\"-Z\", \"Y\").to_euler()
+
+
+def render(name):
+    PREVIEWS.mkdir(parents=True, exist_ok=True)
+    scene = bpy.context.scene
+    scene.render.engine = \"BLENDER_EEVEE\"
+    scene.eevee.taa_render_samples = 24
+    scene.render.resolution_x = scene.render.resolution_y = 512
+    scene.render.resolution_percentage = 100
+    scene.render.image_settings.file_format = \"PNG\"
+    scene.render.filepath = str(PREVIEWS / f\"{name}.png\")
+    scene.view_settings.view_transform = \"AgX\"
+    bpy.ops.render.render(write_still=True)
+
+
+def studio(name, scale, direction=(.62, -1, .64), target=(0, 0, 1.6)):
+    for obj in bpy.context.scene.objects:
+        if obj.name.endswith(\"-col\"):
+            obj.hide_render = True
+    bpy.context.scene.world = bpy.data.worlds.new(\"Studio\")
+    floor = mesh(\"Preview ground\", [(-100, -100, -.026), (100, -100, -.026),
+                                    (100, 100, -.026), (-100, 100, -.026)], [(0, 1, 2, 3)],
+                 material(\"Dried sage backdrop\", \"708478\"))
+    camera(Vector(target) + Vector(direction) * 15, target, scale)
+    light(\"Sun\", \"SUN\", (-8, -10, 16), (0, 0, 0), 2.6, (1, .83, .67), .16)
+    light(\"Sky\", \"AREA\", (2, -6, 10), target, 1600, (.69, .85, 1), 12)
+    light(\"Bounce\", \"AREA\", (-4, 7, 8), target, 2200, (1, .70, .47), 9)
+    if name == \"bridge\":
+        floor.location.z = -1.0
+    render(name)
+
+
+def window(x, y, z, w, h, trim, *, shutter=False, awning=False):
+    box(\"Windows\", (x, y + .025, z), (w, .13, h), \"Dark\", .035)
+    box(\"Windows\", (x, y - .05, z), (w - .14, .042, h - .14), \"Window\")
+    for side in (-1, 1):
+        box(\"Windows\", (x + side * (w / 2 - .035), y - .064, z), (.081, .13, h), trim, .013)
+        box(\"Windows\", (x, y - .064, z + side * (h / 2 - .035)), (w, .13, .08), trim, .014)
+        if shutter:
+            sx = x + side * (w / 2 + .16)
+            box(\"Shutters\", (sx, y - .065, z), (.29, .095, h - .06), trim, .022)
+            for offset in (-.23, 0, .23):
+                box(\"Shutters\", (sx, y - .12, z + offset * h), (.26, .04, .041), \"Gold wood\", .007)
+    box(\"Windows\", (x, y - .084, z), (.062, .07, h - .13), trim, .007)
+    box(\"Windows\", (x, y - .086, z - .08), (w - .14, .07, .059), trim, .007)
+    box(\"Windows\", (x, y - .09, z - h / 2 - .024), (w + .18, .23, .09), \"Gold wood\", .014)
+    for j in (-1, 1):
+        box(\"Windows\", (x + j * w * .24, y - .076, z + h * .25),
+            (w * .26, .008, .036), \"Glint\", rotation=-.44)
+    if awning:
+        for j in range(7):
+            shade = \"Cream\" if j % 2 else trim
+            px = x + (j - 3) * (w + .25) / 7
+            beam(\"Awning\", (px, y - .40, z + h / 2 + .06),
+                 (px, y - .02, z + h / 2 + .28), (w + .25) / 7, .039, shade)
+            box(\"Awning\", (px, y - .40, z + h / 2 + .015), ((w + .25) / 7, .039, .12), shade, .012)
+
+
+def masonry(x1, x2, y, bottom, top):
+    row_height = (top - bottom) / max(1, round((top - bottom) / .42))
+    for row in range(round((top - bottom) / row_height)):
+        x = x1
+        while x < x2 - .028:
+            step = min(x2 - x, rng.uniform(.43, .86) if x > x1 or row % 2 == 0 else .29)
+            if step < .10:
+                break
+            box(\"Stonework\", (x + step / 2, y + rng.uniform(-.025, .008),
+                              bottom + (row + .5) * row_height),
+                (step - .034, .14, row_height - .035), \"Stone\", .043)
+            x += step
+
+
+def roof(w, d, eave, rise, color, overhang=.57):
+    half = w / 2 + overhang
+    front, back = -d / 2 - overhang, d / 2 + overhang
+    spans = round((back - front) / .29)
+    for side in (-1, 1):
+        for i in range(spans):
+            spacing = (back - front) / spans
+            py = front + (i + .5) * spacing
+            beam(\"Roof\", (side * half, py, eave), (0, py, eave + rise),
+                 .080, spacing + .008, color)
+            beam(\"Roof seams\", (side * half, py - spacing / 2, eave + .053),
+                 (0, py - spacing / 2, eave + rise + .053), .043, .039, color)
+        for py in (front, back):
+            beam(\"Fascia\", (side * (half + .03), py, eave - .07), (0, py, eave + rise - .07),
+                 .16, .14, \"Gold wood\", .015)
+        box(\"Fascia\", (side * (half + .045), 0, eave - .10), (.15, back - front, .19),
+            \"Timber\", .025)
+    box(\"Roof\", (0, 0, eave + rise + .04), (.18, back - front + .1, .14), color, .048)
+
+
+def gable(w, d, eave, rise):
+    for side in (-1, 1):
+        y = side * d / 2
+        for i in range(-round(w / .48), round(w / .48) + 1):
+            x = i * .24
+            if abs(x) + .12 > w / 2:
+                continue
+            heights = [eave + rise * (1 - abs(v) / (w / 2 + .57)) - .18
+                       for v in (x - .115, x + .115)]
+            verts = [(x - .115, y - .043, eave - .13), (x + .115, y - .043, eave - .13),
+                     (x + .115, y - .043, heights[1]), (x - .115, y - .043, heights[0]),
+                     (x - .115, y + .043, eave - .13), (x + .115, y + .043, eave - .13),
+                     (x + .115, y + .043, heights[1]), (x - .115, y + .043, heights[0])]
+            obj = mesh(\"Gable\", verts, [(3, 2, 1, 0)[::-1], (4, 7, 6, 5)[::-1],
+                                        (0, 4, 5, 1)[::-1], (3, 2, 6, 7)[::-1],
+                                        (0, 3, 7, 4)[::-1], (1, 5, 6, 2)[::-1]], swatch(\"Timber\"))
+            add_part(obj, \"Gable\")
+
+
+# Each of the five storefronts keeps a clear opening and a prop-ready interior.
+BUILDINGS = {
+    \"shop_building\": (8.56, 6.56, 3.62, 1.39, 0, 1.84, \"Moss\", \"Green\", \"GAFTİ\"),
+    \"kahvehane\": (8.10, 5.85, 4.17, 1.47, -.78, 1.55, \"Copper\", \"Red\", \"FADİME'NİN KAHVEHANESİ\"),
+    \"muhtarlik\": (6.42, 5.40, 4.66, 2.02, 0, 1.48, \"Moss\", \"Moss\", \"MUHTARLIK\"),
+    \"hardware_store\": (7.94, 5.67, 3.49, 1.28, 1.0, 1.80, \"Zinc\", \"Ochre\", \"HIRDAVAT\"),
+    \"inspection_office\": (7.19, 5.86, 4.06, 1.51, 0, 1.55, \"Blue\", \"Blue\", \"LİSANS & DENETİM\"),
+    \"drying_barn\": (6.8, 5.8, 3.76, 1.76, 0, 2.20, \"Copper\", \"Timber\", None),
+}
+
+
+def wall(group, loc, size, color):
+    box(group, loc, size, color)
+    box(\"Shell-col\", loc, size)
+
+
+def building(name):
+    w, d, eave, rise, door_x, door_w, metal, trim, label = BUILDINGS[name]
+    front = -d / 2
+    ground = .018
+    door_h = 2.60 if name == \"drying_barn\" else 2.26
+    thesis = 1.03 if name "'!= "drying_barn" else .68
+    back_center = d / 2 - .14
+    wall("Floor", (0, 0, ground - .19), (w, d, .38), "Dark")
+    for i in range(round(w / .28)):
+        step = (w - .56) / round(w / .28)
+        x = -(w - .56) / 2 + (i + .5) * step
+        box("Floorboards", (x, 0, .028), (step - .004, d - .27, .02), "Gold wood")
+    for side in (-1, 1):
+        x = side * (w / 2 - .14)
+        wall("Walls", (x, 0, eave / 2), (.28, d - .56, eave), "Timber")
+        # Boards on the long sides define the rain screen above the stone plinth.
+        for i in range(round((d - .46) / .29)):
+            step = (d - .46) / round((d - .46) / .29)
+            y = -(d - .46) / 2 + (i + .5) * step
+            box("Cladding", (side * w / 2, y, (eave + thesis) / 2),
+                (.09, step - .016, eave - thesis), "Timber")
+        for row in range(2):
+            columns = round((d - .48) / .60)
+            step = (d - .48) / columns
+            for i in range(columns):
+                y = -(d - .48) / 2 + (i + .5) * step + (.09 if row and i < columns - 1 else 0)
+                box("Stonework", (side * w / 2, y, (row + .5) * thesis / 2),
+                    (.13, step - .039, thesis / 2 - .034), "Stone", .037)
+        box("Frame", (side * (w / 2 + .055), 0, thesis + .035), (.145, d + .15, .14),
+            "Gold wood", .022)
+    wall("Walls", (0, back_center, eave / 2), (w, .28, eave), "Timber")
+    for y in (front - .025, -front + .025):
+        for x in (-w / 2 + .035, w / 2 - .035):
+            box("Frame", (x, y, eave / 2), (.25, .23, eave), "Gold wood", .025)
+    left, right = door_x - door_w / 2, door_x + door_w / 2
+    for x1, x2 in [(-w / 2, left), (right, w / 2)]:
+        wall("Walls", ((x1 + x2) / 2, front + .14, eave / 2),
+             (x2 - x1, .28, eave), "Timber")
+        masonry(x1 + .08, x2 - .08, front - .012, 0, thesis)
+        planks = round((x2 - x1) / .23)
+        for i in range(planks):
+            step = (x2 - x1) / planks
+            box("Cladding", (x1 + (i + .5) * step, front - .012, (thesis + eave) / 2),
+                (step - .011, .065, eave - thesis), "Timber")
+        box("Frame", ((x1 + x2) / 2, front - .075, thesis + .025),
+            (x2 - x1, .16, .15), "Gold wood", .019)
+    wall("Walls", (door_x, front + .14, (door_h + eave) / 2),
+         (door_w, .28, eave - door_h), "Timber")
+    for side in (-1, 1):
+        box("Doorframe", (door_x + side * (door_w / 2 + .055), front - .07, door_h / 2),
+            (.17, .25, door_h), trim, .025)
+    box("Doorframe", (door_x, front - .084, door_h + .035), (door_w + .25, .26, .17), trim, .028)
+    box("Threshold", (door_x, front + .045, .014), (door_w, .67, .055), "Cobbles", .013)
+    box("Threshold-col", (door_x, front + .045, .014), (door_w, .67, .055))
+
+    if name == "drying_barn":
+        for x in (-2.1, 2.1):
+            for offset in (-.18, 0, .18):
+                box("Vents", (x + offset, front - .056, 2.68), (.11, .03, .61), "Dark", .012)
+            beam("Frame", (x - .72, front - .093, 1.08), (x + .61, front - .093, 2.35),
+                 .14, .13, "Gold wood", .012)
+        for y in (front + .16, -front - .11):
+            for x in (-3.2, 3.2):
+                box("Footings", (x, y, .15), (.42, .58, .30), "Stone", .043)
+    else:
+        openings = [(-w / 2, left), (right, w / 2)]
+        for x1, x2 in openings:
+            width = min((x2 - x1) - .50, 2.16 if name == "shop_building" else 1.63)
+            window((x1 + x2) / 2, front - .09, 1.67, width, .99, trim,
+                   shutter=name in ("kahvehane", "muhtarlik"), awning=name == "shop_building")
+        sign_width = {
+            "shop_building": 2.81, "kahvehane": 5.78, "muhtarlik": 2.79,
+            "hardware_store": 2.55, "inspection_office": 4.19,
+        }[name]
+        sign_x = 0 if name in ("kahvehane", "inspection_office") else door_x
+        sign_z = 2.78 if name != "kahvehane" else 2.87
+        box("Sign", (sign_x, front - .145, sign_z), (sign_width, .17, .56), "Gold wood", .04)
+        box("Sign", (sign_x, front - .243, sign_z), (sign_width - .14, .075, .43), trim, .022)
+        letters(label, sign_x, front - .285, sign_z,
+                .42 if name == "shop_building" else .30)
+        for side in (-1, 1):
+            tube("Sign", (sign_x + side * (sign_width / 2 - .135), front - .294, sign_z),
+                 .025, .021, "Amber", axis="Y", segments=8)
+    specialize_building(name, w, d, eave, rise, front, trim)
+    gable(w, d, eave, rise)
+    roof(w, d, eave, rise, metal)
+    box("Ceiling-col", (0, 0, eave - .135), (w, d, .17))
+
+
+def lantern(x, y, z):
+    box("Lanterns", (x, y + .12, z + .22), (.14, .37, .08), "Dark", .014)
+    box("Lanterns", (x, y, z), (.20, .20, .33), "Amber", .027)
+    for dx in (-.094, .094):
+        for dy in (-.094, .094):
+            box("Lanterns", (x + dx, y + dy, z), (.028, .028, .34), "Dark")
+    for dz in (-.17, .17):
+        box("Lanterns", (x, y, z + dz), (.245, .245, .052), "Dark", .016)
+
+
+def specialize_building(name, w, d, eave, rise, front, trim):
+    if name == "shop_building":
+        for x in (-1.68, 1.68):
+            lantern(x, front - .23, 2.34)
+        chimney(2.65, .91, eave + .15)
+    elif name == "kahvehane":
+        window(0, front - .10, 3.64, 1.22, .56, "Gold wood", shutter=True)
+        chimney(-1.98, 1.07, eave + .77)
+        # Fixed porch bench and striped canvas canopy sit clear of the doorway.
+        for x in (1.24, 3.02):
+            box("Porch", (x, front - .72, .26), (.12, .39, .52), "Timber", .02)
+        box("Porch", (2.13, front - .72, .52), (2.05, .42, .09), "Gold wood", .024)
+        box("Porch-col", (2.13, front - .72, .27), (2.05, .42, .54))
+        for i in range(12):
+            x = 2.12 + (i - 5.5) * .285
+            color = "Cream" if i % 2 else "Red"
+            beam("Canopy", (x, front - 1.00, 2.48), (x, front - .08, 2.62), .285, .042, color)
+            box("Canopy", (x, front - 1.00, 2.406), (.285, .046, .15), color, .021)
+        for x in (.46, 3.78):
+            beam("Canopy", (x, front, 2.10), (x, front - .94, 2.46), .067, .074, "Timber")
+    elif name == "muhtarlik":
+        window(0, front - .10, 3.58, 1.31, 1.02, "Gold wood", shutter=True)
+        for x in (-2.04, 2.04):
+            beam("Frame", (0, front - .12, 4.39), (x, front - .12, 3.27),
+                 .16, .10, "Gold wood", .019)
+        x = 1.38
+        beam("Banner", (x, front, 2.61), (x, front - .66, 3.18), .061, .061, "Dark")
+        box("Banner", (x, front - .59, 2.82), (.33, .055, .51), "Red", .013)
+        tube("Banner", (x, front - .626, 2.85), .095, .012, "Cream", axis="Y", segments=16)
+        tube("Banner", (x + .034, front - .634, 2.87), .077, .010, "Red", axis="Y", segments=16)
+    elif name == "hardware_store":
+        for side in (-1, 1):
+            lantern(1.0 + side * 1.46, front - .24, 2.41)
+        for x, z, size in [(-2.91, .25, .48), (-2.29, .29, .56), (-2.29, .72, .36)]:
+            box("Crates", (x, front - .46, z), (size, .48, size), "Timber", .033)
+            for zz in (z - size * .36, z + size * .36):
+                box("Crates", (x, front - .709, zz), (size, .055, .065), "Gold wood", .015)
+        box("Crates-col", (-2.60, front - .46, .29), (1.10, .48, .58))
+        box("Crates-col", (-2.29, front - .46, .72), (.36, .48, .36))
+    elif name == "inspection_office":
+        for x in (-2.0, 2.0):
+            window(x, front - .07, 3.44, .92, .53, "Blue")
+        for x in (-1.06, 1.06):
+            lantern(x, front - .24, 2.29)
+        box("Frame", (0, front - .08, 3.94), (w, .13, .14), "Blue", .025)
+    else:
+        for side in (-1, 1):
+            for y in (-d / 2 + .47, 0, d / 2 - .47):
+                box("Frame", (side * w / 2, y, eave * .52), (.19, .21, eave * .86), "Gold wood", .018)
+        window(0, front - .06, 3.36, .82, .48, trim, shutter=True)
+
+
+def chimney(x, y, z):
+    box("Chimney", (x, y, z), (.56, .65, 1.29), "Stone", .055)
+    for dz in (-.36, -.09, .18, .45):
+        box("Chimney", (x, y, z + dz), (.61, .69, .063), "Cobbles", .026)
+    box("Chimney", (x, y, z + .62), (.76, .79, .13), "Dark", .04)
+    box("Chimney", (x, y, z + .689), (.43, .46, .015), "Stone", .008)
+
+
+def bus_stop():
+    w, d = 4.52, 2.30
+    box("Platform", (0, 0, -.09), (w, d, .22), "Cobbles", .057)
+    box("Platform-col", (0, 0, -.09), (w, d, .22))
+    for x in (-1.97, 1.97):
+        for y in (-.87, .86):
+            wall("Frame", (x, y, 1.16), (.19, .19, 2.32), "Gold wood")
+            box("Footings", (x, y, .13), (.34, .34, .26), "Stone", .042)
+            beam("Frame", (x, y, 1.96), (x * .83, y, 2.31), .14, .14, "Timber", .017)
+    for i in range(16):
+        box("Backrest", ((i - 7.5) * .237, .90, .94), (.221, .123, 1.81), "Timber", .020)
+    box("Back-col", (0, .90, .94), (3.79, .123, 1.81))
+    for x in (-1.28, 1.28):
+        box("Bench", (x, .46, .26), (.23, .42, .49), "Stone", .043)
+    for y in (.25, .43, .61):
+        box("Bench", (0, y, .53), (3.08, .167, .10), "Gold wood", .029)
+    box("Bench-col", (0, .43, .28), (3.08, .61, .56))
+    box("Sign", (0, -.97, 2.26), (2.20, .16, .38), "Moss", .032)
+    letters("PUSLUDERE", 0, -1.059, 2.26, .27)
+    box("Timetable", (1.30, .817, 1.50), (.56, .097, .50), "Cream", .019)
+    for i in range(4):
+        box("Timetable", (1.25, .763, 1.61 - i * .075), (.25, .012, .014), "Ochre")
+        box("Timetable", (1.43, .763, 1.61 - i * .075), (.052, .012, .015), "Dark")
+    box("Ceiling-col", (0, 0, 2.38), (4.55, 2.35, .16))
+    roof(w, d, 2.48, .74, "Copper", overhang=.31)
+
+
+def skin_between(group, sections, colors):
+    count = len(sections[0])
+    vertices = [vertex for section in sections for vertex in section]
+    faces = [tuple(reversed(range(count)))]
+    for j in range(len(sections) - 1):
+        for i in range(count):
+            faces.append((j * count + i, j * count + (i + 1) % count,
+                          (j + 1) * count + (i + 1) % count, (j + 1) * count + i))
+    faces.append(tuple(range(len(vertices) - count, len(vertices))))
+    obj = mesh(group, vertices, faces)
+    for color in colors:
+        obj.data.materials.append(swatch(color, 0))
+    if len(colors) == 2:
+        for face in obj.data.polygons:
+            face.material_index = int(face.center.z > 1.37)
+    add_part(obj, group)
+    return obj
+
+
+def minibus():
+    section = [(-.90, .40), (-1.04, .55), (-1.08, 1.37), (-1.07, 2.16),
+               (-.99, 2.40), (-.78, 2.54), (.78, 2.54), (.99, 2.40), (1.07, 2.16),
+               (1.08, 1.37), (1.04, .55), (.90, .40)]
+    # Moving from rear (+Y in Blender) to nose keeps the section winding outward.
+    rings = []
+    for y, sx, sz in ((2.48, .88, .94), (2.35, 1, 1), (-1.96, 1, 1),
+                      (-2.34, .97, .93), (-2.49, .85, .82)):
+        rings.append([(x * sx, y, .40 + (z - .40) * sz) for x, z in section])
+    skin_between("Body", rings, ["Green", "Ivory"])
+    box("Body-col", (0, 0, 1.30), (2.12, 4.88, 2.51))
+    for side in (-1, 1):
+        x = side * 1.08
+        box("Beltline", (x, .03, 1.38), (.051, 4.62, .105), "Green", .015)
+        for y, width in ((-1.68, .54), (-.96, .67), (-.08, .91), (.96, 1.01), (1.88, .69)):
+            box("Windows", (x, y, 1.90), (.083, width, .65), "Dark", .050)
+            box("Windows", (x + side * .045, y, 1.91), (.026, width - .13, .52), "Window", .026)
+            box("Windows", (x + side * .060, y + .075, 2.05), (.010, width * .54, .038), "Glint")
+        for y in (-1.53, 1.57):
+            tube("Wheel arches", (side * 1.05, y, .49), .56, .14, "Dark", axis="X", segments=18)
+            tube("Wheels", (side * 1.00, y, .435), .435, .30, "Rubber", axis="X", segments=18, soft=.047)
+            tube("Wheels", (side * 1.153, y, .435), .226, .034, "Ivory", axis="X", segments=14, soft=.017)
+            tube("Wheels", (side * 1.18, y, .435), .10, .025, "Metal", axis="X", segments=12)
+            for i in range(5):
+                angle = i * 2 * pi / 5
+                tube("Wheels", (side * 1.174, y + cos(angle) * .162, .435 + sin(angle) * .162),
+                     .024, .019, "Dark", axis="X", segments=6)
+        for y in (-1.84, -.62):
+            box("Trim", (side * 1.102, y, 1.26), (.048, .19, .041), "Metal", .013)
+        beam("Mirrors", (side * .98, -2.08, 1.99), (side * 1.35, -2.20, 1.94),
+             .050, .05, "Dark")
+        box("Mirrors", (side * 1.34, -2.21, 1.99), (.19, .12, .31), "Green", .030)
+        box("Mirrors", (side * 1.34, -2.14, 1.99), (.14, .025, .24), "Glint", .027)
+        tube("Lights", (side * .66, -2.495, 1.04), .199, .11, "Dark", axis="Y", segments=16, soft=.02)
+        tube("Lights", (side * .66, -2.558, 1.04), .159, .058, "Ivory", axis="Y", segments=16, soft=.027)
+        box("Lights", (side * .79, -2.48, .762), (.26, .12, .105), "Amber", .026)
+        box("Lights", (side * .82, 2.47, .97), (.18, .13, .32), "Red", .041)
+    for x in (-.43, .43):
+        box("Windows", (x, -2.465, 1.77), (.79, .097, .57), "Dark", .045)
+        box("Windows", (x, -2.523, 1.78), (.69, .028, .47), "Window", .035)
+        beam("Wipers", (x - .25, -2.549, 1.58), (x + .16, -2.549, 1.74), .032, .029, "Dark")
+        box("Windows", (x + .03, -2.543, 1.94), (.42, .013, .050), "Glint", rotation=-.28)
+        box("Windows", (x, 2.465, 1.83), (.72, .096, .63), "Window", .045)
+    box("Grille", (0, -2.521, 1.03), (.87, .081, .31), "Dark", .045)
+    for i in range(4):
+        box("Grille", (0, -2.57, .932 + i * .063), (.72, .036, .019), "Metal", .007)
+    for y in (-2.50, 2.50):
+        box("Bumpers", (0, y, .49), (2.00, .20, .20), "Metal", .062)
+        box("Bumpers", (0, y * 1.022, .49), (1.68, .12, .09), "Dark", .026)
+    box("Sign", (0, -2.389, 2.117), (1.05, .074, .19), "Cream", .020)
+    letters("PUSLUDERE", 0, -2.432, 2.117, .132, color="Dark")
+    for x in (-.63, .63):
+        for y in (-.95, .83):
+            box("Roof rack", (x, y, 2.60), (.10, .10, .15), "Metal", .015)
+        box("Roof rack", (x, -.04, 2.70), (.047, 2.19, .047), "Metal", .012)
+    for y in (-1.05, -.63, -.21, .21, .63, 1.05):
+        box("Roof rack", (0, y, 2.69), (1.26, .041, .041), "Metal", .007)
+
+
+def bridge_height(y):
+    return 1 + .58 * (1 - (y / 5) ** 2) ** 1.5
+
+
+def arch_block(group, x, thickness, start, end, inside, outside, color, soft=.014):
+    points = [(start, inside), (end, inside), (end, outside), (start, outside)]
+    vertices = [(xx, 3.25 * radius * cos(angle), -.24 + 1.37 * radius * sin(angle))
+                for xx in (x - thickness / 2, x + thickness / 2) for angle, radius in points]
+    obj = mesh(group, vertices, [(0, 1, 2, 3), (7, 6, 5, 4), (4, 5, 1, 0),
+                                 (5, 6, 2, 1), (6, 7, 3, 2), (7, 4, 0, 3)], swatch(color))
+    if soft:
+        bevel(obj, soft)
+    add_part(obj, group)
+
+
+def bridge():
+    # The placed GLB origin sits at creek-bed height. Both ramp ends are 1 m higher.
+    angles = [i * pi / 16 for i in range(17)]
+    profile = sorted({-5, 5, -4.25, 4.25, *[3.25 * cos(a) for a in angles]})
+    sections = []
+    for y in profile:
+        under = -.24 + 1.37 * sqrt(max(0, 1 - (y / 3.25) ** 2))
+        sections.append([(-1.38, y, under), (-1.38, y, bridge_height(y)),
+                         (1.38, y, bridge_height(y)), (1.38, y, under)])
+    skin_between("Arch", sections, ["Stone"])
+    for i in range(16):
+        a0, a1 = angles[i], angles[i + 1]
+        for side in (-1, 1):
+            arch_block("Voussoirs", side * 1.37, .21, a0 + .009, a1 - .009, .995, 1.22, "Cobbles")
+    for side in (-1, 1):
+        for row in range(3):
+            for i in range(16):
+                y = (i - 7.5) * .61 + (.09 if row % 2 else 0)
+                top = bridge_height(y)
+                bottom = top - .24 - row * .21
+                inner_edge = max(0, abs(y) - .31)
+                if inner_edge < 3.95:
+                    arch_top = -.24 + 1.67 * sqrt(max(0, 1 - (inner_edge / 3.95) ** 2))
+                    if bottom < arch_top:
+                        continue
+                box("Spandrel", (side * 1.39, y, bottom + .085), (.16, .567, .18),
+                    "Stone", .031)
+        for i in range(16):
+            a = -5 + i * .625
+            b = a + .625
+            mid = (a + b) / 2
+            za, zb = bridge_height(a), bridge_height(b)
+            angle = atan2(za - zb, b - a)
+            # Box pitch is around X because the bridge crosses along Blender Y.
+            parapet = box("Parapets", (side * 1.25, mid, (za + zb) / 2 + .292),
+                          (.35, .616, .56), "Stone", .037)
+            parapet.rotation_euler.x = -angle
+            cap = box("Parapets", (side * 1.25, mid, (za + zb) / 2 + .602),
+                      (.43, .617, .13), "Cobbles", .035)
+            cap.rotation_euler.x = -angle
+            rail = box("Parapets-col", (side * 1.25, mid, (za + zb) / 2 + .32),
+                       (.38, .64, .66))
+            rail.rotation_euler.x = -angle
+            if i in (1, 4, 10, 14):
+                box("Lichen", (side * 1.477, mid, (za + zb) / 2 + .14), (.016, .20, .085),
+                    "Lichen", .007)
+        for y in (-4.81, 4.81):
+            box("End piers", (side * 1.25, y, 1.09), (.60, .43, 1.43), "Stone", .061)
+            box("End piers", (side * 1.25, y, 1.84), (.66, .48, .14), "Cobbles", .041)
+            box("Parapets-col", (side * 1.25, y, 1.09), (.57, .41, 1.60))
+    for i in range(23):
+        a, b = -5 + i * 10 / 23, -5 + (i + 1) * 10 / 23
+        y = (a + b) / 2
+        pitch = atan2(bridge_height(b) - bridge_height(a), b - a)
+        for j in range(5):
+            x = (j - 2) * .406 + (.041 if i % 2 else -.041)
+            obj = box("Cobbled deck", (x, y, bridge_height(y) + .026),
+                      (.385, b - a - .021, .055), "Cobbles", .015)
+            obj.rotation_euler.x = pitch
+    coords = [(x, y, bridge_height(y) + .048) for y in profile for x in (-1.14, 1.14)]
+    deck_faces = [(i, i + 1, i + 3, i + 2) for i in range(0, len(coords) - 2, 2)]
+    add_part(mesh("Deck-col", coords, deck_faces), "Deck-col")
+
+
+def main():
+    for name in (*BUILDINGS, "bus_stop", "minibus", "bridge"):
+        reset_scene()
+        if name in BUILDINGS:
+            building(name)
+        else:
+            globals()[name]()
+        objects = combine()
+        export(name, objects, 8000)
+        if name == "bridge":
+            studio(name, 12.0, (1.05, -.72, .53), (0, 0, .34))
+        elif name == "minibus":
+            studio(name, 6.55, (.86, -1, .49), (0, 0, 1.18))
+        elif name == "bus_stop":
+            studio(name, 6.37, (.54, -1, .61), (0, 0, 1.40))
+        else:
+            w, d, eave, rise, *_ = BUILDINGS[name]
+            studio(name, w + 2.9, (.50, -1, .52), (0, 0, (eave + rise) * .43))
+
+
+if __name__ == "__main__":
+    main()
+'"'@ | Set-Content -Encoding UTF8 tools/blender/town.py
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py
+" in C:\Users\31\Documents\we2
+ exited -1 in 0ms:
+Failed to create unified exec process: Dosya adı veya uzantısı çok uzun. (os error 206)
+2026-11-24T09:26:49.977337Z ERROR codex_core::tools::router: error=exec_command failed: CreateProcess { message: "Rejected(\"Failed to create unified exec process: Dosya adı veya uzantısı çok uzun. (os error 206)\")" }
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Generate Pusludere architecture and its GLB previews.\"\"\"
+from math import atan2, cos, pi, sin, sqrt
+from pathlib import Path
+from random import Random
+
+import bpy
+from mathutils import Vector
+
+ROOT = Path(__file__).resolve().parents[2]
+OUTPUT = ROOT / \"assets/models/town\"
+PREVIEWS = ROOT / \"tools/previews\"
+COLORS = {
+    \"Stone\": \"535959 6E706A 838078 635C54 92918A\",
+    \"Cobble\": \"6D7470 81857B 777A73 969185\",
+    \"Wood\": \"623C28 764A30 895338 986543 A3714D\",
+    \"Oak\": \"C18756 A67045 D29A66\", \"Dark\": \"312D2A\", \"Cream\": \"F3D9A9\",
+    \"Window\": \"305460\", \"Glint\": \"618687\", \"Amber\": \"FFB05B\",
+    \"Copper\": \"A5563A 944630 B46044 AD553E\", \"Moss\": \"426754 395C50 527763 4C705B\",
+    \"Blue\": \"3E6875 477684 547B86 40606C\", \"Zinc\": \"626C71 788185 68777D 899193\",
+    \"Red\": \"8F3E32 A94732 A7553A\", \"Ochre\": \"BA793F C88949 D89753\",
+    \"Green\": \"35754F 428B5B 3D7E53\", \"Lichen\": \"758550 96A35D\",
+    \"Rubber\": \"282E30\", \"Metal\": \"ADAAA0\", \"Ivory\": \"E8E0CA\",
+}
+pieces, materials = {}, {}
+rng = Random(23)
+
+
+def linear_color(code):
+    channels = (int(code[i:i + 2], 16) / 255 for i in (0, 2, 4))
+    return tuple(c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in channels)
+
+
+def material(name, code, roughness=.82):
+    mat = bpy.data.materials.new(name)
+    mat.diffuse_color = (*linear_color(code), 1)
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get(\"Principled BSDF\")
+    bsdf.inputs[\"Base Color\"].default_value = mat.diffuse_color
+    bsdf.inputs[\"Roughness\"].default_value = roughness
+    return mat
+
+
+def swatch(group):
+    code = rng.choice(COLORS[group].split())
+    if code not in materials:
+        materials[code] = material(f\"{group} {code}\", code, .35 if group == \"Window\" else .82)
+    return materials[code]
+
+
+def reset_scene():
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    pieces.clear()
+    materials.clear()
+    rng.seed(23)
+
+
+def mesh(name, vertices, faces, mat=None):
+    data = bpy.data.meshes.new(name)
+    data.from_pydata(vertices, [], faces)
+    data.update()
+    obj = bpy.data.objects.new(name, data)
+    bpy.context.collection.objects.link(obj)
+    if mat:
+        data.materials.append(mat)
+    return obj
+
+
+def part(obj, name):
+    pieces.setdefault(name, []).append(obj)
+    return obj
+
+
+def bevel(obj, amount):
+    if amount:
+        modifier = obj.modifiers.new(\"Soft edges\", \"BEVEL\")
+        modifier.width = amount
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+
+
+def box(name, loc, size, color=None, soft=0):
+    x, y, z = (axis / 2 for axis in size)
+    verts = [(-x,-y,-z), (x,-y,-z), (x,y,-z), (-x,y,-z),
+             (-x,-y,z), (x,-y,z), (x,y,z), (-x,y,z)]
+    faces = [(3,2,1,0), (0,1,5,4), (1,2,6,5), (2,3,7,6), (3,0,4,7), (4,5,6,7)]
+    obj = mesh(name, verts, faces, swatch(color) if color else None)
+    obj.location = loc
+    bevel(obj, soft)
+    return part(obj, name)
+
+
+def beam(name, a, b, width, depth, color, soft=0):
+    a, b = Vector(a), Vector(b)
+    obj = box(name, (a + b) / 2, (width, depth, (b - a).length), color, soft)
+    obj.rotation_euler = (b - a).to_track_quat(\"Z\", \"Y\").to_euler()
+    return obj
+
+
+def tube(name, loc, radius, depth, color, axis=\"Z\", segments=12, soft=0):
+    rotation = (0, pi / 2, 0) if axis == \"X\" else (pi / 2, 0, 0) if axis == \"Y\" else (0, 0, 0)
+    bpy.ops.mesh.primitive_cylinder_add(vertices=segments, radius=radius, depth=depth,
+                                       location=loc, rotation=rotation)
+    obj = bpy.context.object
+    obj.data.materials.append(swatch(color))
+    bevel(obj, soft)
+    return part(obj, name)
+
+
+def letters(body, x, y, z, size, color=\"Cream\"):
+    curve = bpy.data.curves.new(body, \"FONT\")
+    curve.body = body
+    curve.align_x = curve.align_y = \"CENTER\"
+    curve.size, curve.resolution_u = size, 2
+    obj = bpy.data.objects.new(body, curve)
+    bpy.context.collection.objects.link(obj)
+    obj.location, obj.rotation_euler.x = (x, y, z), pi / 2
+    curve.materials.append(swatch(color))
+    bpy.ops.object.select_all(action=\"DESELECT\")
+    obj.select_set(True)
+    bpy.context.view_layer.objects.active = obj
+    bpy.ops.object.convert(target=\"MESH\")
+    part(bpy.context.object, \"Sign\")
+
+
+def combine():
+    result = []
+    for name, objects in pieces.items():
+        bpy.ops.object.select_all(action=\"DESELECT\")
+        for obj in objects:
+            obj.select_set(True)
+        obj = bpy.context.view_layer.objects.active = objects[0]
+        if len(objects) > 1:
+            bpy.ops.object.join()
+        obj.name = obj.data.name = name
+        bpy.ops.object.origin_set(type=\"ORIGIN_CURSOR\")
+        bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+        result.append(obj)
+    return result
+
+
+def export(name, objects, limit):
+    OUTPUT.mkdir(parents=True, exist_ok=True)
+    bpy.ops.object.select_all(action=\"DESELECT\")
+    counts = {}
+    for obj in objects:
+        obj.select_set(True)
+        obj.data.calc_loop_triangles()
+        counts[obj.name] = len(obj.data.loop_triangles)
+    if sum(counts.values()) > limit:
+        raise ValueError(f\"{name}: {sum(counts.values())} triangles exceed {limit}: {counts}\")
+    bpy.ops.export_scene.gltf(filepath=str(OUTPUT / f\"{name}.glb\"), export_format=\"GLB\",
+                              use_selection=True, export_yup=True, export_animations=False)
+    print(f\"TOWN_ASSET {name} {sum(counts.values())} {counts}\", flush=True)
+
+
+def camera(location, target, scale):
+    data = bpy.data.cameras.new(\"Preview camera\")
+    cam = bpy.data.objects.new(\"Preview camera\", data)
+    bpy.context.collection.objects.link(cam)
+    cam.location = location
+    cam.rotation_euler = (Vector(target) - cam.location).to_track_quat(\"-Z\", \"Y\").to_euler()
+    data.type, data.ortho_scale, data.clip_end = \"ORTHO\", scale, 1800
+    bpy.context.scene.camera = cam
+    return cam
+
+
+def light(name, kind, location, target, energy, color, size):
+    data = bpy.data.lights.new(name, kind)
+    data.energy, data.color = energy, color
+    if kind == \"AREA\":
+        data.shape, data.size = \"DISK\", size
+    else:
+        data.angle = size
+    obj = bpy.data.objects.new(name, data)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    obj.rotation_euler = (Vector(target) - obj.location).to_track_quat(\"-Z\", \"Y\").to_euler()
+
+
+def render(name):
+    PREVIEWS.mkdir(parents=True, exist_ok=True)
+    scene = bpy.context.scene
+    scene.render.engine = \"BLENDER_EEVEE\"
+    scene.eevee.taa_render_samples = 24
+    scene.render.resolution_x = scene.render.resolution_y = 512
+    scene.render.resolution_percentage = 100
+    scene.render.image_settings.file_format = \"PNG\"
+    scene.render.filepath = str(PREVIEWS / f\"{name}.png\")
+    scene.view_settings.view_transform = \"AgX\"
+    bpy.ops.render.render(write_still=True)
+
+
+def studio(name, scale, direction, target):
+    for obj in bpy.context.scene.objects:
+        if obj.name.endswith(\"-col\"):
+            obj.hide_render = True
+    bpy.context.scene.world = bpy.data.worlds.new(\"Studio\")
+    z = -.93 if name == \"bridge\" else -.025
+    mesh(\"Backdrop\", [(-100,-100,z), (100,-100,z), (100,100,z), (-100,100,z)],
+         [(0,1,2,3)], material(\"Dried sage\", \"708478\"))
+    camera(Vector(target) + Vector(direction) * 15, target, scale)
+    light(\"Sun\", \"SUN\", (-8,-10,16), (0,0,0), 2.6, (1,.83,.67), .16)
+    light(\"Sky\", \"AREA\", (2,-6,10), target, 1600, (.69,.85,1), 12)
+    light(\"Bounce\", \"AREA\", (-4,7,8), target, 2300, (1,.70,.47), 9)
+    render(name)
+
+
+def window(x, y, z, w, h, trim, shutter=False, awning=False):
+    box(\"Windows\", (x,y,z), (w,.14,h), \"Dark\", .032)
+    box(\"Windows\", (x,y-.079,z), (w-.13,.03,h-.13), \"Window\")
+    for side in (-1, 1):
+        box(\"Windows\", (x+side*(w/2-.036),y-.067,z), (.085,.13,h), trim, .013)
+        box(\"Windows\", (x,y-.067,z+side*(h/2-.036)), (w,.13,.08), trim, .014)
+        if shutter:
+            sx = x + side * (w / 2 + .16)
+            box(\"Shutters\", (sx,y-.065,z), (.29,.095,h-.04), trim, .022)
+            for offset in (-.23, 0, .23):
+                box(\"Shutters\", (sx,y-.12,z+offset*h), (.25,.04,.039), \"Oak\", .007)
+    box(\"Windows\", (x,y-.092,z), (.062,.07,h-.13), trim, .007)
+    box(\"Windows\", (x,y-.095,z-.06), (w-.14,.07,.052), trim, .007)
+    box(\"Windows\", (x,y-.09,z-h/2-.025), (w+.18,.23,.09), \"Oak\", .014)
+    for j in (-1, 1):
+        obj = box(\"Windows\", (x+j*w*.24,y-.098,z+h*.24), (w*.26,.009,.036), \"Glint\")
+        obj.rotation_euler.y = -.42
+    if awning:
+        canopy(x, y, z + h / 2, w + .25, .44, 7, trim)
+
+
+def canopy(x, y, z, w, reach, panels, trim):
+    for j in range(panels):
+        shade = \"Cream\" if j % 2 else trim
+        px = x + (j + .5 - panels / 2) * w / panels
+        beam(\"Canopy\", (px,y-reach,z+.07), (px,y,z+.29), w/panels, .048, shade)
+        box(\"Canopy\", (px,y-reach,z+.025), (w/panels,.045,.13), shade, .012)
+
+
+def masonry(x1, x2, y, top):
+    for row in range(2):
+        x = x1
+        while x < x2 - .10:
+            step = min(x2 - x, rng.uniform(.48,.86) if x > x1 or not row else .31)
+            box(\"Stonework\", (x+step/2,y+rng.uniform(-.025,.008),(row+.5)*top/2),
+                (step-.033,.15,top/2-.035), \"Stone\", .044)
+            x += step
+
+
+def roof(w, d, eave, rise, color, overhang=.57):
+    half, length = w / 2 + overhang, d + 2 * overhang
+    spans = round(length / .31)
+    for side in (-1, 1):
+        for i in range(spans):
+            spacing = length / spans
+            y = -length / 2 + (i + .5) * spacing
+            beam(\"Roof\", (side*half,y,eave), (0,y,eave+rise), .084, spacing+.008, color)
+            y -= spacing / 2
+            beam(\"Roof seams\", (side*half,y,eave+.055), (0,y,eave+rise+.055), .042,.038,color)
+        for y in (-length/2, length/2):
+            beam(\"Fascia\", (side*(half+.02),y,eave-.09), (0,y,eave+rise-.09), .176,.14,\"Oak\",.016)
+        box(\"Fascia\", (side*(half+.035),0,eave-.12), (.15,length,.19), \"Wood\", .024)
+    box(\"Roof\", (0,0,eave+rise+.04), (.18,length+.10,.14), color, .04)
+
+
+def gables(w, d, eave, rise):
+    for side in (-1, 1):
+        y, count = side * d / 2, round(w / .24)
+        for i in range(count):
+            a, b = (i - count / 2) * w / count, (i + 1 - count / 2) * w / count - .013
+            za, zb = [eave + rise * (1 - abs(x) / (w / 2 + .57)) - .09 for x in (a,b)]
+            verts = [(a,y-.044,eave-.12),(b,y-.044,eave-.12),(b,y-.044,zb),(a,y-.044,za),
+                     (a,y+.044,eave-.12),(b,y+.044,eave-.12),(b,y+.044,zb),(a,y+.044,za)]
+            faces = [(0,1,2,3),(7,6,5,4),(0,4,5,1),(3,2,6,7),(0,3,7,4),(1,5,6,2)]
+            part(mesh(\"Gables\", verts, faces, swatch(\"Wood\")), \"Gables\")
+'@ | Set-Content -Encoding UTF8 tools/blender/town.py" in C:\Users\31\Documents\we2
+ succeeded in 510ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+BUILDINGS = {
+    \"shop_building\": (8.56, 6.56, 3.62, 1.39, 0, 1.84, \"Moss\", \"Green\", \"GAFTİ\"),
+    \"kahvehane\": (8.10, 5.85, 4.17, 1.47, -.78, 1.55, \"Copper\", \"Red\", \"FADİME'NİN KAHVEHANESİ\"),
+    \"muhtarlik\": (6.42, 5.40, 4.66, 2.02, 0, 1.48, \"Moss\", \"Moss\", \"MUHTARLIK\"),
+    \"hardware_store\": (7.94, 5.67, 3.49, 1.28, 1, 1.80, \"Zinc\", \"Ochre\", \"HIRDAVAT\"),
+    \"inspection_office\": (7.19, 5.86, 4.06, 1.51, 0, 1.55, \"Blue\", \"Blue\", \"LİSANS & DENETİM\"),
+    \"drying_barn\": (6.8, 5.8, 3.76, 1.76, 0, 2.20, \"Copper\", \"Wood\", None),
+}
+
+
+def wall(name, loc, size, color):
+    box(name, loc, size, color)
+    box(\"Shell-col\", loc, size)
+
+
+def building(name):
+    w, d, eave, rise, door_x, door_w, metal, trim, label = BUILDINGS[name]
+    front = -d / 2
+    door_h, plinth = (2.60, .68) if name == \"drying_barn\" else (2.26, 1.03)
+    wall(\"Floor\", (0,0,-.172), (w,d,.38), \"Dark\")
+    for i in range(round(w/.28)):
+        step = (w-.56) / round(w/.28)
+        x = -(w-.56)/2 + (i+.5)*step
+        box(\"Floorboards\", (x,0,.028), (step-.004,d-.27,.02), \"Oak\")
+    wall(\"Walls\", (0,-front-.14,eave/2), (w,.28,eave), \"Wood\")
+    for side in (-1, 1):
+        x = side * (w / 2 - .14)
+        wall(\"Walls\", (x,0,eave/2), (.28,d-.56,eave), \"Wood\")
+        for i in range(round(d/.29)):
+            step = (d-.46) / round(d/.29)
+            y = -(d-.46)/2 + (i+.5)*step
+            box(\"Cladding\", (side*w/2,y,(eave+plinth)/2),
+                (.09,step-.013,eave-plinth), \"Wood\")
+        for row in range(2):
+            count = round((d-.46)/.66)
+            for i in range(count):
+                step = (d-.46) / count
+                y = -(d-.46)/2 + (i+.5)*step + (.073 if row and i < count-1 else 0)
+                box(\"Stonework\", (side*w/2,y,(row+.5)*plinth/2), (.13,step-.038,plinth/2-.039), \"Stone\", .042)
+        box(\"Frame\", (side*(w/2+.055),0,plinth+.035), (.145,d+.15,.14), \"Oak\", .022)
+    left, right = door_x-door_w/2, door_x+door_w/2
+    for x1, x2 in ((-w/2,left),(right,w/2)):
+        wall(\"Walls\", ((x1+x2)/2,front+.14,eave/2), (x2-x1,.28,eave), \"Wood\")
+        masonry(x1+.08, x2-.08, front-.012, plinth)
+        count = round((x2-x1)/.23)
+        for i in range(count):
+            step = (x2-x1) / count
+            box(\"Cladding\", (x1+(i+.5)*step,front-.011,(plinth+eave)/2),
+                (step-.011,.065,eave-plinth), \"Wood\")
+        box(\"Frame\", ((x1+x2)/2,front-.075,plinth+.027), (x2-x1,.16,.15), \"Oak\", .018)
+    wall(\"Walls\", (door_x,front+.14,(door_h+eave)/2), (door_w,.28,eave-door_h), \"Wood\")
+    for x in (-w/2+.045, w/2-.045):
+        for y in (front-.02, -front+.02):
+            box(\"Frame\", (x,y,eave/2), (.25,.23,eave), \"Oak\", .025)
+    for side in (-1,1):
+        box(\"Doorframe\", (door_x+side*(door_w/2+.068),front-.07,door_h/2),
+            (.17,.25,door_h), trim, .025)
+    box(\"Doorframe\", (door_x,front-.084,door_h+.040), (door_w+.25,.26,.17), trim, .027)
+    box(\"Threshold\", (door_x,front+.042,.013), (door_w,.67,.052), \"Cobble\", .013)
+    box(\"Threshold-col\", (door_x,front+.042,.013), (door_w,.67,.052))
+    if label:
+        for x1, x2 in ((-w/2,left),(right,w/2)):
+            width = min(x2-x1-.49, 2.16 if name == \"shop_building\" else 1.63)
+            window((x1+x2)/2, front-.09, 1.67, width, .99, trim,
+                   name in (\"kahvehane\",\"muhtarlik\"), name == \"shop_building\")
+        sign_width = {\"shop_building\":2.81,\"kahvehane\":5.78,\"muhtarlik\":2.79,
+                      \"hardware_store\":2.55,\"inspection_office\":4.19}[name]
+        sx = 0 if name in (\"kahvehane\",\"inspection_office\") else door_x
+        sz = 2.87 if name == \"kahvehane\" else 2.78
+        sign(label, sx, front-.145, sz, sign_width, .56, trim, .42 if name==\"shop_building\" else .30)
+    customize(name, front, w, d, eave)
+    gables(w, d, eave, rise)
+    roof(w, d, eave, rise, metal)
+    box(\"Ceiling-col\", (0,0,eave-.135), (w,d,.17))
+    box(\"Ceiling\", (0,0,eave-.135), (w,d,.15), \"Wood\")
+
+
+def sign(label, x, y, z, w, h, color, size):
+    box(\"Sign\", (x,y,z), (w,.17,h), \"Oak\", .036)
+    box(\"Sign\", (x,y-.098,z), (w-.14,.075,h-.13), color, .022)
+    letters(label, x, y-.141, z, size)
+    for side in (-1, 1):
+        tube(\"Sign\", (x+side*(w/2-.135),y-.15,z), .025,.021,\"Amber\",\"Y\",8)
+
+
+def lantern(x, y, z):
+    box(\"Lanterns\", (x,y+.12,z+.22), (.14,.37,.08), \"Dark\", .014)
+    box(\"Lanterns\", (x,y,z), (.20,.20,.33), \"Amber\", .027)
+    for dx in (-.094,.094):
+        for dy in (-.094,.094):
+            box(\"Lanterns\", (x+dx,y+dy,z), (.028,.028,.34), \"Dark\")
+    for dz in (-.17,.17):
+        box(\"Lanterns\", (x,y,z+dz), (.245,.245,.052), \"Dark\", .016)
+
+
+def chimney(x, y, z):
+    box(\"Chimney\", (x,y,z), (.56,.65,1.29), \"Stone\", .055)
+    for dz in (-.36,-.09,.18,.45):
+        box(\"Chimney\", (x,y,z+dz), (.60,.69,.062), \"Cobble\", .021)
+    box(\"Chimney\", (x,y,z+.62), (.76,.79,.13), \"Dark\", .039)
+
+
+def customize(name, front, w, d, eave):
+    if name == \"shop_building\":
+        for x in (-1.68,1.68):
+            lantern(x,front-.23,2.34)
+        chimney(2.65,.91,eave+.15)
+    elif name == \"kahvehane\":
+        window(0, front-.10, 3.64, 1.22, .56, \"Oak\", True)
+        chimney(-1.98,1.07,eave+.77)
+        for x in (1.24,3.02):
+            box(\"Porch\", (x,front-.72,.26), (.12,.39,.52), \"Wood\", .02)
+        box(\"Porch\", (2.13,front-.72,.52), (2.05,.42,.09), \"Oak\", .024)
+        box(\"Porch-col\", (2.13,front-.72,.27), (2.05,.42,.54))
+        canopy(2.11, front-.09, 2.27, 3.31, .91, 12, \"Red\")
+        for x in (.46,3.76):
+            beam(\"Canopy\",(x,front,2.10),(x,front-.94,2.34),.067,.074,\"Wood\")
+    elif name == \"muhtarlik\":
+        window(0, front-.10, 3.58, 1.31, 1.02, \"Oak\", True)
+        for x in (-2.04,2.04):
+            beam(\"Frame\",(0,front-.12,4.39),(x,front-.12,3.27),.16,.10,\"Oak\",.019)
+        x = 1.70
+        beam(\"Banner\",(x,front,2.61),(x,front-.66,3.18),.061,.061,\"Dark\")
+        box(\"Banner\",(x,front-.59,2.82),(.33,.055,.51),\"Red\",.013)
+        tube(\"Banner\",(x,front-.624,2.85),.095,.012,\"Cream\",\"Y\",16)
+        tube(\"Banner\",(x+.034,front-.634,2.87),.077,.010,\"Red\",\"Y\",16)
+    elif name == \"hardware_store\":
+        for x in (-.47,2.47):
+            lantern(x,front-.24,2.41)
+        for x,z,size in ((-2.91,.25,.48),(-2.29,.29,.56),(-2.29,.72,.36)):
+            box(\"Crates\",(x,front-.46,z),(size,.48,size),\"Wood\",.033)
+            for zz in (z-size*.36,z+size*.36):
+                box(\"Crates\",(x,front-.71,zz),(size,.055,.065),\"Oak\",.015)
+        box(\"Crates-col\",(-2.60,front-.46,.29),(1.10,.48,.58))
+        box(\"Crates-col\",(-2.29,front-.46,.72),(.36,.48,.36))
+    elif name == \"inspection_office\":
+        for x in (-2,2):
+            window(x,front-.07,3.44,.92,.53,\"Blue\")
+        for x in (-1.06,1.06):
+            lantern(x,front-.24,2.29)
+        box(\"Frame\",(0,front-.08,3.94),(w,.13,.14),\"Blue\",.025)
+    else:
+        for x in (-2.10,2.10):
+            for offset in (-.18,0,.18):
+                box(\"Vents\",(x+offset,front-.056,2.68),(.11,.03,.61),\"Dark\",.012)
+            beam(\"Frame\",(x-.72,front-.093,1.08),(x+.61,front-.093,2.35),.14,.13,\"Oak\",.012)
+        for side in (-1,1):
+            for y in (-d/2+.47,0,d/2-.47):
+                box(\"Frame\",(side*w/2,y,eave*.52),(.19,.21,eave*.86),\"Oak\",.018)
+        window(0,front-.06,3.36,.82,.48,\"Wood\",True)
+
+
+def bus_stop():
+    w, d = 4.52, 2.30
+    wall(\"Platform\",(0,0,-.09),(w,d,.22),\"Cobble\")
+    for x in (-1.97,1.97):
+        for y in (-.87,.86):
+            wall(\"Frame\",(x,y,1.16),(.19,.19,2.32),\"Oak\")
+            box(\"Footings\",(x,y,.13),(.34,.34,.26),\"Stone\",.042)
+            beam(\"Frame\",(x,y,1.96),(x*.83,y,2.31),.14,.14,\"Wood\",.017)
+    for i in range(16):
+        box(\"Back wall\",((i-7.5)*.237,.90,.94),(.221,.123,1.81),\"Wood\",.020)
+    box(\"Back-col\",(0,.90,.94),(3.79,.123,1.81))
+    for x in (-1.28,1.28):
+        box(\"Bench\",(x,.46,.26),(.23,.42,.49),\"Stone\",.043)
+    for y in (.25,.43,.61):
+        box(\"Bench\",(0,y,.53),(3.08,.167,.10),\"Oak\",.029)
+    box(\"Bench-col\",(0,.43,.28),(3.08,.61,.56))
+    sign(\"PUSLUDERE\",0,-.96,2.24,2.20,.39,\"Moss\",.27)
+    box(\"Timetable\",(1.30,.817,1.50),(.56,.097,.50),\"Cream\",.019)
+    for i in range(4):
+        box(\"Timetable\",(1.25,.763,1.61-i*.075),(.25,.012,.014),\"Ochre\")
+        box(\"Timetable\",(1.43,.763,1.61-i*.075),(.052,.012,.015),\"Dark\")
+    box(\"Ceiling-col\",(0,0,2.38),(4.55,2.35,.16))
+    roof(w,d,2.48,.74,\"Copper\",.31)
+'@ | Add-Content -Encoding UTF8 tools/blender/town.py" in C:\Users\31\Documents\we2
+ succeeded in 238ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+def loft(name, rings, colors, split_height=None):
+    count = len(rings[0])
+    verts = [point for ring in rings for point in ring]
+    faces = [tuple(range(count - 1,-1,-1))]
+    for j in range(len(rings)-1):
+        for i in range(count):
+            a, b = j * count + i, j * count + (i+1) % count
+            faces.append((a,b,b+count,a+count))
+    faces.append(tuple(range(len(verts)-count,len(verts))))
+    obj = mesh(name, verts, faces)
+    for color in colors:
+        obj.data.materials.append(swatch(color))
+    if split_height is not None:
+        for face in obj.data.polygons:
+            face.material_index = int(face.center.z > split_height)
+    return part(obj,name)
+
+
+def minibus():
+    profile = [(-.90,.40),(-1.04,.55),(-1.08,1.37),(-1.07,2.16),(-.99,2.40),(-.78,2.54),
+               (.78,2.54),(.99,2.40),(1.07,2.16),(1.08,1.37),(1.04,.55),(.90,.40)]
+    rings = [[(x*sx,y,.40+(z-.40)*sz) for x,z in profile]
+             for y,sx,sz in ((2.48,.88,.94),(2.35,1,1),(-1.96,1,1),(-2.34,.97,.93),(-2.49,.85,.82))]
+    loft(\"Body\", rings, (\"Green\",\"Ivory\"), 1.37)
+    box(\"Body-col\",(0,0,1.28),(2.12,4.88,2.56))
+    for side in (-1,1):
+        x = side*1.08
+        box(\"Beltline\",(x,.03,1.38),(.051,4.62,.105),\"Green\",.015)
+        for y,width in ((-1.68,.54),(-.96,.67),(-.08,.91),(.96,1.01),(1.88,.69)):
+            box(\"Windows\",(x,y,1.90),(.083,width,.65),\"Dark\",.05)
+            box(\"Windows\",(x+side*.045,y,1.91),(.026,width-.13,.52),\"Window\",.026)
+            box(\"Windows\",(x+side*.060,y+.075,2.05),(.010,width*.54,.038),\"Glint\")
+        for y in (-1.53,1.57):
+            tube(\"Wheel arches\",(side*1.05,y,.52),.53,.14,\"Dark\",\"X\",18)
+            tube(\"Wheels\",(side*1.00,y,.435),.435,.30,\"Rubber\",\"X\",18,.047)
+            tube(\"Wheels\",(side*1.153,y,.435),.226,.034,\"Ivory\",\"X\",14,.017)
+            tube(\"Wheels\",(side*1.18,y,.435),.10,.025,\"Metal\",\"X\",12)
+            for i in range(5):
+                angle = i*2*pi/5
+                tube(\"Wheels\",(side*1.174,y+cos(angle)*.162,.435+sin(angle)*.162),
+                     .024,.019,\"Dark\",\"X\",6)
+        for y in (-1.84,-.62):
+            box(\"Trim\",(side*1.106,y,1.24),(.048,.19,.041),\"Metal\",.013)
+        beam(\"Mirrors\",(side*.98,-2.08,1.99),(side*1.35,-2.20,1.94),.05,.05,\"Dark\")
+        box(\"Mirrors\",(side*1.34,-2.21,1.99),(.19,.12,.31),\"Green\",.030)
+        box(\"Mirrors\",(side*1.34,-2.14,1.99),(.14,.025,.24),\"Glint\",.027)
+        tube(\"Lights\",(side*.66,-2.495,1.04),.199,.11,\"Dark\",\"Y\",16,.020)
+        tube(\"Lights\",(side*.66,-2.558,1.04),.159,.058,\"Ivory\",\"Y\",16,.025)
+        box(\"Lights\",(side*.79,-2.48,.762),(.26,.12,.105),\"Amber\",.026)
+        box(\"Lights\",(side*.82,2.47,.97),(.18,.13,.32),\"Red\",.039)
+    for x in (-.43,.43):
+        box(\"Windows\",(x,-2.465,1.76),(.79,.097,.57),\"Dark\",.045)
+        box(\"Windows\",(x,-2.522,1.77),(.69,.028,.47),\"Window\",.035)
+        beam(\"Wipers\",(x-.25,-2.549,1.58),(x+.16,-2.549,1.74),.032,.029,\"Dark\")
+        glint = box(\"Windows\",(x+.03,-2.542,1.93),(.42,.013,.050),\"Glint\")
+        glint.rotation_euler.y = -.28
+        box(\"Windows\",(x,2.465,1.83),(.72,.096,.63),\"Window\",.045)
+    box(\"Grille\",(0,-2.521,1.03),(.87,.081,.31),\"Dark\",.045)
+    for i in range(4):
+        box(\"Grille\",(0,-2.569,.932+i*.063),(.72,.036,.019),\"Metal\",.007)
+    for y in (-2.50,2.50):
+        box(\"Bumpers\",(0,y,.49),(2,.20,.20),\"Metal\",.062)
+        box(\"Bumpers\",(0,y*1.022,.49),(1.68,.12,.09),\"Dark\",.026)
+    box(\"Sign\",(0,-2.493,2.075),(1.05,.075,.17),\"Cream\",.021)
+    letters(\"PUSLUDERE\",0,-2.535,2.075,.133,\"Dark\")
+    for x in (-.63,.63):
+        for y in (-.95,.83):
+            box(\"Roof rack\",(x,y,2.60),(.10,.10,.15),\"Metal\",.015)
+        box(\"Roof rack\",(x,-.04,2.70),(.047,2.19,.047),\"Metal\",.012)
+    for y in (-1.05,-.63,-.21,.21,.63,1.05):
+        box(\"Roof rack\",(0,y,2.69),(1.26,.041,.041),\"Metal\",.007)
+
+
+def bridge_height(y):
+    return 1 + .58 * (1 - (y / 5) ** 2) ** 1.5
+
+
+def arch_stone(x, start, end):
+    points = [(start,1),(end,1),(end,1.23),(start,1.23)]
+    verts = [(xx,3.25*r*cos(a),-.24+1.37*r*sin(a))
+             for xx in (x-.10,x+.10) for a,r in points]
+    faces = [(3,2,1,0),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]
+    obj = mesh(\"Voussoirs\", verts, faces, swatch(\"Cobble\"))
+    bevel(obj,.014)
+    part(obj,\"Voussoirs\")
+
+
+def bridge():
+    # Place the origin at creek-bed height. Both ramp ends sit about 1 m above it.
+    angles = [i*pi/16 for i in range(17)]
+    profile = sorted({-5,5,-4.25,4.25,*[3.25*cos(a) for a in angles]})
+    sections = []
+    for y in reversed(profile):
+        under = -.24 + 1.37 * sqrt(max(0,1-(y/3.25)**2))
+        sections.append([(-1.38,y,under),(-1.38,y,bridge_height(y)),
+                         (1.38,y,bridge_height(y)),(1.38,y,under)])
+    loft(\"Arch\", sections, (\"Stone\",))
+    for side in (-1,1):
+        for a,b in zip(angles,angles[1:]):
+            arch_stone(side*1.37,a+.010,b-.010)
+        for row in range(4):
+            for i in range(16):
+                y = (i-7.5)*.61 + (.09 if row%2 else 0)
+                bottom = bridge_height(y)-.25-row*.21
+                edge = max(0,abs(y)-.30)
+                arch_top = -.24+1.69*sqrt(max(0,1-(edge/4)**2))
+                if bottom >= arch_top:
+                    box(\"Spandrel\",(side*1.38,y,bottom+.086),(.14,.567,.18),\"Stone\",.031)
+        for i in range(16):
+            a, b = -5+i*.625, -5+(i+1)*.625
+            y = (a+b)/2
+            za, zb = bridge_height(a), bridge_height(b)
+            z = (za+zb)/2
+            pitch = atan2(zb-za,b-a)
+            for name, height, size, color, soft in (
+                    (\"Parapets\",.292,(.35,.616,.56),\"Stone\",.037),
+                    (\"Parapets\",.602,(.43,.617,.13),\"Cobble\",.035),
+                    (\"Parapets-col\",.32,(.38,.64,.66),None,0)):
+                box(name,(side*1.25,y,z+height),size,color,soft).rotation_euler.x = pitch
+            if i in (1,4,10,14):
+                box(\"Lichen\",(side*1.45,y,z+.14),(.016,.20,.085),\"Lichen\",.007)
+        for y in (-4.81,4.81):
+            box(\"End piers\",(side*1.25,y,1.09),(.60,.43,1.43),\"Stone\",.061)
+            box(\"End piers\",(side*1.25,y,1.84),(.66,.48,.14),\"Cobble\",.041)
+            box(\"Parapets-col\",(side*1.25,y,1.09),(.57,.41,1.60))
+    for i in range(23):
+        a,b = -5+i*10/23, -5+(i+1)*10/23
+        y = (a+b)/2
+        pitch = atan2(bridge_height(b)-bridge_height(a),b-a)
+        for j in range(5):
+            x = (j-2)*.406 + (.041 if i%2 else -.041)
+            tile = box(\"Cobbled deck\",(x,y,bridge_height(y)+.026),(.385,b-a-.021,.055),\"Cobble\",.015)
+            tile.rotation_euler.x = pitch
+    coords = [(x,y,bridge_height(y)+.048) for y in profile for x in (-1.14,1.14)]
+    faces = [(i,i+1,i+3,i+2) for i in range(0,len(coords)-2,2)]
+    part(mesh(\"Deck-col\",coords,faces),\"Deck-col\")
+
+
+def main():
+    for name in (*BUILDINGS,\"bus_stop\",\"minibus\",\"bridge\"):
+        reset_scene()
+        if name in BUILDINGS:
+            building(name)
+        else:
+            globals()[name]()
+        export(name,combine(),8000)
+        if name == \"bridge\":
+            studio(name,11.6,(1.05,-.62,.50),(0,0,.43))
+        elif name == \"minibus\":
+            studio(name,6.25,(.86,-1,.49),(0,0,1.17))
+        elif name == \"bus_stop\":
+            studio(name,6.25,(.54,-1,.56),(0,0,1.38))
+        else:
+            w,d,eave,rise,*_ = BUILDINGS[name]
+            studio(name,w+2.35,(.50,-1,.52),(0,0,(eave+rise)*.43))
+
+
+if __name__ == \"__main__\":
+    main()
+'@ | Add-Content -Encoding UTF8 tools/blender/town.py
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py" in C:\Users\31\Documents\we2
+ succeeded in 5695ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem assets/models/town; Get-ChildItem tools/previews; Get-Process '*blender*' | Select-Object Id,ProcessName; Get-Command python" in C:\Users\31\Documents\we2
+ succeeded in 490ms:
+
+
+    Directory: C:\Users\31\Documents\we2\tools\previews
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:29         292520 bed.png                                                              
+-a----        24.11.2026     12:28         290576 bench.png                                                            
+-a----        24.11.2026     12:27         302579 bong_bottle.png                                                      
+-a----        24.11.2026     12:27         340344 bong_bucket.png                                                      
+-a----        24.11.2026     12:28         301089 cash_register.png                                                    
+-a----        24.11.2026     12:28         288694 character_raincoat.png                                               
+-a----        24.11.2026     12:28         286024 character_shirt.png                                                  
+-a----        24.11.2026     12:28         285455 character_sweater.png                                                
+-a----        24.11.2026     12:28         288835 counter.png                                                          
+-a----        24.11.2026     12:29         301343 crate.png                                                            
+-a----        24.11.2026     12:28         335456 drying_rack.png                                                      
+-a----        24.11.2026     12:28         263929 fence.png                                                            
+-a----        24.11.2026     12:27         317091 filter_tip.png                                                       
+-a----        24.11.2026     12:28         321177 generator.png                                                        
+-a----        24.11.2026     12:26         345513 greenhouse.png                                                       
+-a----        24.11.2026     12:27         326325 grinder.png                                                          
+-a----        24.11.2026     12:28         221494 grow_lamp.png                                                        
+-a----        24.11.2026     12:27         362164 house.png                                                            
+-a----        24.11.2026     12:28         266550 jar.png                                                              
+-a----        24.11.2026     12:28         286277 joint.png                                                            
+-a----        24.11.2026     12:28         230412 lamp_post.png                                                        
+-a----        24.11.2026     12:27         314218 lighter.png                                                          
+-a----        24.11.2026     12:25          42076 logo_icon.png                                                        
+-a----        24.11.2026     12:25          64124 logo_wordmark.png                                                    
+-a----        24.11.2026     12:29         246952 mirror.png                                                           
+-a----        24.11.2026     12:27         353025 plant_flower.png                                                     
+-a----        24.11.2026     12:27         282101 plant_germ.png                                                       
+-a----        24.11.2026     12:27         360197 plant_harvest.png                                                    
+-a----        24.11.2026     12:27         295040 plant_seedling.png                                                   
+-a----        24.11.2026     12:27         346356 plant_veg.png                                                        
+-a----        24.11.2026     12:28         287237 pot.png                                                              
+-a----        24.11.2026     12:29        6827155 props_sheet.png                                                      
+-a----        24.11.2026     12:28         259773 rock_01.png                                                          
+-a----        24.11.2026     12:28         263999 rock_02.png                                                          
+-a----        24.11.2026     12:27         273901 rolling_paper.png                                                    
+-a----        24.11.2026     12:28         304814 rolling_table.png                                                    
+-a----        24.11.2026     12:28         310396 rolling_tray.png                                                     
+-a----        24.11.2026     12:28         306811 shelf_shop.png                                                       
+-a----        24.11.2026     12:29         288446 sofa.png                                                             
+-a----        24.11.2026     12:28         279885 spruce_tree.png                                                      
+-a----        24.11.2026     12:29         304598 tavla_table.png                                                      
+-a----        24.11.2026     12:28         299773 tea_bush.png                                                         
+-a----        24.11.2026     12:28         265507 watering_can.png                                                     
+-a----        24.11.2026     12:28         295899 water_tank.png                                                       
+
+Id          : 21172
+ProcessName : blender
+
+
+Id          : 6088
+ProcessName : mcp-for-blender
+
+
+Id          : 24392
+ProcessName : mcp-for-blender
+
+
+Id          : 31104
+ProcessName : mcp-for-blender
+
+
+Id          : 33816
+ProcessName : mcp-for-blender
+
+
+Id          : 34364
+ProcessName : mcp-for-blender
+
+
+Path               : C:\Users\31\AppData\Local\Programs\Python\Python311\python.exe
+Extension          : .exe
+Definition         : C:\Users\31\AppData\Local\Programs\Python\Python311\python.exe
+Source             : C:\Users\31\AppData\Local\Programs\Python\Python311\python.exe
+Version            : 3.11.1150.1013
+Visibility         : Public
+OutputType         : {System.String}
+Name               : python.exe
+CommandType        : Application
+ModuleName         : 
+Module             : 
+RemotingCapability : PowerShell
+Parameters         : 
+ParameterSets      : 
+HelpUri            : 
+FileVersionInfo    : File:             C:\Users\31\AppData\Local\Programs\Python\Python311\python.exe
+                     InternalName:     Python Console
+                     OriginalFilename: python.exe
+                     FileVersion:      3.11.1
+                     FileDescription:  Python
+                     Product:          Python
+                     ProductVersion:   3.11.1
+                     Debug:            False
+                     Patched:          False
+                     PreRelease:       False
+                     PrivateBuild:     False
+                     SpecialBuild:     False
+                     Language:         Dilden Bağımsız
+                     
+
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem tools/blender -File | Select-Object Name,Length
+Get-ChildItem tools/codex_logs -File | Select-Object Name,Length
+Get-CimInstance Win32_Process -Filter \"name = 'blender.exe'\" | Select-Object ProcessId,CommandLine
+Get-Content tools/blender/town.py -Tail 6" in C:\Users\31\Documents\we2
+ succeeded in 392ms:
+
+Name                          Length
+----                          ------
+buildings_hero.py              20052
+character.py                   20204
+paraphernalia.py               18862
+plants.py                      13475
+props.py                       42487
+run_blender.ps1                  508
+town.py                        26460
+astra_buildings.log            72920
+astra_buildings_last.md          990
+astra_buildings_report.md       2827
+astra_character.log            86217
+astra_character_last.md         1038
+astra_character_report.md       3331
+astra_logo.log                 69010
+astra_logo_last.md              1069
+astra_logo_report.md            2109
+astra_paraphernalia.log        76737
+astra_paraphernalia_last.md      646
+astra_paraphernalia_report.md   2875
+astra_plants.log                   0
+astra_plants_last.md               0
+astra_plants_report.md          3268
+sol_audio.log                      0
+sol_audio_last.md                  0
+sol_props.log                      0
+sol_props_last.md                  0
+sol_town.log                       0
+sol_town_last.md                   0
+                                    
+            w,d,eave,rise,*_ = BUILDINGS[name]
+            studio(name,w+2.35,(.50,-1,.52),(0,0,(eave+rise)*.43))
+
+
+if __name__ == "__main__":
+    main()
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content tools/blender/props.py -Tail 55
+Get-Content tools/blender/buildings_hero.py -Tail 40
+Get-ChildItem tools/codex_prompts -File | Select-Object Name
+Get-ChildItem assets/models/town -Name' in C:\Users\31\Documents\we2
+ succeeded in 192ms:
+        pixels[y + caption:y + caption + SIZE, x:x + SIZE] = tile.reshape((SIZE, SIZE, 4))
+        bpy.data.images.remove(img)
+        label = name.upper()
+        left = x + (SIZE - (len(label) * 4 - 1) * unit) // 2
+        for letter_index, letter in enumerate(label):
+            for i, bit in enumerate(GLYPHS[letter]):
+                if bit == "1":
+                    gx = left + (letter_index * 4 + i % 3) * unit
+                    gy = y + 9 + (4 - i // 3) * unit
+                    pixels[gy:gy + unit, gx:gx + unit, :3] = (.88, .82, .70)
+    canvas = bpy.data.images.new("GAFTI Props", width=width, height=height, alpha=False)
+    canvas.pixels.foreach_set(pixels.ravel())
+    canvas.file_format = "PNG"
+    canvas.filepath_raw = str(PREVIEWS / "props_sheet.png")
+    canvas.save()
+
+
+def main():
+    MODELS.mkdir(parents=True, exist_ok=True)
+    PREVIEWS.mkdir(parents=True, exist_ok=True)
+    arguments = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    names = [argument for argument in arguments if not argument.startswith("--")]
+    unknown = set(names) - BUILDERS.keys()
+    if unknown:
+        raise ValueError(f"Unknown props: {sorted(unknown)}")
+    if "--sheet-only" in arguments:
+        sheet()
+        return
+    for name in names or BUILDERS:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        COLORS.clear()
+        COLORS.update(palette())
+        objects = BUILDERS[name]()
+        export(name, objects)
+        if "--export-only" not in arguments:
+            preview(name, objects)
+    if not names and "--export-only" not in arguments:
+        sheet()
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        # The Store launcher does not pass Blender's --python-exit-code.
+        import os
+        import tempfile
+        import traceback
+
+        diagnostic = Path(tempfile.gettempdir()) / "gafti_props_error.txt"
+        diagnostic.write_text(traceback.format_exc(), encoding="utf-8")
+        traceback.print_exc()
+        sys.stderr.flush()
+        os._exit(1)
+
+    for p,power,size in [((-6,-9,13),2600,8),((7,-4,8),1150,7),((0,8,12),2000,6)]:
+        bpy.ops.object.light_add(type='AREA',location=p)
+        light=bpy.context.object
+        light.data.energy=power
+        light.data.shape='DISK'
+        light.data.size=size
+        light.rotation_euler=(-light.location).to_track_quat('-Z','Y').to_euler()
+    target=Vector((0,0,1.5 if name=="greenhouse" else 3.15))
+    bpy.ops.object.camera_add(location=target+Vector((9,-17,8.2)))
+    camera=bpy.context.object
+    camera.rotation_euler=(target-camera.location).to_track_quat('-Z','Y').to_euler()
+    camera.data.type='ORTHO'
+    camera.data.ortho_scale=16.1 if name=='greenhouse' else 14.6
+    scene.camera=camera
+    scene.render.filepath=str(PREVIEW/(name+'.png'))
+    bpy.ops.render.render(write_still=True)
+
+
+def generate(name, builder):
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    parts.clear()
+    rng.seed(1912)
+    builder()
+    realize()
+    path=OUT/(name+".glb")
+    bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',export_yup=True,
+                              export_vertex_color='ACTIVE',export_cameras=False,export_lights=False)
+    raw=path.read_bytes()
+    length=struct.unpack_from('<I',raw,12)[0]
+    gltf=json.loads(raw[20:20+length])
+    tris=sum(gltf['accessors'][p['indices']]['count']//3 for m in gltf['meshes'] for p in m['primitives'])
+    assert tris<=8000,(name,tris)
+    print(name,tris,"triangles",flush=True)
+    preview(name)
+
+
+generate("greenhouse",greenhouse)
+generate("house",house)
+
+
+
+Name                  
+----                  
+astra_buildings.md    
+astra_character.md    
+astra_logo.md         
+astra_paraphernalia.md
+astra_plants.md       
+run.sh                
+sol_audio.md          
+sol_props.md          
+sol_town.md           
+_header.md            
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile = '"'tools/blender/town.py'
+"'$source = Get-Content $townFile -Raw -Encoding UTF8
+$source = $source.Replace('"'    main()', @'
+    try:
+        main()
+    except Exception:
+        import os
+        import tempfile
+        import traceback
+        diagnostic = Path(tempfile.gettempdir()) / \"gafti_town_error.txt\"
+        diagnostic.write_text(traceback.format_exc(), encoding=\"utf-8\")
+        traceback.print_exc()
+        os._exit(1)
+'@)
+Set-Content -Encoding UTF8 "'$townFile $source
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py
+Get-Content "$env:TEMP/gafti_town_error.txt" -ErrorAction SilentlyContinue' in C:\Users\31\Documents\we2
+ succeeded in 5653ms:
+Traceback (most recent call last):
+  File "C:\Users\31\Documents\we2\tools\blender\town.py", line 609, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\31\Documents\we2\tools\blender\town.py", line 595, in main
+    export(name,combine(),8000)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\Documents\we2\tools\blender\town.py", line 150, in export
+    raise ValueError(f"{name}: {sum(counts.values())} triangles exceed {limit}: {counts}")
+ValueError: shop_building: 9425 triangles exceed 8000: {'Floor': 12, 'Shell-col': 84, 'Floorboards': 372, 'Walls': 72, 'Cladding': 912, 'Stonework': 2552, 'Frame': 352, 'Doorframe': 132, 'Threshold': 44, 'Threshold-col': 12, 'Windows': 776, 'Canopy': 784, 'Sign': 213, 'Lanterns': 448, 'Chimney': 264, 'Gables': 864, 'Roof': 644, 'Roof seams': 600, 'Fascia': 264, 'Ceiling-col': 12, 'Ceiling': 12}
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile = '"'tools/blender/town.py'
+"'$source = Get-Content $townFile -Raw -Encoding UTF8
+$source = $source.Replace('"'def masonry(x1, x2, y, top):', @'
+def stone(loc, width, height, angle=0):
+    # An inset face and four chamfers cover the backing wall with ten triangles.
+    x, z, cut = width / 2, height / 2, .047
+    verts = [(-x,0,-z),(x,0,-z),(x,0,z),(-x,0,z),
+             (-x+cut,-.075,-z+cut),(x-cut,-.075,-z+cut),
+             (x-cut,-.075,z-cut),(-x+cut,-.075,z-cut)]
+    faces = [(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6,7)]
+    obj = mesh(\"Stonework\", verts, faces, swatch(\"Stone\"))
+    obj.location, obj.rotation_euler.z = loc, angle
+    part(obj,\"Stonework\")
+
+
+def masonry(x1, x2, y, top):
+'@)
+"'$source = $source.Replace(@'"'
+            box(\"Stonework\", (x+step/2,y+rng.uniform(-.025,.008),(row+.5)*top/2),
+                (step-.033,.15,top/2-.035), \"Stone\", .044)
+'@, @'
+            stone((x+step/2,y+rng.uniform(-.021,.006),(row+.5)*top/2),
+                  step-.033,top/2-.035)
+'@)
+"'$source = $source.Replace('"'box(\"Stonework\", (side*w/2,y,(row+.5)*plinth/2), (.13,step-.038,plinth/2-.039), \"Stone\", .042)', 'stone((side*w/2,y,(row+.5)*plinth/2), step-.038,plinth/2-.039,side*pi/2)')
+"'$source = $source.Replace('"'range(23)', 'range(19)').Replace('10/23','10/19').Replace('for j in range(5):
+            x = (j-2)*.406', 'for j in range(4):
+            x = (j-1.5)*.50')
+"'$source = $source.Replace("for j in range(5):`r`n            x = (j-2)*.406", "for j in range(4):`r`n            x = (j-1.5)*.50").Replace('"'(.385,b-a-.021,.055)','(.475,b-a-.021,.055)')
+Set-Content -Encoding UTF8 "'$townFile $source
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py' in C:\Users\31\Documents\we2
+ exited 1 in 18646ms:
+codex
+Dükkânı +Z cephesinde açık giriş ve 8 × 6 m iç alanla kurdum. Araziyi işlerken çiftlikteki yerleşim noktalarını kesintisiz bir terasa bağlıyorum. Dereyi de sözleşmedeki iki uçtan ve köprü merkezinden geçiriyorum.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Generate the Pusludere heightfield, road network, creek, and annotated map.\"\"\"
+from bisect import bisect_right
+from math import cos, exp, hypot, sin, sqrt
+from pathlib import Path
+import sys
+
+# Blender's background --python does not add the file's folder to sys.path.
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from town import camera, export, light, linear_color, material, mesh, render, reset_scene
+
+import bpy
+
+EDGE = 130
+BRIDGE_X, BRIDGE_Z = 5, -45
+LOCATIONS = (
+    (\"Başlangıç\", -62, 28, 2), (\"Ev\", -70, 40, 2), (\"Sera\", -55, 30, 2),
+    (\"Dış tarla\", -45, 48, 2), (\"Kurutma ambarı\", -78, 22, 2),
+    (\"Meydan\", 60, 0, 0), (\"GAFTİ dükkânı\", 60, -14, 0),
+    (\"Kahvehane\", 46, 8, 0), (\"Muhtarlık\", 74, 8, 0),
+    (\"Denetim ofisi\", 78, -8, 0), (\"Hırdavatçı\", 42, -10, 0),
+    (\"Minibüs durağı\", 72, 48, 0), (\"Köprü\", BRIDGE_X, BRIDGE_Z, -1),
+    (\"Ladin ormanı\", -45, -70, None), (\"Keklik Tepe\", 0, -110, 28),
+)
+FARM_HULL = ((-78,22),(-55,30),(-45,48),(-70,40))
+PADS = ((60,0,22,0),(72,48,6,0),(0,-110,6,28))
+
+# The pairs are X/Z in Godot. The separate creek bank approach segments stop at
+# the bridge ramps, so the imported bridge is the crossing surface.
+ROUTES = (
+    (2.25, ((-70,29),(-62,28),(-50,25),(-28,21),(-13,16),(0,10),(18,6),(40,0),(60,0))),
+    (2.20, ((60,0),(64,15),(66,30),(72,48))),
+    (1.95, ((40,0),(29,-8),(15,-19),(9,-29),(5,-38),(5,-40))),
+    (1.45, ((5,-50),(5,-54),(6,-63),(13,-74),(15,-85),(8,-94),(0,-102),(0,-110))),
+    (1.35, ((-65,28),(-73,25),(-78,22))),
+    (1.27, ((-55,26),(-55,30),(-49,37),(-45,48))),
+    (1.50, ((60,0),(60,-14))),
+    (1.30, ((49,0),(46,8))),
+    (1.35, ((66,0),(74,8))),
+    (1.40, ((71,0),(78,-8))),
+    (1.40, ((47,-.5),(42,-10))),
+)
+SEGMENTS = [(width, *a, b[0]-a[0], b[1]-a[1],
+             (b[0]-a[0])**2+(b[1]-a[1])**2)
+            for width, points in ROUTES for a,b in zip(points,points[1:])]
+
+
+def clamp(value):
+    return max(0, min(1, value))
+
+
+def smooth(a, b, value):
+    t = clamp((value - a) / (b - a))
+    return t * t * (3 - 2 * t)
+
+
+def blend(a, b, weight):
+    return a + (b-a)*weight
+
+
+def gaussian(x,z,cx,cz,sx,sz):
+    return exp(-((x-cx)/sx)**2 - ((z-cz)/sz)**2)
+
+
+def distance_to_segment(x,z,ax,az,dx,dz,length):
+    t = clamp(((x-ax)*dx+(z-az)*dz)/length)
+    return hypot(x-ax-t*dx,z-az-t*dz)
+
+
+def farm_distance(x,z):
+    distances, signs = [], []
+    for a,b in zip(FARM_HULL,FARM_HULL[1:]+FARM_HULL[:1]):
+        dx,dz = b[0]-a[0], b[1]-a[1]
+        distances.append(distance_to_segment(x,z,*a,dx,dz,dx*dx+dz*dz))
+        signs.append(dx*(z-a[1])-dz*(x-a[0]))
+    return 0 if min(signs) >= 0 or max(signs) <= 0 else min(distances)
+
+
+def river(x):
+    # Each interval is pinned at both ends, including the bridge at (5,-45).
+    if x <= BRIDGE_X:
+        t = (x + EDGE) / (EDGE + BRIDGE_X)
+        return blend(-60, BRIDGE_Z, t) + 9.0 * sin(t*6.28318)*sin(t*3.14159)**2
+    t = (x-BRIDGE_X) / (EDGE-BRIDGE_X)
+    return blend(BRIDGE_Z,-35,t) + 5.8 * sin(t*6.28318)*sin(t*3.14159)**2
+
+
+def channel_width(x):
+    return 1 + .19 * sin((x-BRIDGE_X)*.093) * smooth(9,32,abs(x-BRIDGE_X))
+
+
+def near_road(x,z):
+    return min(distance_to_segment(x,z,ax,az,dx,dz,d2)-width
+               for width,ax,az,dx,dz,d2 in SEGMENTS)
+
+
+def landscape(x,z):
+    roll = (1.35*sin(x*.052+z*.048)+1.08*cos(z*.084-x*.024)
+            +.56*sin(z*.122)*cos(x*.121)+.30*cos(x*.25-z*.12))
+    west = 17*gaussian(x,z,-98,-65,30,39) + 12*gaussian(x,z,-60,-104,30,26)
+    east = 16*gaussian(x,z,104,-70,26,42) + 13*gaussian(x,z,101,84,29,29)
+    south = 14*gaussian(x,z,-62,100,42,29) + 10*gaussian(x,z,37,112,50,35)
+    summit = 28*gaussian(x,z,0,-112,30,39) + 7.5*gaussian(x,z,17,-89,29,31)
+    # Closed, steep boundary ridges with varying crests around the whole valley.
+    edge_dist = EDGE - max(abs(x),abs(z))
+    brow = ((12+4.2*sin(x*.105-z*.064)+3.4*cos(x*.043+z*.074)) *
+            (1-smooth(1,32,edge_dist)))
+    boundary = 15*(1-smooth(0,7.5,edge_dist))
+    height = roll + west + east + south + summit + brow + boundary
+    height = blend(2,height,smooth(16,28,farm_distance(x,z)))
+    for px,pz,r,y in PADS:
+        pad = hypot(x-px,z-pz)
+        height = blend(y,height,smooth(r+2.6,r+(13 if y==28 else 14),pad))
+
+    off = abs(z-river(x))/channel_width(x)
+    bank = 0 if abs(x-BRIDGE_X)<8 else max(0,min(2,height*.18))
+    bed = -1 - .16 * sin((x-BRIDGE_X)*.095)**2
+    bed_profile = blend(bed,bank,smooth(1.39,4.15,off))
+    shore = 1-smooth(5.6,13.4,off)
+    height = blend(height,bed_profile,shore)
+    # Both ends have level landings at the contracted bridge placement.
+    bridge_landing = (1-smooth(1.8,5.5,abs(x-BRIDGE_X))) * (1-smooth(7.2,12,off))
+    return blend(height,bed_profile,bridge_landing)
+
+
+def point(x, z):
+    return (x, z, landscape(x,z), near_road(x,z))
+
+
+def xyz(point):
+    x,z,y,_ = point
+    return (x,-z,y)
+
+
+def coordinates(step, coarse):
+    # Rows near the creek follow its centerline. Farther rows gradually return
+    # to global X/Z. Keep the exact frame corners and the river endpoints.
+    edge_pin = [-130, -60, 5, 60, 130]
+    xs = sorted(set(range(-130,131,step)) | set(edge_pin))
+    band = [-11,-8,-5.2,-4.15,-3.3,-2.5,-1.4,0,1.4,2.5,3.3,4.15,5.2,8,11]
+    if coarse:
+        band = [-11,-6,-4.15,-2.5,0,2.5,4.15,6,11]
+    rows = [z for z in range(-130,131,step) if z < -58 or z > -32] + [-130,130]
+    rows = sorted(set(rows) | {-45+offset for offset in band})
+    return xs,rows
+
+
+def actual_z(x, base):
+    offset = base-BRIDGE_Z
+    if abs(offset)<=11:
+        return river(x)+offset*channel_width(x)
+    rim = EDGE if offset>0 else -EDGE
+    joint = BRIDGE_Z+(11 if offset>0 else -11)
+    edge_row = river(x)+(11 if offset>0 else -11)*channel_width(x)
+    return blend(edge_row,rim,(base-joint)/(rim-joint))
+
+
+def grid(step, coarse=False):
+    xs,rows = coordinates(step,coarse)
+    columns = [[point(x,actual_z(x,base)) for base in rows] for x in xs]
+    return xs,rows,columns
+
+
+def road_split(triangle, inside):
+    result = []
+    for a,b in zip(triangle,triangle[1:]+triangle[:1]):
+        a_in = (a[3] <= 0) == inside
+        b_in = (b[3] <= 0) == inside
+        if a_in:
+            result.append(a)
+        if a_in "'!= b_in:
+            t = a[3] / (a[3]-b[3])
+            result.append(tuple(blend(a[i],b[i],t) for i in range(3))+(0,))
+    return result
+
+
+def pigments(*codes):
+    return [linear_color(code) for code in codes]
+
+
+GRASS = pigments("376044","598448","82A653","A4AA65","707B66","626E6A")
+ROAD = pigments("947859","B7A17B","CAB18C")
+CREEK = pigments("465E54","647A66","A08D67")
+WATER = pigments("3A7773","58A8A1","82BBB0")
+
+
+def mix(a,b,t):
+    return tuple(blend(x,y,t) for x,y in zip(a,b))
+
+
+def paint(kind, p):
+    x,z,y,road = p
+    fields = clamp(.51+.24*sin(.061*x+.084*z)+.16*cos(.099*z-.034*x)+.085*sin(x*.42)*cos(z*.39))
+    speckle = clamp(.50+.19*sin(x*1.33+z*.62)+.23*cos(z*1.69-x*.73))
+    if kind == "Road":
+        return mix(mix(ROAD[0],ROAD[1],.44+.46*speckle),ROAD[2],.35*fields*smooth(0,1,-road))
+    if kind == "Creek":
+        bank = smooth(1.0,4.3,abs(z-river(x)))
+        return mix(mix(CREEK[0],CREEK[1],speckle),CREEK[2],bank*(.41+.27*fields))
+    if kind == "Water":
+        t = clamp(.48+.23*sin(z*2.6+x*.73)+.17*sin(x*1.2))
+        mid = mix(WATER[0],WATER[1],t)
+        return mix(mid,WATER[2],.25*smooth(.68,1,t))
+    meadow = mix(GRASS[0],GRASS[1],smooth(0,.58,fields))
+    meadow = mix(meadow,GRASS[2],.91*smooth(.37,1,fields))
+    forest = .68*gaussian(x,z,-45,-70,24,20)
+    meadow = mix(meadow,GRASS[0],forest)
+    tea = gaussian(x,z,-28,41,24,12)*(.5+.5*cos(z*1.33+x*.11+sin(x*.11)))
+    meadow = mix(meadow,GRASS[2],.44*tea)
+    near_field = gaussian(x,z,-44,49,9,7)
+    furrows = .50+.50*sin(x*1.12+z*.48)
+    meadow = mix(meadow,GRASS[3],near_field*(.35+.21*furrows))
+    warm_edges = (1-smooth(0,1.2,max(0,road)))*.19
+    meadow = mix(meadow,ROAD[0],warm_edges*(.55+.44*speckle))
+    stone = smooth(11,32,y)*(.37+.50*smooth(.32,.80,fields))
+    rock = mix(GRASS[4],GRASS[5],speckle)
+    return mix(meadow,rock,stone)
+'"'@ | Set-Content -Encoding UTF8 tools/blender/terrain.py" in C:\Users\31\Documents\we2
+ succeeded in 167ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem assets/models/town -Name
+Get-Content "$env:TEMP/gafti_town_error.txt" -ErrorAction SilentlyContinue
+Select-String -Path tools/blender/town.py -Pattern '"'stone\\(\\(x\\+step|for j in range\\(4\\)'" in C:\Users\31\Documents\we2
+ succeeded in 238ms:
+shop_building.glb
+Traceback (most recent call last):
+  File "C:\Users\31\Documents\we2\tools\blender\town.py", line 621, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\31\Documents\we2\tools\blender\town.py", line 607, in main
+    export(name,combine(),8000)
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\Documents\we2\tools\blender\town.py", line 150, in export
+    raise ValueError(f"{name}: {sum(counts.values())} triangles exceed {limit}: {counts}")
+ValueError: kahvehane: 8386 triangles exceed 8000: {'Floor': 12, 'Shell-col': 84, 'Floorboards': 348, 'Walls': 72, 'Cladding': 828, 'Stonework': 530, 'Frame': 352, 'Doorframe': 132, 'Threshold': 44, 'Threshold-col': 12, 'Windows': 1164, 'Shutters': 1056, 'Sign': 396, 'Chimney': 264, 'Porch': 132, 'Porch-col': 12, 'Canopy': 696, 'Gables': 816, 'Roof': 596, 'Roof seams': 552, 'Fascia': 264, 'Ceiling-col': 12, 'Ceiling': 12}
+
+tools\blender\town.py:254:            stone((x+step/2,y+rng.uniform(-.021,.006),(row+.5)*top/2),
+tools\blender\town.py:591:        for j in range(4):
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile = '"'tools/blender/town.py'
+"'$source = Get-Content $townFile -Raw -Encoding UTF8
+$source = $source.Replace('"'(.25,.04,.039), \"Oak\", .007)', '(.25,.04,.039), \"Oak\")')
+"'$source = $source.Replace('"'tuple(range(count - 1,-1,-1))', 'tuple(range(count))').Replace('faces.append((a,b,b+count,a+count))','faces.append((a,a+count,b+count,b))').Replace('tuple(range(len(verts)-count,len(verts)))','tuple(range(len(verts)-1,len(verts)-count-1,-1))')
+"'$source = $source.Replace('"'[(3,2,1,0),(4,5,6,7),(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7)]','[(0,1,2,3),(7,6,5,4),(4,5,1,0),(5,6,2,1),(6,7,3,2),(7,4,0,3)]')
+"'$source = $source.Replace('"'tile = box(\"Cobbled deck\",(x,y,bridge_height(y)+.026),(.475,b-a-.021,.055),\"Cobble\",.015)
+            tile.rotation_euler.x = pitch', @'
+tile = deck_tile(x,y,bridge_height(y),.475,b-a-.021)
+            tile.rotation_euler.x = pitch
+'@)
+"'$source = $source.Replace('"'def bridge():', @'
+def deck_tile(x, y, z, width, length):
+    w, l, inset = width/2, length/2, .028
+    verts = [(-w,-l,0),(w,-l,0),(w,l,0),(-w,l,0),
+             (-w+inset,-l+inset,.053),(w-inset,-l+inset,.053),
+             (w-inset,l-inset,.053),(-w+inset,l-inset,.053)]
+    faces = [(0,1,5,4),(1,2,6,5),(2,3,7,6),(3,0,4,7),(4,5,6,7)]
+    obj = mesh(\"Cobbled deck\",verts,faces,swatch(\"Cobble\"))
+    obj.location = (x,y,z)
+    return part(obj,\"Cobbled deck\")
+
+
+def bridge():
+'@)
+Set-Content -Encoding UTF8 "'$townFile $source
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py' in C:\Users\31\Documents\we2
+ succeeded in 29062ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+
+
+def triangles(columns):
+    for i in range(len(columns)-1):
+        for j in range(len(columns[i])-1):
+            a,b = columns[i][j:j+2]
+            d,c = columns[i+1][j:j+2]
+            if (i+j)%2:
+                yield j,(a,b,d)
+                yield j,(b,c,d)
+            else:
+                yield j,(a,b,c)
+                yield j,(a,c,d)
+
+
+class Surface:
+    def __init__(self, name):
+        self.name = name
+        self.vertices = []
+        self.faces = []
+        self.lookup = {}
+
+    def add(self, polygon):
+        if len(polygon) < 3:
+            return
+        indices = []
+        for point in polygon:
+            key = tuple(round(value,7) for value in point[:3])
+            index = self.lookup.get(key)
+            if index is None:
+                index = len(self.vertices)
+                self.lookup[key] = index
+                self.vertices.append(point)
+            if index not in indices:
+                indices.append(index)
+        if len(indices) >= 3:
+            self.faces.append(tuple(indices))
+
+    def finish(self):
+        obj = mesh(self.name, [xyz(p) for p in self.vertices], self.faces)
+        if self.name.endswith(\"-col\"):
+            return obj
+        roughness = .45 if self.name==\"Water\" else .92
+        mat = material(self.name, \"FFFFFF\", roughness)
+        color_input = mat.node_tree.nodes.new(\"ShaderNodeVertexColor\")
+        color_input.layer_name = \"Paint\"
+        mat.node_tree.links.new(color_input.outputs[\"Color\"],
+                                mat.node_tree.nodes[\"Principled BSDF\"].inputs[\"Base Color\"])
+        obj.data.materials.append(mat)
+        colors = obj.data.color_attributes.new(name=\"Paint\", type=\"FLOAT_COLOR\", domain=\"POINT\")
+        obj.data.color_attributes.active_color = colors
+        colors.data.foreach_set(\"color\",[c for p in self.vertices for c in (*paint(self.name,p),1)])
+        for face in obj.data.polygons:
+            face.use_smooth = True
+        return obj
+
+
+def terrain():
+    xs,rows,columns = grid(2)
+    ground,road,creek,water,collision = map(Surface,(\"Ground\",\"Road\",\"Creek\",\"Water\",\"Ground-col\"))
+    for j,triangle in triangles(columns):
+        if -50.2 <= rows[j] and rows[j+1] <= -39.8:
+            creek.add(triangle)
+        else:
+            ground.add(road_split(triangle,False))
+            road.add(road_split(triangle,True))
+
+    # The water is level across the valley. Its perimeter is buried in the banks.
+    for a,b in zip(xs,xs[1:]):
+        cross_sections = [[(x,river(x)+i*channel_width(x),-.69,0)
+                           for i in (-2.85,-1.9,-.95,0,.95,1.9,2.85)] for x in (a,b)]
+        for i in range(6):
+            water.add((cross_sections[0][i],cross_sections[0][i+1],
+                       cross_sections[1][i+1],cross_sections[1][i]))
+
+    _,_,coarse = grid(4,True)
+    for _,triangle in triangles(coarse):
+        collision.add(triangle)
+    border = (list(coarse[0]) + [c[-1] for c in coarse[1:]] +
+              list(reversed(coarse[-1][:-1])) + [c[0] for c in reversed(coarse[1:-1])])
+    for a,b in zip(border,border[1:]+border[:1]):
+        # Close the outer rim and the two stream outlets for character collision.
+        collision.add((b,a,(a[0],a[1],a[2]+30,0),(b[0],b[1],b[2]+30,0)))
+
+    return [part.finish() for part in (ground,road,creek,water,collision)]
+
+
+def emission(name, code):
+    mat = material(name, code)
+    tree = mat.node_tree
+    shader = tree.nodes.new(\"ShaderNodeEmission\")
+    shader.inputs[\"Color\"].default_value = (*linear_color(code),1)
+    tree.links.new(shader.outputs[\"Emission\"], tree.nodes[\"Material Output\"].inputs[\"Surface\"])
+    return mat
+
+
+def map_rectangle(name,x1,y1,x2,y2,z,mat):
+    return mesh(name,[(x1,y1,z),(x2,y1,z),(x2,y2,z),(x1,y2,z)],[(0,1,2,3)],mat)
+
+
+def map_text(body,x,y,z,size,mat,align=\"LEFT\"):
+    data = bpy.data.curves.new(body,\"FONT\")
+    data.body,data.size,data.align_x,data.align_y = body,size,align,\"CENTER\"
+    obj = bpy.data.objects.new(body,data)
+    bpy.context.collection.objects.link(obj)
+    obj.location = (x,y,z)
+    data.materials.append(mat)
+
+
+def map_circle(x,y,z,radius,mat):
+    from math import tau
+    corners = [(x+radius*cos(i*tau/24),y+radius*sin(i*tau/24),z) for i in range(24)]
+    mesh(\"Map pin\",corners,[tuple(range(24))],mat)
+
+
+def map_line(ax,ay,bx,by,z,mat,width=.55):
+    length = hypot(bx-ax,by-ay)
+    px,py = (by-ay)*width/length,(ax-bx)*width/length
+    mesh(\"Pin leader\",[(ax+px,ay+py,z),(ax-px,ay-py,z),
+                      (bx-px,by-py,z),(bx+px,by+py,z)],[(0,1,2,3)],mat)
+
+
+def annotated_map():
+    cam = camera((0,-14,480),(0,-14,0),344)
+    cam.rotation_euler = (0,0,0)
+    dark = emission(\"Map ink\",\"152822\")
+    paper = emission(\"Map lettering\",\"F4E7C8\")
+    muted = emission(\"Map captions\",\"B4CCAD\")
+    farm = emission(\"Farm pins\",\"FFD490\")
+    town = emission(\"Town pins\",\"BDE7A1\")
+    wild = emission(\"Valley pins\",\"D4EEE8\")
+    accent = emission(\"North arrow\",\"FFBA73\")
+    map_rectangle(\"Map backing\",-175,-187,175,159,-35,material(\"Map backing\",\"324E42\"))
+    map_rectangle(\"Title card\",-175,130,175,159,431,dark)
+    map_rectangle(\"Legend card\",-175,-187,175,-131,431,dark)
+    map_text(\"PUSLUDERE YAYLASI\",-131,145,432,13,paper)
+    map_text(\"260 × 260 m\",-131,134,432,5.6,muted)
+    map_text(\"K\",130,150,432,7,paper,\"CENTER\")
+    mesh(\"North arrow\",[(126.5,137,432),(133.5,137,432),(130,145,432)],[(0,1,2)],accent)
+    map_line(-128,-123,-103,-123,432,paper,.50)
+    for x in (-128,-103):
+        map_line(x,-125,x,-121,432,paper,.47)
+    map_text(\"25 m\",-100,-123,432,5,paper)
+
+    pin_offsets = ((-4,10),(-10,-8),(5,7),(5,-9),(-11,8),(4,-14),(0,11),
+                   (-12,4),(10,-7),(11,6),(-10,4),(12,-4),(-9,-9),(-9,6),(10,5))
+    for i,((label,x,z,_),(dx,dy)) in enumerate(zip(LOCATIONS,pin_offsets)):
+        y = -z
+        color = farm if i<5 else town if i<12 else wild
+        map_line(x,y,x+dx,y+dy,430,paper,.32)
+        map_circle(x,y,431,1.28,paper)
+        map_circle(x+dx,y+dy,431,4.22,dark)
+        map_text(str(i+1),x+dx,y+dy,432,5.35,color,\"CENTER\")
+        col,row = divmod(i,5)
+        legend_x,legend_y = -132+91*col, -139-8.65*row
+        map_text(f\"{i+1:02}\",legend_x,legend_y,432,5.40,color)
+        map_text(label,legend_x+11,legend_y,432,5.40,paper)
+
+    render(\"terrain_top\")
+
+
+def previews(objects):
+    objects[-1].hide_render = True
+    scene = bpy.context.scene
+    scene.world = bpy.data.worlds.new(\"Valley sky\")
+    light(\"Morning sun\",\"SUN\",(-175,-120,190),(0,0,0),2.45,(1,.86,.70),.13)
+    light(\"Cool sky\",\"AREA\",(55,22,170),(0,0,0),340000,(.68,.83,1),285)
+    camera((211,-318,282),(0,0,2),363)
+    mesh(\"Valley backdrop\",[(-900,-900,-31),(900,-900,-31),(900,900,-31),(-900,900,-31)],
+         [(0,1,2,3)], material(\"Valley backdrop\",\"536B5D\"))
+    render(\"terrain\")
+    annotated_map()
+
+
+def main():
+    reset_scene()
+    objects = terrain()
+    export(\"terrain\",objects,60000)
+    previews(objects)
+
+
+if __name__ == \"__main__\":
+    try:
+        main()
+    except Exception:
+        import os
+        import tempfile
+        import traceback
+        diagnostic = Path(tempfile.gettempdir())/\"gafti_terrain_error.txt\"
+        diagnostic.write_text(traceback.format_exc(),encoding=\"utf-8\")
+        traceback.print_exc()
+        os._exit(1)
+'@ | Add-Content -Encoding UTF8 tools/blender/terrain.py
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/terrain.py" in C:\Users\31\Documents\we2
+ succeeded in 10540ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'python -c "import PIL; print(PIL.__version__)"; Get-FileHash project.godot' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem assets/models/town -Name
+Get-ChildItem tools/previews -Name | Where-Object { $_ -match '"'"'^(shop_building|kahvehane|muhtarlik|hardware_store|inspection_office|drying_barn|bus_stop|minibus|bridge|terrain)'"' }
+Get-Item \""'$env:TEMP/gafti_town_error.txt","$env:TEMP/gafti_terrain_error.txt" -ErrorAction SilentlyContinue | Select-Object Name,LastWriteTime
+Get-Content "$env:TEMP/gafti_terrain_error.txt" -ErrorAction SilentlyContinue
+Select-String -Path tools/blender/town.py -Pattern '"'tile ='" in C:\Users\31\Documents\we2
+ succeeded in 200ms:
+bridge.glb
+bus_stop.glb
+drying_barn.glb
+hardware_store.glb
+inspection_office.glb
+kahvehane.glb
+minibus.glb
+muhtarlik.glb
+shop_building.glb
+terrain.glb
+bridge.png
+bus_stop.png
+drying_barn.png
+hardware_store.png
+inspection_office.png
+kahvehane.png
+minibus.png
+muhtarlik.png
+shop_building.png
+terrain.png
+terrain_top.png
+
+Name                 LastWriteTime      
+----                 -------------      
+gafti_town_error.txt 24.11.2026 12:31:19
+                                        
+
+
+
+ succeeded in 317ms:
+11.3.0
+
+Algorithm       Hash                                                                   Path                            
+---------       ----                                                                   ----                            
+SHA256          8D8B495D725115C836815BB722761DCAFD1FE059065F7813EE922AB3DCF0D319       C:\Users\31\Documents\we2\pro...
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from PIL import Image, ImageDraw
+from pathlib import Path
+import os
+names = \"shop_building kahvehane muhtarlik hardware_store inspection_office drying_barn bus_stop minibus bridge\".split()
+sheet = Image.new(\"RGB\", (780, 834), \"#22302a\")
+draw = ImageDraw.Draw(sheet)
+for i,name in enumerate(names):
+    x,y = (i%3)*260,(i//3)*278
+    im = Image.open(Path(\"tools/previews\")/(name+\".png\")).convert(\"RGB\")
+    assert im.size == (512,512)
+    sheet.paste(im.resize((258,254)), (x,y))
+    draw.text((x+8,y+257),name,fill=\"white\")
+sheet.save(Path(os.environ[\"TEMP\"])/\"gafti_town_review.png\")
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 614ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile = '"'tools/blender/town.py'
+"'$source = Get-Content $townFile -Raw -Encoding UTF8
+$source = $source.Replace('"'studio(name,w+2.35,(.50,-1,.52),(0,0,(eave+rise)*.43))','studio(name,w+3.60,(.50,-1,.49),(0,0,(eave+rise)*.46))')
+"'$source = $source.Replace('"'1600, (.69,.85,1), 12','2200, (.69,.85,1), 12').Replace('(2,-6,10), target, 1600','(7,-3,9), target, 2300')
+"'$source = $source.Replace('"'def loft(name, rings, colors, split_height=None):','def loft(name, rings, colors, belt=None):')
+"'$source = $source.Replace('"'faces = [tuple(range(count))]', @'
+    ends = [tuple(range(count))] if belt is None else [
+        tuple(range(belt[0]+1)) + tuple(range(belt[1],count)), tuple(range(belt[0],belt[1]+1))]
+    faces = ends.copy()
+'@.TrimStart())
+"'$source = $source.Replace('"'faces.append(tuple(range(len(verts)-1,len(verts)-count-1,-1)))','faces.extend(tuple(len(verts)-count+i for i in reversed(face)) for face in ends)')
+"'$source = $source.Replace('"'if split_height is not None:', 'if belt is not None:').Replace('face.center.z > split_height','face.center.z > 1.29')
+"'$source = $source.Replace('"'loft(\"Body\", rings, (\"Green\",\"Ivory\"), 1.37)','loft(\"Body\", rings, (\"Green\",\"Ivory\"), belt=(2,9))')
+Set-Content -Encoding UTF8 "'$townFile $source
+$terrainFile = '"'tools/blender/terrain.py'
+"'$source = Get-Content $terrainFile -Raw -Encoding UTF8
+$source = $source.Replace('"'from bisect import bisect_right','from mathutils.noise import noise')
+"'$source = $source.Replace('"'from mathutils.noise import noise' + \""'`r`n", '"'').Replace('import bpy' + \""'`r`n", '"'import bpy' + \""'`r`n" + '"'from mathutils.noise import noise' + \""'`r`n")
+$source = $source.Replace('"'r+2.6','r+4.2')
+"'$source = $source.Replace(@'"'
+    fields = clamp(.51+.24*sin(.061*x+.084*z)+.16*cos(.099*z-.034*x)+.085*sin(x*.42)*cos(z*.39))
+    speckle = clamp(.50+.19*sin(x*1.33+z*.62)+.23*cos(z*1.69-x*.73))
+'@, @'
+    broad = noise((x*.043,z*.046,2.7), noise_basis=\"PERLIN_ORIGINAL\")
+    marks = noise((x*.137,z*.181,13.1), noise_basis=\"PERLIN_ORIGINAL\")
+    grain = noise((x*.29,z*.39,5.3), noise_basis=\"PERLIN_ORIGINAL\")
+    fields = clamp(.50+.81*broad+.29*marks+.12*grain)
+    speckle = clamp(.50+.48*marks+.37*grain)
+'@)
+"'$source = $source.Replace('"'(.68,.83,1),285','(.73,.86,1),260').Replace('340000','580000').Replace('0,0,2),363','0,0,2),396')
+"'$source = $source.Replace('"'material(\"Valley backdrop\",\"536B5D\")','material(\"Valley backdrop\",\"718A77\")')
+Set-Content -Encoding UTF8 "'$terrainFile $source
+python -c "import ast, pathlib; [ast.parse(pathlib.Path('"'tools/blender/'+n+'.py').read_text(encoding='utf-8-sig')) for n in ('town','terrain')]\"
+Select-String -Path tools/blender/terrain.py -Pattern 'mathutils|road_split|gafti_terrain'" in C:\Users\31\Documents\we2
+ succeeded in 519ms:
+
+tools\blender\terrain.py:2:from mathutils.noise import noise
+tools\blender\terrain.py:164:def road_split(triangle, inside):
+tools\blender\terrain.py:285:            ground.add(road_split(triangle,False))
+tools\blender\terrain.py:286:            road.add(road_split(triangle,True))
+tools\blender\terrain.py:409:        diagnostic = Path(tempfile.gettempdir())/"gafti_terrain_error.txt"
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/terrain.py' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Select-String -Path tools/blender/terrain.py -Pattern 'broad =|edge_pin|shore ='
+Select-String -Path tools/blender/town.py -Pattern 'ends =|tile =|2300|w\\+3.60'" in C:\Users\31\Documents\we2
+ succeeded in 236ms:
+
+tools\blender\terrain.py:119:    shore = 1-smooth(5.6,13.4,off)
+tools\blender\terrain.py:138:    edge_pin = [-130, -60, 5, 60, 130]
+tools\blender\terrain.py:139:    xs = sorted(set(range(-130,131,step)) | set(edge_pin))
+tools\blender\terrain.py:193:    broad = noise((x*.043,z*.046,2.7), noise_basis="PERLIN_ORIGINAL")
+tools\blender\town.py:204:    light("Bounce", "AREA", (-4,7,8), target, 2300, (1,.70,.47), 9)
+tools\blender\town.py:465:    ends = [tuple(range(count))] if belt is None else [
+tools\blender\town.py:606:            tile = deck_tile(x,y,bridge_height(y),.475,b-a-.021)
+tools\blender\town.py:629:            studio(name,w+3.60,(.50,-1,.49),(0,0,(eave+rise)*.46))
+
+
+
+ succeeded in 8656ms:
+ succeeded in 26804ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+"'$null = New-Item -ItemType Directory -Force -Path $verifyRoot
+@'"'
+config_version=5
+[application]
+config/name=\"GAFTI Town Asset Verification\"
+[rendering]
+renderer/rendering_method=\"gl_compatibility\"
+'@ | Set-Content -Encoding ASCII (Join-Path "'$verifyRoot '"'project.godot')
+@'
+extends SceneTree
+
+const BUILDINGS: Dictionary[String, float] = {
+	\"shop_building\": 0.0, \"kahvehane\": -0.78, \"muhtarlik\": 0.0,
+	\"hardware_store\": 1.0, \"inspection_office\": 0.0, \"drying_barn\": 0.0,
+}
+var stage: Node3D
+var problems: int = 0
+
+func _initialize() -> void:
+	call_deferred(\"_run\")
+
+func check(condition: bool, message: String) -> void:
+	if not condition:
+		printerr(message)
+		problems += 1
+
+func ray(a: Vector3, b: Vector3) -> Dictionary:
+	return stage.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(a, b))
+
+func ground_at(x: float, z: float, expected: float, label: String) -> void:
+	var hit: Dictionary = ray(Vector3(x, 70, z), Vector3(x, -10, z))
+	check(not hit.is_empty() and absf(hit.position.y - expected) < 0.015,
+		\"%s (%s,%s) expected %s, got %s\" % [label, x, z, expected, hit.get(\"position\")])
+
+func _run() -> void:
+	stage = Node3D.new()
+	root.add_child(stage)
+	for name: String in BUILDINGS.keys() + [\"bus_stop\", \"bridge\", \"minibus\", \"terrain\"]:
+		var scene: PackedScene = load(\"res://%s.glb\" % name) as PackedScene
+		if scene == null:
+			check(false,\"Could not import \" + name)
+			continue
+		var asset: Node3D = scene.instantiate() as Node3D
+		stage.add_child(asset)
+		await physics_frame
+		await physics_frame
+		var bodies: Array[Node] = asset.find_children(\"*\", \"StaticBody3D\", true, false)
+		var shapes: Array[Node] = asset.find_children(\"*\", \"CollisionShape3D\", true, false)
+		check(not bodies.is_empty() and not shapes.is_empty(), \"Missing imported collision for \" + name)
+		print(name, \" bodies=\", bodies.size(), \" shapes=\", shapes.size())
+		if BUILDINGS.has(name):
+			var door_x: float = BUILDINGS[name]
+			check(ray(Vector3(door_x, 1.15, 5), Vector3(door_x, 1.15, 0)).is_empty(),
+				name + \": +Z doorway is blocked\")
+			check(ray(Vector3(door_x, 1.15, -5), Vector3(door_x, 1.15, 0)).size() > 0,
+				name + \": rear wall lacks collision\")
+			check(not ray(Vector3(0, 1, 0), Vector3(0, -1, 0)).is_empty(), name + \": missing interior floor\")
+			check(not ray(Vector3(5, 1.1, 0), Vector3(0, 1.1, 0)).is_empty(), name + \": missing side wall\")
+		elif name == \"terrain\":
+			ground_at(-62, 28, 2, \"Spawn\")
+			ground_at(-70, 40, 2, \"House\")
+			ground_at(-55, 30, 2, \"Greenhouse\")
+			ground_at(-45, 48, 2, \"Field\")
+			ground_at(-78, 22, 2, \"Barn\")
+			ground_at(60, -14, 0, \"Shop\")
+			ground_at(46, 8, 0, \"Cafe\")
+			ground_at(74, 8, 0, \"Municipality\")
+			ground_at(78, -8, 0, \"Inspection office\")
+			ground_at(42, -10, 0, \"Hardware store\")
+			ground_at(5, -45, -1, \"Creek at bridge\")
+			ground_at(5, -40, 0, \"South bridge ramp\")
+			ground_at(5, -50, 0, \"North bridge ramp\")
+			for pad: Vector4 in [Vector4(-70,40,14,2), Vector4(60,0,22,0),
+					Vector4(72,48,6,0), Vector4(0,-110,6,28)]:
+				for i in range(72):
+					var angle: float = TAU * i / 72.0
+					ground_at(pad.x + cos(angle)*pad.z, pad.y + sin(angle)*pad.z, pad.w, \"Pad perimeter\")
+			for line: Array in [
+				[Vector3(127,20,-35),Vector3(134,20,-35)],
+				[Vector3(-127,20,-60),Vector3(-134,20,-60)],
+				[Vector3(10,45,127),Vector3(10,45,134)],
+				[Vector3(0,47,-127),Vector3(0,47,-134)]]:
+				check(not ray(line[0], line[1]).is_empty(), \"Open valley boundary at \" + str(line))
+		elif name == \"bridge\":
+			var center: Dictionary = ray(Vector3(0,5,0), Vector3(0,-1,0))
+			check(not center.is_empty() and absf(center.position.y-1.628) < .02, \"Incorrect bridge deck\")
+			for z: float in [-4.98,4.98]:
+				var hit: Dictionary = ray(Vector3(0,4,z), Vector3(0,-1,z))
+				check(not hit.is_empty() and absf(hit.position.y-1.048) < .03, \"Missing bridge landing\")
+			check(not ray(Vector3(2,1.90,0),Vector3(0,1.90,0)).is_empty(), \"Missing bridge railing\")
+		asset.queue_free()
+		await process_frame
+	print(\"Failures: \", problems)
+	quit(int(problems "'!= 0))
+'"'@ | Set-Content -Encoding ASCII (Join-Path "'$verifyRoot '"'verify.gd')
+Copy-Item -Path 'assets/models/town/*.glb' -Destination "'$verifyRoot -Force
+$godot = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+& "'$godot --headless --path $verifyRoot --import --log-file (Join-Path $verifyRoot '"'import.log')
+& "'$godot --headless --path $verifyRoot --script res://verify.gd --log-file (Join-Path $verifyRoot '"'physics.log')" in C:\Users\31\Documents\we2
+ succeeded in 298ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+Get-Content (Join-Path "'$verifyRoot '"'import.log') -Tail 20 -ErrorAction SilentlyContinue
+Get-Content (Join-Path "'$verifyRoot '"'physics.log') -Tail 50 -ErrorAction SilentlyContinue
+Get-Item tools/previews/terrain.png,tools/previews/terrain_top.png,tools/previews/bridge.png | Select-Object Name,LastWriteTime
+Get-ChildItem tools/blender -Directory" in C:\Users\31\Documents\we2
+ succeeded in 231ms:
+
+[  81% ] reimport | terrain.glb
+[   0% ] import | Started Sahneyi Ä°Ã§e Aktar (104 steps)
+[   0% ] import | Sahne Ä°Ã§e AktarÄ±lÄ±yor...
+[   1% ] import | Ã–zel Betik Ã‡alÄ±ÅŸtÄ±rÄ±lÄ±yor...
+[  99% ] import | Kaydediliyor...
+[ DONE ] import
+
+[  90% ] reimport | VarlÄ±k Ä°Ã§e AktarÄ±mÄ± TamamlanÄ±yor...
+[ DONE ] reimport
+
+[   0% ] reimport | Started VarlÄ±klar (Yeniden)Ä°Ã§e AktarÄ±lÄ±yor (10 steps)
+[   0% ] reimport | Yeniden iÃ§e aktarma sonrasÄ± iÅŸlemler yÃ¼rÃ¼tÃ¼lÃ¼yor...
+[ DONE ] reimport
+
+[   0% ] loading_editor_layout | Started DÃ¼zenleyici yÃ¼kleniyor (5 steps)
+[   0% ] loading_editor_layout | DÃ¼zenleyici yerleÅŸim dÃ¼zeni yÃ¼kleniyor...
+[  16% ] loading_editor_layout | Yuvalar yÃ¼kleniyor...
+[ DONE ] loading_editor_layout
+
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import shop_building
+ERROR: No loader found for resource: res://kahvehane.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import kahvehane
+ERROR: No loader found for resource: res://muhtarlik.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import muhtarlik
+ERROR: No loader found for resource: res://hardware_store.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import hardware_store
+ERROR: No loader found for resource: res://inspection_office.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import inspection_office
+ERROR: No loader found for resource: res://drying_barn.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import drying_barn
+ERROR: No loader found for resource: res://bus_stop.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import bus_stop
+ERROR: No loader found for resource: res://bridge.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import bridge
+ERROR: No loader found for resource: res://minibus.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import minibus
+ERROR: No loader found for resource: res://terrain.glb (expected type: unknown)
+   at: _load (core/io/resource_loader.cpp:332)
+   GDScript backtrace (most recent call first):
+       [0] _run (res://verify.gd:30)
+Could not import terrain
+Failures: 10
+
+Name            LastWriteTime      
+----            -------------      
+terrain.png     24.11.2026 12:35:10
+terrain_top.png 24.11.2026 12:35:11
+bridge.png      24.11.2026 12:35:29
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+Copy-Item -Path 'assets/models/town/*.glb' -Destination "'$verifyRoot -Force
+$godot = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+"'$p = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$verifyRoot,'"'--import','--log-file',(Join-Path "'$verifyRoot '"'import.log')) -Wait -PassThru -WindowStyle Hidden
+\"import exit "'$($p.ExitCode)"
+$p = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$verifyRoot,'"'--script','res://verify.gd','--log-file',(Join-Path "'$verifyRoot '"'physics.log')) -Wait -PassThru -WindowStyle Hidden
+\"physics exit "'$($p.ExitCode)"
+Get-Content (Join-Path $verifyRoot '"'physics.log')" in C:\Users\31\Documents\we2
+ succeeded in 4266ms:
+import exit 0
+physics exit 1
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+shop_building bodies=3 shapes=3
+kahvehane bodies=4 shapes=4
+muhtarlik bodies=3 shapes=3
+hardware_store bodies=4 shapes=4
+inspection_office bodies=3 shapes=3
+drying_barn bodies=3 shapes=3
+bus_stop bodies=4 shapes=4
+bridge bodies=2 shapes=2
+minibus bodies=1 shapes=1
+terrain bodies=1 shapes=1
+Pad perimeter (-75.9166556643698,52.6883090185131) expected 2.0, got (-75.91666, 1.984947, 52.68831)
+Pad perimeter (-83.1556966910027,44.7882820065594) expected 2.0, got (-83.15569, 1.979736, 44.78828)
+Failures: 2
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from PIL import Image, ImageDraw
+from pathlib import Path
+import os
+names = \"shop_building kahvehane muhtarlik hardware_store inspection_office drying_barn bus_stop minibus bridge\".split()
+sheet = Image.new(\"RGB\", (780, 834), \"#22302a\")
+draw = ImageDraw.Draw(sheet)
+for i,name in enumerate(names):
+    x,y = (i%3)*260,(i//3)*278
+    im = Image.open(Path(\"tools/previews\")/(name+\".png\")).convert(\"RGB\")
+    assert im.size == (512,512)
+    sheet.paste(im.resize((258,258)), (x,y))
+    draw.text((x+8,y+260),name,fill=\"white\")
+sheet.save(Path(os.environ[\"TEMP\"])/\"gafti_town_review.png\")
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 499ms:
+codex
+İlk Godot 4.7.2 kontrolünde on model de içe aktarıldı ve bina girişleri açık kaldı. Arazi kontrolü, ev düzlüğünün 14 m sınırındaki iki noktada yaklaşık 2 cm sapma buldu. Terası genişletip aynı kontrolleri yeniden çalıştırıyorum.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile = '"'tools/blender/town.py'
+"'$source = Get-Content $townFile -Raw -Encoding UTF8
+$source = $source.Replace('"'camera(Vector(target) + Vector(direction) * 15, target, scale)','camera(Vector(target) + Vector(direction) * 15, target, scale * 1.075)')
+"'$source = $source.Replace('"'wall(\"Floor\", (0,0,-.172), (w,d,.38), \"Dark\")',
+'box(\"Floor\", (0,0,-.172), (w,d,.38), \"Dark\")' + \""'`r`n" + '"'    box(\"Shell-col\", (0,0,-.152), (w,d,.38))')
+"'$source = $source.Replace('"'loft(\"Arch\", sections, (\"Stone\",))','loft(\"Arch\", sections, (\"Stone\",))' + \""'`r`n" + '"'    loft(\"Arch-col\", sections, ())')
+Set-Content -Encoding UTF8 "'$townFile $source
+$terrainFile = '"'tools/blender/terrain.py'
+"'$source = Get-Content $terrainFile -Raw -Encoding UTF8
+$source = $source.Replace('"'smooth(16,28,farm_distance(x,z))','smooth(18.5,29,farm_distance(x,z))')
+Set-Content -Encoding UTF8 "'$terrainFile $source
+python -c "import ast, pathlib; [ast.parse(pathlib.Path('"'tools/blender/'+n+'.py').read_text(encoding='utf-8-sig')) for n in ('town','terrain')]\"" in C:\Users\31\Documents\we2
+ succeeded in 234ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/terrain.py' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py' in C:\Users\31\Documents\we2
+ succeeded in 8526ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from pathlib import Path
+import json,struct
+from PIL import Image
+for f in sorted(Path(\"assets/models/town\").glob(\"*.glb\")):
+    raw=f.read_bytes()
+    magic,version,total,n=struct.unpack_from(\"<4sIII\",raw)
+    assert (magic,version,total)==(b\"glTF\",2,len(raw))
+    gltf=json.loads(raw[20:20+n])
+    nodes={}
+    for node in gltf[\"nodes\"]:
+        if \"mesh\" not in node:
+            continue
+        assert \"rotation\" not in node and \"scale\" not in node and \"translation\" not in node, node
+        prim=gltf[\"meshes\"][node[\"mesh\"]][\"primitives\"]
+        nodes[node[\"name\"]] = sum(gltf[\"accessors\"][p[\"indices\"]][\"count\"]//3 for p in prim)
+        if f.stem==\"terrain\":
+            a=gltf[\"accessors\"][prim[0][\"attributes\"][\"POSITION\"]]
+            print(node[\"name\"],\"bounds\",a[\"min\"],a[\"max\"],\"vertex colors\",\"COLOR_0\" in prim[0][\"attributes\"])
+            if node[\"name\"]==\"Water\":
+                assert abs(a[\"min\"][1]+.69)<.00001 and a[\"max\"][1]==a[\"min\"][1]
+                assert a[\"min\"][0]==-130 and a[\"max\"][0]==130
+    assert sum(nodes.values()) <= (60000 if f.stem==\"terrain\" else 8000)
+    assert any(name.endswith(\"-col\") for name in nodes)
+    assert Image.open(Path(\"tools/previews\")/(f.stem+\".png\")).size==(512,512)
+    print(f.stem,sum(nodes.values()),\"visual nodes\",\", \".join(k for k in nodes if not k.endswith(\"-col\")),\"| colliders\", \", \".join(k for k in nodes if k.endswith(\"-col\")))
+assert Image.open(\"tools/previews/terrain_top.png\").size==(512,512)
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 578ms:
+bridge 7732 visual nodes Arch, Cobbled deck, End piers, Lichen, Parapets, Spandrel, Voussoirs | colliders Deck-col, Parapets-col
+bus_stop 2586 visual nodes Back wall, Bench, Fascia, Footings, Frame, Platform, Roof, Roof seams, Sign, Timetable | colliders Back-col, Bench-col, Ceiling-col, Shell-col
+drying_barn 5410 visual nodes Ceiling, Cladding, Doorframe, Fascia, Floor, Floorboards, Frame, Gables, Roof, Roof seams, Shutters, Stonework, Threshold, Vents, Walls, Windows | colliders Ceiling-col, Shell-col, Threshold-col
+hardware_store 6419 visual nodes Ceiling, Cladding, Crates, Doorframe, Fascia, Floor, Floorboards, Frame, Gables, Lanterns, Roof, Roof seams, Sign, Stonework, Threshold, Walls, Windows | colliders Ceiling-col, Crates-col, Shell-col, Threshold-col
+inspection_office 6844 visual nodes Ceiling, Cladding, Doorframe, Fascia, Floor, Floorboards, Frame, Gables, Lanterns, Roof, Roof seams, Sign, Stonework, Threshold, Walls, Windows | colliders Ceiling-col, Shell-col, Threshold-col
+kahvehane 7810 visual nodes Canopy, Ceiling, Chimney, Cladding, Doorframe, Fascia, Floor, Floorboards, Frame, Gables, Porch, Roof, Roof seams, Shutters, Sign, Stonework, Threshold, Walls, Windows | colliders Ceiling-col, Porch-col, Shell-col, Threshold-col
+minibus 5514 visual nodes Beltline, Body, Bumpers, Grille, Lights, Mirrors, Roof rack, Sign, Trim, Wheel arches, Wheels, Windows, Wipers | colliders Body-col
+muhtarlik 6289 visual nodes Banner, Ceiling, Cladding, Doorframe, Fascia, Floor, Floorboards, Frame, Gables, Roof, Roof seams, Shutters, Sign, Stonework, Threshold, Walls, Windows | colliders Ceiling-col, Shell-col, Threshold-col
+shop_building 7453 visual nodes Canopy, Ceiling, Chimney, Cladding, Doorframe, Fascia, Floor, Floorboards, Frame, Gables, Lanterns, Roof, Roof seams, Sign, Stonework, Threshold, Walls, Windows | colliders Ceiling-col, Shell-col, Threshold-col
+Creek bounds [-130, -1.1598460674285889, -65.21123504638672] [130, 2, -30.598665237426758] vertex colors True
+Ground bounds [-130, -2.3764967918395996, -130] [130, 50.89946365356445, 130] vertex colors True
+Ground-col bounds [-130, -2.3764967918395996, -130] [130, 80.89945983886719, 130] vertex colors False
+Road bounds [-79.30297088623047, -2.0889878273010254, -111.44999694824219] [79.21900939941406, 29.620100021362305, 50.20000076293945] vertex colors True
+Water bounds [-130, -0.6899999976158142, -62.85615539550781] [130, -0.6899999976158142, -32.587730407714844] vertex colors True
+terrain 47274 visual nodes Creek, Ground, Road, Water | colliders Ground-col
+
+ succeeded in 24605ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Item assets/models/town/bridge.glb,tools/previews/bridge.png,assets/models/town/terrain.glb,tools/previews/terrain_top.png | Select-Object Name,LastWriteTime
+Get-Item "$env:TEMP/gafti_town_error.txt","$env:TEMP/gafti_terrain_error.txt" -ErrorAction SilentlyContinue | Select-Object Name,LastWriteTime' in C:\Users\31\Documents\we2
+ exited 1 in 146ms:
+
+Name                 LastWriteTime      
+----                 -------------      
+bridge.glb           24.11.2026 12:37:07
+bridge.png           24.11.2026 12:37:08
+terrain.glb          24.11.2026 12:36:48
+terrain_top.png      24.11.2026 12:36:51
+gafti_town_error.txt 24.11.2026 12:31:19
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+"'$verifyScript = Join-Path $verifyRoot '"'verify.gd'
+"'$src = Get-Content -Raw $verifyScript
+$src = $src.Replace('"'		elif name == \"bridge\":', @'
+		elif name == \"bridge\":
+			check(ray(Vector3(2,0.5,0),Vector3(-2,0.5,0)).is_empty(), \"Bridge arch opening is blocked\")
+			check(not ray(Vector3(2,.58,4.2),Vector3(0,.58,4.2)).is_empty(), \"Bridge stone abutment lacks collision\")
+'@)
+Set-Content -Path "'$verifyScript -Value $src -Encoding ASCII
+Copy-Item -Path '"'assets/models/town/*.glb' -Destination "'$verifyRoot -Force
+$godot = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+"'$p = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$verifyRoot,'"'--import','--log-file',(Join-Path "'$verifyRoot '"'import.log')) -Wait -PassThru -WindowStyle Hidden
+\"import exit "'$($p.ExitCode)"
+$p = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$verifyRoot,'"'--script','res://verify.gd','--log-file',(Join-Path "'$verifyRoot '"'physics.log')) -Wait -PassThru -WindowStyle Hidden
+\"physics exit "'$($p.ExitCode)"
+Get-Content (Join-Path $verifyRoot '"'physics.log')" in C:\Users\31\Documents\we2
+ succeeded in 5288ms:
+import exit 0
+physics exit 0
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+shop_building bodies=3 shapes=3
+kahvehane bodies=4 shapes=4
+muhtarlik bodies=3 shapes=3
+hardware_store bodies=4 shapes=4
+inspection_office bodies=3 shapes=3
+drying_barn bodies=3 shapes=3
+bus_stop bodies=4 shapes=4
+bridge bodies=3 shapes=3
+minibus bodies=1 shapes=1
+terrain bodies=1 shapes=1
+Failures: 0
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile = '"'tools/blender/town.py'
+"'$source = Get-Content $townFile -Raw -Encoding UTF8
+$source = $source.Replace('"'(0,0,-.172), (w,d,.38)','(0,0,.009), (w,d,.018)').Replace('(0,0,-.152), (w,d,.38)','(0,0,.019), (w,d,.038)').Replace('(door_x,front+.042,.013)','(door_x,front+.042,.026)').Replace('(0,0,-.09),(w,d,.22)','(0,0,.020),(w,d,.040)').Replace('(side*1.05,y,.52),.53','(side*1.05,y,.53),.53')
+Set-Content -Encoding UTF8 "'$townFile $source
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py' in C:\Users\31\Documents\we2
+ succeeded in 25812ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+@'
+from pathlib import Path
+import json
+import struct
+
+from PIL import Image
+
+ROOT = Path.cwd()
+MODELS = ROOT / \"assets/models/town\"
+NAMES = (\"shop_building\", \"kahvehane\", \"muhtarlik\", \"hardware_store\", \"inspection_office\",
+         \"bus_stop\", \"minibus\", \"drying_barn\", \"bridge\", \"terrain\")
+
+
+def verify(name):
+    data = (MODELS / f\"{name}.glb\").read_bytes()
+    magic, version, size, json_size = struct.unpack_from(\"<4sIII\", data)
+    assert (magic, version, size) == (b\"glTF\", 2, len(data))
+    gltf = json.loads(data[20:20+json_size])
+    bin_offset = 28+json_size
+    nodes, primitives = {}, {}
+    for node in gltf[\"nodes\"]:
+        assert \"rotation\" not in node and \"scale\" not in node and \"translation\" not in node
+        prim = gltf[\"meshes\"][node[\"mesh\"]][\"primitives\"]
+        nodes[node[\"name\"]] = sum(gltf[\"accessors\"][p[\"indices\"]][\"count\"]//3 for p in prim)
+        primitives[node[\"name\"]] = prim
+    total = sum(nodes.values())
+    assert total <= (60000 if name==\"terrain\" else 8000), (name, total)
+    assert any(node.endswith(\"-col\") for node in nodes)
+
+    def elements(index):
+        accessor = gltf[\"accessors\"][index]
+        view = gltf[\"bufferViews\"][accessor[\"bufferView\"]]
+        kind = {5123:\"H\",5125:\"I\",5126:\"f\"}[accessor[\"componentType\"]]
+        count = {\"SCALAR\":1,\"VEC3\":3}[accessor[\"type\"]]
+        parser = struct.Struct(\"<\"+kind*count)
+        start = bin_offset + view.get(\"byteOffset\",0) + accessor.get(\"byteOffset\",0)
+        stride = view.get(\"byteStride\",parser.size)
+        return [parser.unpack_from(data,start+i*stride) for i in range(accessor[\"count\"])]
+
+    def surface_at(node, x, z):
+        prim = primitives[node][0]
+        verts = elements(prim[\"attributes\"][\"POSITION\"])
+        indices = elements(prim[\"indices\"])
+        for i in range(0,len(indices),3):
+            a,b,c = [verts[indices[j][0]] for j in range(i,i+3)]
+            bx,bz,cx,cz = b[0]-a[0],b[2]-a[2],c[0]-a[0],c[2]-a[2]
+            dx,dz = x-a[0],z-a[2]
+            det = bx*cz-bz*cx
+            if abs(det)<1e-8:
+                continue
+            wb, wc = (dx*cz-dz*cx)/det, (bx*dz-bz*dx)/det
+            if wb>=-.0001 and wc>=-.0001 and wb+wc<=1.0001:
+                return a[1]+wb*(b[1]-a[1])+wc*(c[1]-a[1])
+        return None
+
+    if name==\"terrain\":
+        assert set(nodes)=={\"Ground\",\"Road\",\"Creek\",\"Water\",\"Ground-col\"}
+        for node in (\"Ground\",\"Road\",\"Creek\",\"Water\"):
+            assert \"COLOR_0\" in primitives[node][0][\"attributes\"]
+        ground = elements(primitives[\"Ground\"][0][\"attributes\"][\"POSITION\"])
+        assert [(min(p[k] for p in ground),max(p[k] for p in ground)) for k in (0,2)]==[(-130,130)]*2
+        water = elements(primitives[\"Water\"][0][\"attributes\"][\"POSITION\"])
+        heights = {round(p[1],5) for p in water}
+        coords = {(round(p[0],5), round(p[2],5)) for p in water}
+        assert heights == {-.69}
+        assert {(-130,-60),(130,-35),(5,-45)} <= coords
+        assert abs(surface_at(\"Creek\",5,-45)+1)<.001
+        for x,z in [(-50,25),(0,10),(40,0),(60,0),(72,48),(5,-40),(5,-50),(0,-110)]:
+            assert surface_at(\"Road\",x,z) is not None, (x,z)
+    else:
+        if name "'!= "bridge":
+            geometry = [p for key, value in primitives.items() if not key.endswith("-col") for p in value]
+            y_min = min(gltf["accessors"][p["attributes"]["POSITION"]]["min"][1] for p in geometry)
+            assert abs(y_min) < .001, (name,y_min)
+    assert Image.open(ROOT/"tools/previews"/f"{name}.png").size == (512,512)
+    return total, nodes
+
+
+if __name__ == "__main__":
+    assert Image.open(ROOT/"tools/previews/terrain_top.png").size == (512,512)
+    print(json.dumps({n: verify(n) for n in NAMES}, ensure_ascii=False))
+'"'@ | Set-Content -Encoding UTF8 (Join-Path "'$verifyRoot '"'verify_glb.py')
+python (Join-Path "'$verifyRoot '"'verify_glb.py')" in C:\Users\31\Documents\we2
+ exited 1 in 448ms:
+Traceback (most recent call last):
+  File "C:\Users\31\AppData\Local\Temp\gafti_sol_town_verify\verify_glb.py", line 80, in <module>
+    print(json.dumps({n: verify(n) for n in NAMES}, ensure_ascii=False))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\31\AppData\Local\Temp\gafti_sol_town_verify\verify_glb.py", line 80, in <dictcomp>
+    print(json.dumps({n: verify(n) for n in NAMES}, ensure_ascii=False))
+                         ^^^^^^^^^
+  File "C:\Users\31\AppData\Local\Temp\gafti_sol_town_verify\verify_glb.py", line 73, in verify
+    assert abs(y_min) < .001, (name,y_min)
+           ^^^^^^^^^^^^^^^^^
+AssertionError: ('minibus', 0.0066086165606975555)
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+python -c \"import runpy,sys; v=runpy.run_path(sys.argv[1]); print(v['verify']('terrain'))\" (Join-Path "'$verifyRoot '"'verify_glb.py')
+Get-Item tools/previews/bridge.png,tools/previews/minibus.png | Select-Object Name,LastWriteTime" in C:\Users\31\Documents\we2
+ succeeded in 326ms:
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "C:\Users\31\AppData\Local\Temp\gafti_sol_town_verify\verify_glb.py", line 68, in verify
+    assert surface_at("Road",x,z) is not None, (x,z)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (5, -40)
+
+Name        LastWriteTime      
+----        -------------      
+bridge.png  24.11.2026 12:38:20
+minibus.png 24.11.2026 12:38:18
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$townFile='"'tools/blender/town.py'
+"'$source=Get-Content $townFile -Raw -Encoding UTF8
+$source=$source.Replace('"'        for y in (-1.53,1.57):','        wheel_height = .4284' + \""'`r`n" + '"'        for y in (-1.53,1.57):')
+"'$source=$source.Replace('"'y,.435),.435','y,wheel_height),.435').Replace('y,.435),.226','y,wheel_height),.226').Replace('y,.435),.10','y,wheel_height),.10').Replace('.435+sin(angle)','wheel_height+sin(angle)')
+Set-Content -Encoding UTF8 "'$townFile $source
+$terrainFile='"'tools/blender/terrain.py'
+"'$source=Get-Content $terrainFile -Raw -Encoding UTF8
+$source=$source.Replace('"'    return min(distance_to_segment(x,z,ax,az,dx,dz,d2)-width', '    distance = min(distance_to_segment(x,z,ax,az,dx,dz,d2)-width')
+"'$source=$source.Replace('"'               for width,ax,az,dx,dz,d2 in SEGMENTS])', '               for width,ax,az,dx,dz,d2 in SEGMENTS])')
+"'$source=$source.Replace('"'               for width,ax,az,dx,dz,d2 in SEGMENTS)', '               for width,ax,az,dx,dz,d2 in SEGMENTS)' + \""'`r`n" + '"'    return max(distance, min(z+50, -40-z))')
+"'$source=$source.Replace('"'[-11,-8,-5.2,-4.15','[-11,-8,-5.2,-5,-4.15').Replace('3.3,4.15,5.2,8,11','3.3,4.15,5,5.2,8,11').Replace('-50.2 <= rows[j] and rows[j+1] <= -39.8','-49.15 <= rows[j] and rows[j+1] <= -40.85')
+Set-Content -Encoding UTF8 "'$terrainFile $source
+Select-String -Path $terrainFile -Pattern '"'distance =|return max\\(distance|band =|49.15'
+Select-String -Path "'$townFile -Pattern '"'wheel_height'" in C:\Users\31\Documents\we2
+ succeeded in 438ms:
+
+tools\blender\terrain.py:93:    distance = min(distance_to_segment(x,z,ax,az,dx,dz,d2)-width
+tools\blender\terrain.py:95:    return max(distance, min(z+50, -40-z))
+tools\blender\terrain.py:141:    band = [-11,-8,-5.2,-5,-4.15,-3.3,-2.5,-1.4,0,1.4,2.5,3.3,4.15,5,5.2,8,11]
+tools\blender\terrain.py:143:        band = [-11,-6,-4.15,-2.5,0,2.5,4.15,6,11]
+tools\blender\terrain.py:283:        if -49.15 <= rows[j] and rows[j+1] <= -40.85:
+tools\blender\town.py:497:        wheel_height = .4284
+tools\blender\town.py:500:            tube("Wheels",(side*1.00,y,wheel_height),.435,.30,"Rubber","X",18,.047)
+tools\blender\town.py:501:            tube("Wheels",(side*1.153,y,wheel_height),.226,.034,"Ivory","X",14,.017)
+tools\blender\town.py:502:            tube("Wheels",(side*1.18,y,wheel_height),.10,.025,"Metal","X",12)
+tools\blender\town.py:505:                tube("Wheels",(side*1.174,y+cos(angle)*.162,wheel_height+sin(angle)*.162),
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/terrain.py' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py' in C:\Users\31\Documents\we2
+ succeeded in 9813ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+python -c \"import runpy,sys; v=runpy.run_path(sys.argv[1]); print(v['verify']('terrain'))\" (Join-Path "'$verifyRoot '"'verify_glb.py')
+Get-Item assets/models/town/minibus.glb,assets/models/town/terrain.glb | Select-Object Name,LastWriteTime" in C:\Users\31\Documents\we2
+ succeeded in 497ms:
+(47830, {'Creek': 2096, 'Ground': 32872, 'Ground-col': 9652, 'Road': 1638, 'Water': 1572})
+
+Name        LastWriteTime      
+----        -------------      
+minibus.glb 24.11.2026 12:38:17
+terrain.glb 24.11.2026 12:39:19
+
+
+
+ succeeded in 24904ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot=Join-Path $env:TEMP '"'gafti_sol_town_verify'
+@'
+from pathlib import Path
+from verify_glb import ROOT, NAMES, verify
+from PIL import Image, ImageDraw
+
+header = \"\"\"# GAFTİ · Kasaba ve vadi teslimi
+
+"'`tools/blender/town.py` dokuz kasaba modelini, `tools/blender/terrain.py` vadiyi üretir. Modeller `assets/models/town/`, 512 × 512 Eevee önizlemeleri `tools/previews/` altında yer alır. Her GLB için aynı adlı bir PNG ve arazi için ayrıca 15 konumun işaretlendiği `terrain_top.png` bulunur.
+
+## GLB düğümleri ve üçgen sayıları
+
+Üçgen sayıları GLB içindeki görsel geometriyi ve çarpışma geometrisini kapsar.
+
+| Dosya | Üçgen | Görsel mesh düğümleri | Çarpışma düğümleri |
+|---|---:|---|---|
+"""
+
+body = """
+## Yerleşim ve doğrulama
+
+- GAFTİ dükkânının duvarlar arasındaki net ölçüsü 8 × 6 m. +Z cephesi 1,84 m açıklığa sahip ve ahşap döşeme düz. İç mekân ayrı raf ve tezgâh yerleşimine hazır.
+- Arazi X ve Z eksenlerinde −130 ile 130 m arasında uzanıyor. Blender `(x, y, z)` koordinatları GLB'"'de "'`(x, z, -y)` olarak doğrulandı. Çiftlik noktaları +2 m'"'deki tek terasa bağlandı. Meydan ve durak 0 m, Keklik Tepe düzlüğü 28 m. Belirtilen yol geçiş noktaları GLB'nin "'`Road` yüzeyinde sorgulandı.
+- Köprü Godot `(5, -1, -45)` konumunda Z doğrultusunda yerleşir. Taş kemerin iki rampa ucu çevredeki 0 m düzlükle birleşir. Dere tabanı köprü merkezinde −1 m, düz su yüzeyi −0,69 m. Dere, sözleşmedeki iki uçtan geçer.
+- Godot 4.7.2 ile on GLB geçici bir test projesinde içe aktarıldı. Fizik ışınları bina girişlerini, arka ve yan duvarları, iç zeminleri, köprü açıklığını ve güvertesini, düz alanların çevrelerinde 72'"'şer örneği ve arazi sınırlarını doğruladı. Sonuç 0 hata.
+- Bütün önizlemeler görsel olarak incelendi. Çatı kadrajları, minibüsün ön renk ayrımı ve arazinin renk geçişleri inceleme sonrası düzeltildi.
+
+## Bilinen sınırlar
+
+- Minibüs statik bir model. Tekerlek dönüşü ve kapı animasyonu yok. Bina camları opak.
+- Su düz ve statik bir yüzey. Ladin ormanı bölgesindeki ağaç yerleşimi ve binaların sahneye montajı dünya sahnesinin entegrasyonuna ait.
+- Doğrulama, Godot'un varlık içe aktarma ve fizik kontrollerini kapsıyor. Tam oyun sahnesinde karakterle oynanış kontrolü yapılmadı.
+
+## Yeniden üretim
+
+Proje kökünden çalıştırın.
+
+"'```powershell
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/town.py
+powershell -ExecutionPolicy Bypass -File tools/blender/run_blender.ps1 -Script C:/Users/31/Documents/we2/tools/blender/terrain.py
+```
+"""
+rows=[]
+for name in NAMES:
+    total, nodes = verify(name)
+    visual = ", ".join(f"`{node}`" for node in nodes if not node.endswith("-col"))
+    collision = ", ".join(f"`{node}`" for node in nodes if node.endswith("-col"))
+    rows.append(f"| `{name}.glb` | {total} | {visual} | {collision} |")
+
+sheet = Image.new("RGB", (840, 894), "#22302a")
+draw = ImageDraw.Draw(sheet)
+for i,name in enumerate(NAMES[:9]):
+    x,y=(i%3)*280,(i//3)*298
+    im=Image.open(ROOT/"tools/previews"/(name+".png")).convert("RGB")
+    sheet.paste(im.resize((278,278)),(x,y))
+    draw.text((x+8,y+281),name,fill="white")
+sheet.save(Path(__file__).parent/"review.png")
+(ROOT/"tools/codex_logs/sol_town_report.md").write_text(header+"'"\\n\".join(rows)+\"\\n\"+body,encoding=\"utf-8\")
+print(\"\\n\".join(rows))
+'@ | Set-Content -Encoding UTF8 (Join-Path "'$verifyRoot '"'report.py')
+Get-Item assets/models/town/bridge.glb,tools/previews/bridge.png | Select-Object Name,LastWriteTime" in C:\Users\31\Documents\we2
+ succeeded in 205ms:
+
+Name       LastWriteTime      
+----       -------------      
+bridge.glb 24.11.2026 12:39:37
+bridge.png 24.11.2026 12:39:38
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot=Join-Path $env:TEMP '"'gafti_sol_town_verify'
+python (Join-Path "'$verifyRoot '"'report.py')
+if ("'$LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+Get-Item tools/codex_logs/sol_town_report.md | Select-Object Name,Length
+Get-FileHash project.godot' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$verifyRoot = Join-Path $env:TEMP '"'gafti_sol_town_verify'
+Copy-Item -Path 'assets/models/town/*.glb' -Destination "'$verifyRoot -Force
+$godot = '"'C:/Users/31/Desktop/Godot_v4.7.2-stable_win64.exe'
+"'$p = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$verifyRoot,'"'--import','--log-file',(Join-Path "'$verifyRoot '"'import.log')) -Wait -PassThru -WindowStyle Hidden
+if ("'$p.ExitCode -ne 0) { exit $p.ExitCode }
+$p = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$verifyRoot,'"'--script','res://verify.gd','--log-file',(Join-Path "'$verifyRoot '"'physics.log')) -Wait -PassThru -WindowStyle Hidden
+Get-Content (Join-Path "'$verifyRoot '"'physics.log')
+exit "'$p.ExitCode' in C:\Users\31\Documents\we2
+ succeeded in 916ms:
+| `shop_building.glb` | 7453 | `Canopy`, `Ceiling`, `Chimney`, `Cladding`, `Doorframe`, `Fascia`, `Floor`, `Floorboards`, `Frame`, `Gables`, `Lanterns`, `Roof`, `Roof seams`, `Sign`, `Stonework`, `Threshold`, `Walls`, `Windows` | `Ceiling-col`, `Shell-col`, `Threshold-col` |
+| `kahvehane.glb` | 7810 | `Canopy`, `Ceiling`, `Chimney`, `Cladding`, `Doorframe`, `Fascia`, `Floor`, `Floorboards`, `Frame`, `Gables`, `Porch`, `Roof`, `Roof seams`, `Shutters`, `Sign`, `Stonework`, `Threshold`, `Walls`, `Windows` | `Ceiling-col`, `Porch-col`, `Shell-col`, `Threshold-col` |
+| `muhtarlik.glb` | 6289 | `Banner`, `Ceiling`, `Cladding`, `Doorframe`, `Fascia`, `Floor`, `Floorboards`, `Frame`, `Gables`, `Roof`, `Roof seams`, `Shutters`, `Sign`, `Stonework`, `Threshold`, `Walls`, `Windows` | `Ceiling-col`, `Shell-col`, `Threshold-col` |
+| `hardware_store.glb` | 6419 | `Ceiling`, `Cladding`, `Crates`, `Doorframe`, `Fascia`, `Floor`, `Floorboards`, `Frame`, `Gables`, `Lanterns`, `Roof`, `Roof seams`, `Sign`, `Stonework`, `Threshold`, `Walls`, `Windows` | `Ceiling-col`, `Crates-col`, `Shell-col`, `Threshold-col` |
+| `inspection_office.glb` | 6844 | `Ceiling`, `Cladding`, `Doorframe`, `Fascia`, `Floor`, `Floorboards`, `Frame`, `Gables`, `Lanterns`, `Roof`, `Roof seams`, `Sign`, `Stonework`, `Threshold`, `Walls`, `Windows` | `Ceiling-col`, `Shell-col`, `Threshold-col` |
+| `bus_stop.glb` | 2586 | `Back wall`, `Bench`, `Fascia`, `Footings`, `Frame`, `Platform`, `Roof`, `Roof seams`, `Sign`, `Timetable` | `Back-col`, `Bench-col`, `Ceiling-col`, `Shell-col` |
+| `minibus.glb` | 5514 | `Beltline`, `Body`, `Bumpers`, `Grille`, `Lights`, `Mirrors`, `Roof rack`, `Sign`, `Trim`, `Wheel arches`, `Wheels`, `Windows`, `Wipers` | `Body-col` |
+| `drying_barn.glb` | 5410 | `Ceiling`, `Cladding`, `Doorframe`, `Fascia`, `Floor`, `Floorboards`, `Frame`, `Gables`, `Roof`, `Roof seams`, `Shutters`, `Stonework`, `Threshold`, `Vents`, `Walls`, `Windows` | `Ceiling-col`, `Shell-col`, `Threshold-col` |
+| `bridge.glb` | 7896 | `Arch`, `Cobbled deck`, `End piers`, `Lichen`, `Parapets`, `Spandrel`, `Voussoirs` | `Arch-col`, `Deck-col`, `Parapets-col` |
+| `terrain.glb` | 47830 | `Creek`, `Ground`, `Road`, `Water` | `Ground-col` |
+
+Name               Length
+----               ------
+sol_town_report.md   4787
+                         
+
+
+
+ succeeded in 6405ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+shop_building bodies=3 shapes=3
+kahvehane bodies=4 shapes=4
+muhtarlik bodies=3 shapes=3
+hardware_store bodies=4 shapes=4
+inspection_office bodies=3 shapes=3
+drying_barn bodies=3 shapes=3
+bus_stop bodies=4 shapes=4
+bridge bodies=3 shapes=3
+minibus bodies=1 shapes=1
+terrain bodies=1 shapes=1
+Failures: 0
+
+codex
+GAFTİ için dokuz kasaba modeli ve 260 × 260 m vadi arazisi üretildi. Dükkânın +Z girişi açık, 8 × 6 m iç alanı düz ve raf yerleşimine hazır. Yaklaşık 10 m uzunluğundaki taş kemer köprü Z doğrultusunda geçiliyor.
+
+Godot 4.7.2’de on GLB de içe aktarıldı. Kapı açıklıkları, köprü geçişi, arazi sınırları ve düz alanların yükseklikleri fizik kontrollerinden geçti. Çarpışmalar dahil en ağır kasaba modeli 7.896, arazi 47.830 üçgen. Tüm 512 × 512 Blender önizlemeleri görsel olarak incelendi.
+
+[İşaretli kuşbakışı harita](C:/Users/31/Documents/we2/tools/previews/terrain_top.png) · [Dükkân önizlemesi](C:/Users/31/Documents/we2/tools/previews/shop_building.png) · [Dosya ve düğüm raporu](C:/Users/31/Documents/we2/tools/codex_logs/sol_town_report.md)
+
+Minibüs ve su yüzeyi statik. Oynanış doğrulaması varlık ve fizik kontrolleriyle sınırlı kaldı.
+tokens used
+144.084
+GAFTİ için dokuz kasaba modeli ve 260 × 260 m vadi arazisi üretildi. Dükkânın +Z girişi açık, 8 × 6 m iç alanı düz ve raf yerleşimine hazır. Yaklaşık 10 m uzunluğundaki taş kemer köprü Z doğrultusunda geçiliyor.
+
+Godot 4.7.2’de on GLB de içe aktarıldı. Kapı açıklıkları, köprü geçişi, arazi sınırları ve düz alanların yükseklikleri fizik kontrollerinden geçti. Çarpışmalar dahil en ağır kasaba modeli 7.896, arazi 47.830 üçgen. Tüm 512 × 512 Blender önizlemeleri görsel olarak incelendi.
+
+[İşaretli kuşbakışı harita](C:/Users/31/Documents/we2/tools/previews/terrain_top.png) · [Dükkân önizlemesi](C:/Users/31/Documents/we2/tools/previews/shop_building.png) · [Dosya ve düğüm raporu](C:/Users/31/Documents/we2/tools/codex_logs/sol_town_report.md)
+
+Minibüs ve su yüzeyi statik. Oynanış doğrulaması varlık ve fizik kontrolleriyle sınırlı kaldı.

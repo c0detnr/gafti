@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/buildable_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"led_lamp"
+name_key = "BUILD_LED_LAMP"
+description_key = "BUILD_LED_LAMP_DESC"
+price = 250
+scene_path = ""
+model_path = "res://assets/models/props/grow_lamp.glb"
+size = Vector3(0.4, 1.8, 0.4)
+color = Color(0.9, 0.7, 0.4, 1)
+footprint = 0.25
+effect = &"light"
+effect_radius = 1.6
+power_cost_per_day = 15
+min_license = 1

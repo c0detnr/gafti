@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StrainData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/strain_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"ladin_duman"
+name_key = "STRAIN_LADIN_DUMAN"
+description_key = "STRAIN_LADIN_DUMAN_DESC"
+yield_trait = 60.0
+speed = 35.0
+hardiness = 75.0
+aroma = 70.0
+quality_potential = 70.0
+leaf_tint = Color(0.2, 0.45, 0.28, 1)
+height_scale = 1.15
+ideal_temp_min = 14.0
+ideal_temp_max = 25.0
+ideal_humidity_min = 0.4
+ideal_humidity_max = 0.75
+light_need = 0.4
+seed_price = 70
+price_multiplier = 1.1
+rare_traits = Array[StringName]([])

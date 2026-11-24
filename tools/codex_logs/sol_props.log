@@ -1,0 +1,2914 @@
+OpenAI Codex v0.172.0
+--------
+workdir: C:\Users\31\Documents\we2
+model: gpt-6.2-sol
+provider: openai
+approval: never
+sandbox: danger-full-access
+reasoning effort: medium
+reasoning summaries: none
+session id: 01a20cdd-0283-7642-9ec8-1c348286ab21
+--------
+user
+Sen GAFTİ adlı Godot 4.7 oyun projesinde çalışan bir alt ajansın. Proje kökü: C:\Users\31\Documents\we2
+ÖNCE AGENTS.md ve GDD.md dosyalarını oku; oradaki sözleşmeye (dosya adları, düğüm adları, ölçek, bütçe, Blender sarmalayıcısı tools\blender\run_blender.ps1) birebir uy.
+Windows 11 + PowerShell kullan. Kullanıcıya soru sorma, onay bekleme, iş bitene kadar çalış. project.godot dosyasını DÜZENLEME. Sana verilmeyen alanlardaki dosyalara dokunma.
+Görsel kaliteyi kontrol et: ürettiğin her modeli Blender ile (Eevee ya da Workbench) 512px önizleme olarak tools\previews\<ad>.png dosyasına render et, görüntüyü kendin incele ve iyi görünmüyorsa düzelt.
+Stil: "detaylı stilize" — Karadeniz yaylası, el boyaması hissi, yumuşak bevel, sıcak ve sevimli, abartılı ama okunaklı oranlar. Doygun yeşiller, ahşap kahvesi, ıslak taş grisi, sıcak turuncu.
+Bitince tools\codex_logs\<GOREV>_report.md dosyasına üretilen dosyaları, düğüm adlarını ve bilinen eksikleri yaz.
+
+GOREV=sol_props
+İŞ: AGENTS.md §8'deki props listesinin TAMAMI → tools\blender\props.py → assets\models\props\*.glb. Her prop ≤2k üçgen, stilize, PBR materyal, orijin tabanın ortasında, gerçek ölçülerde (tezgah ~0.9 m, raf ~1.8 m, saksı ~0.3 m çap). grow_lamp sıcak emissive ampul (Bulb düğümü). jar.glb cam kavanoz + mantar kapak (Glass, Lid). Büyük nesnelere (raf, tezgah, kanepe, yatak, jeneratör, su deposu, çit, kaya, ağaç gövdesi) "-col" son ekli basit çarpışma mesh'i ekle. Tümünün kontak sayfası önizlemesini tools\previews\props_sheet.png olarak render et.
+
+codex
+Önce AGENTS.md, GDD.md ve Blender sarmalayıcısını okuyacağım. Ardından prop modellerini üretip her birini üçgen bütçesi, düğüm adları ve 512 px önizlemesi üzerinden kontrol edeceğim.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -LiteralPath AGENTS.md, GDD.md -Raw' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -LiteralPath tools/blender/run_blender.ps1 -Raw; git status --short; Get-ChildItem tools/blender, assets/models/props -ErrorAction SilentlyContinue' in C:\Users\31\Documents\we2
+ succeeded in 2003ms:
+# GAFTÄ° â€” Ajan KurallarÄ± ve Mimari SÃ¶zleÅŸmesi
+
+Bu dosya her ajan (Claude, Codex) iÃ§in baÄŸlayÄ±cÄ±dÄ±r. TasarÄ±m: `GDD.md`.
+
+## 1. Ortam (ZORUNLU)
+- Ä°ÅŸletim sistemi **Windows 11**. KullanÄ±cÄ±ya **asla Linux/bash komutu Ã¶nerme** (`ls`, `cat`, `rm`, `grep`, `sed`...).
+  KullanÄ±cÄ±ya gÃ¶sterilen her komut **PowerShell** olmalÄ± (`Get-ChildItem`, `Get-Content`, `Remove-Item`, `Select-String`).
+- Kendi Ã§alÄ±ÅŸtÄ±rdÄ±ÄŸÄ±n komutlar iÃ§in de PowerShell tercih et. Yollar: `C:\Users\31\Documents\we2\...`
+- Godot: `C:\Users\31\Desktop\Godot_v4.7.2-stable_win64.exe`
+  - Ä°Ã§e aktarma: `& $godot --headless --path C:\Users\31\Documents\we2 --import`
+  - Hata kontrolÃ¼: `& $godot --headless --path C:\Users\31\Documents\we2 --quit-after 120`
+- Blender 5.3 (Store sÃ¼rÃ¼mÃ¼, doÄŸrudan exe Ã§alÄ±ÅŸmaz). Sadece ÅŸu sarmalayÄ±cÄ±yÄ± kullan:
+  `powershell -ExecutionPolicy Bypass -File C:\Users\31\Documents\we2\tools\blender\run_blender.ps1 -Script <script.py> [-ScriptArgs a,b]`
+- KullanÄ±cÄ±dan onay isteme; etkileÅŸimli komut Ã§alÄ±ÅŸtÄ±rma.
+
+## 2. Model/ajan daÄŸÄ±lÄ±mÄ±
+| Ä°ÅŸ | Kim |
+|---|---|
+| Ã–nemli/detaylÄ± gÃ¶rseller (logo, bitki, bong, joint seti, karakter, sera, shader) | Codex `gpt-6.2-astra` medium |
+| Ä°kincil modeller, kasaba props, tekrarlayan kod | Codex `gpt-6.2-sol` medium |
+| Ã‡ekirdek sistemler, mini oyunlar, oyuncu/dÃ¼nya kodu | Claude Opus 5.5 alt ajanlarÄ± |
+| Orkestrasyon, entegrasyon, doÄŸrulama | Ana Claude oturumu |
+
+## 3. Kod kurallarÄ±
+- Godot **4.7**, GDScript, **statik tipler zorunlu** (`var x: int = 0`, `func f(a: float) -> void`).
+- TÃ¼m oyuncu metinleri `tr("ANAHTAR")`. AnahtarlarÄ± `localization/parts/<alan>.csv` dosyasÄ±na ekle
+  (baÅŸlÄ±k satÄ±rÄ±: `keys,tr`). Ana oturum bunlarÄ± `localization/strings.csv` iÃ§inde birleÅŸtirir.
+  Anahtar biÃ§imi: `ALAN_ACIKLAMA` (Ã¶r. `ROLL_STEP_GRIND`).
+- `project.godot` dosyasÄ±nÄ± **sadece ana oturum** dÃ¼zenler. Yeni autoload/input gerekiyorsa raporunda belirt.
+- Bir autoload'u yalnÄ±zca **sahibi** dÃ¼zenler (aÅŸaÄŸÄ±daki tablo). DiÄŸerleri sadece genel API'yi Ã§aÄŸÄ±rÄ±r.
+- Sahneler `.tscn` metin biÃ§iminde. Kodla sahne Ã¼retmek serbest (`tools/` altÄ±nda `@tool` veya headless script).
+- Placeholder kullanacaksan model yolunu sabit tut; gerÃ§ek `.glb` sonra aynÄ± yola gelir.
+- Mobil uyum: dokunmatik = fare (emulate_touch aÃ§Ä±k). Mini oyunlar sadece sÃ¼rÃ¼kle/tÄ±kla/basÄ±lÄ± tut kullanÄ±r.
+
+## 4. Autoload API sÃ¶zleÅŸmesi
+Sahip sÃ¼tunu: dosyayÄ± kim yazar. Ä°mzalar sabittir, deÄŸiÅŸtirme.
+
+### EventBus (`autoload/event_bus.gd`) â€” ana oturum
+Sadece sinyaller:
+```
+signal interaction_prompt(text: String)            # "" = gizle
+signal minigame_requested(id: StringName, context: Dictionary)
+signal minigame_finished(id: StringName, result: Dictionary)
+signal notify(text: String, kind: StringName)      # kind: &"info", &"good", &"bad"
+signal plant_harvested(plant_id: int, item: Dictionary)
+signal sale_completed(amount: int, item: Dictionary, customer_type: StringName)
+signal inspection_finished(score: int, fine: int)
+signal dialogue_requested(dialogue_id: StringName)
+signal dialogue_finished(dialogue_id: StringName)
+signal player_customization_changed(data: Dictionary)
+signal ui_block_input(blocked: bool)               # mini oyun/diyalog aÃ§Ä±kken oyuncu hareketi kilitlenir
+```
+
+### ContentFlags â€” ana oturum
+`var consumption: bool = true` (iÃ§me sahneleri), `var is_mobile: bool`, `var is_demo: bool`, `const DEMO_DAY_LIMIT := 7`.
+
+### Settings â€” ana oturum
+`day_length_minutes: float = 14.0`, `master_volume`, `music_volume`, `sfx_volume`, `graphics_quality: int (0..2)`, `save()`, `load_settings()`.
+
+### InputSetup â€” ana oturum
+Kodla tanÄ±mlanan aksiyonlar: `move_forward, move_back, move_left, move_right, sprint, interact, inventory, build_mode, pause, jump, camera_zoom_in, camera_zoom_out`.
+
+### GameClock â€” Ajan A (sistemler)
+```
+signal minute_passed(total_minutes: int)
+signal hour_passed(hour: int)
+signal phase_changed(phase: StringName)   # &"morning", &"noon", &"evening", &"night"
+signal day_started(day: int)
+signal season_changed(season: StringName) # &"spring", &"summer", &"autumn", &"winter"
+var day: int; var hour: int; var minute: int; var season: StringName; var paused: bool; var time_scale: float
+func get_time_string() -> String
+func get_day_fraction() -> float          # 0..1, 0 = gece yarÄ±sÄ±
+func sleep_until_morning() -> void
+func advance_minutes(m: int) -> void
+```
+
+### Weather â€” Ajan A
+```
+signal weather_changed(weather: StringName)  # &"sunny", &"cloudy", &"foggy", &"rainy", &"storm", &"snow"
+var current: StringName; var tomorrow: StringName
+func get_customer_multiplier() -> float
+func is_power_out() -> bool
+```
+
+### Economy â€” Ajan A
+```
+signal money_changed(money: int)
+var money: int
+func add(amount: int, reason: String) -> void
+func spend(amount: int, reason: String) -> bool   # yetersizse false
+func get_day_report() -> Dictionary
+```
+
+### Reputation â€” Ajan A
+```
+signal reputation_changed(value: float)
+signal license_level_changed(level: int)
+var reputation: float; var license_level: int; var compliance: float
+func add_reputation(v: float) -> void
+func record_id_check(done: bool) -> void
+```
+
+### Inventory â€” Ajan A
+EÅŸya = Dictionary: `{ "id": StringName, "kind": StringName, "strain": StringName, "quality": int, "grams": float, "count": int }`
+kind: `&"seed", &"wet_bud", &"dry_bud", &"jar", &"preroll", &"paper", &"filter", &"nutrient", &"tool"`
+```
+signal changed()
+func add_item(item: Dictionary) -> void
+func remove_item(id: StringName, count: int = 1) -> bool
+func count_of(id: StringName) -> int
+func get_items(kind: StringName = &"") -> Array[Dictionary]
+```
+
+### QuestManager â€” Ajan C
+```
+signal quest_started(id: StringName); signal quest_completed(id: StringName)
+func start(id: StringName) -> void; func complete(id: StringName) -> void
+func is_active(id: StringName) -> bool; func get_active() -> Array[StringName]
+func notify_event(event: StringName, data: Dictionary = {}) -> void   # gÃ¶rev hedefi ilerletme
+```
+
+### SaveSystem â€” Ajan A
+Her autoload `func get_save_data() -> Dictionary` ve `func load_save_data(d: Dictionary) -> void` saÄŸlar.
+Sahnedeki kalÄ±cÄ± dÃ¼ÄŸÃ¼mler `persist` grubunda ve aynÄ± iki fonksiyonu saÄŸlar (`get_save_id() -> String` de).
+```
+func save_game() -> void; func load_game() -> bool; func has_save() -> bool; func new_game() -> void
+```
+KayÄ±t yolu: `user://save_1.json`.
+
+### Effects â€” Ajan B (mini oyunlar)
+```
+signal gafti_mode_changed(active: bool, strength: float)
+var gafti_active: bool; var gafti_strength: float   # 0..1
+func start_gafti(strength: float, duration_game_minutes: int) -> void
+func get_move_multiplier() -> float                 # GaftÃ®'de 0.85
+func get_customer_patience_multiplier() -> float    # GaftÃ®'de 1.3
+func get_rolling_bonus() -> int                     # GaftÃ®'de +10
+func get_water_jitter() -> float                    # GaftÃ®'de Â±0.2
+```
+
+### AudioManager â€” Ajan C
+`func play_sfx(id: StringName, pos: Variant = null) -> void`, `func play_music(id: StringName) -> void`, `func set_ambience(id: StringName) -> void`.
+Eksik ses dosyasÄ±nda sessizce geÃ§ (hata verme).
+
+## 5. EtkileÅŸim sÃ¶zleÅŸmesi
+- EtkileÅŸilebilir her nesne `interactable` grubunda, bir `Area3D` (layer 4) iÃ§erir ve ÅŸu fonksiyonlarÄ± saÄŸlar:
+  `func get_interact_text() -> String` ve `func interact(player: Node) -> void`.
+- Oyuncu: `scenes/player/player.tscn`, kÃ¶k `CharacterBody3D`, `player` grubunda.
+- Mini oyun sahneleri `CanvasLayer` + `SubViewport` ya da kendi `Camera3D` ile yakÄ±n Ã§ekim. Mini oyunu
+  `scenes/minigames/minigame_host.gd` aÃ§ar: `EventBus.minigame_requested` dinler, sahneyi yÃ¼kler, bitince
+  `EventBus.minigame_finished` yayar.
+- Mini oyun id'leri: `&"rolling"`, `&"gravity_bong"`, `&"care"`, `&"id_check"`, `&"customize"`.
+
+## 6. Sahiplik
+| Alan | Sahip |
+|---|---|
+| `autoload/game_clock, weather, economy, reputation, inventory, save_system` + `scripts/systems/` (bitki, genetik, iÅŸleme) + `scenes/plants/` + `data/strains,items` | Ajan A (Opus) |
+| `autoload/effects` + `scenes/minigames/` + `shaders/gafti_post.gdshader` | Ajan B (Opus) |
+| `autoload/quest_manager, audio_manager` + `scenes/player/` + `scenes/npc/` + `scenes/shop/` + `scenes/ui/` + `data/customers,quests,dialogue` | Ajan C (Opus) |
+| `scenes/world/` (vadi montajÄ±) | Ana oturum (+ Codex sol yardÄ±m) |
+| `assets/models/hero/`, `assets/logo/`, `shaders/` (toon, foliage, fog) | Codex astra |
+| `assets/models/props/`, `assets/models/town/`, `assets/models/characters/npc_*` | Codex sol |
+
+## 7. Model dosya sÃ¶zleÅŸmesi (Blender â†’ .glb)
+- Ã–lÃ§ek: 1 birim = 1 metre, +Y yukarÄ± (glTF), orijin tabanÄ±n ortasÄ±nda.
+- Script: `tools/blender/<ad>.py` â†’ Ã§Ä±ktÄ± `assets/models/<klasÃ¶r>/<ad>.glb`. Script tekrar Ã§alÄ±ÅŸtÄ±rÄ±labilir olmalÄ±.
+- Stil: detaylÄ± stilize; yumuÅŸak bevel, abartÄ±lÄ± oranlar, el boyamasÄ± hissi veren vertex color/basit dokular, dÃ¼ÅŸÃ¼k Ã¼Ã§gen sayÄ±sÄ±.
+- BÃ¼tÃ§e: bitki aÅŸamasÄ± â‰¤4k Ã¼Ã§gen, prop â‰¤2k, karakter â‰¤12k, bina â‰¤8k.
+- Animasyonlu modellerde aksiyon isimleri: `idle, walk, run, interact, sit` vb. (kÃ¼Ã§Ã¼k harf).
+
+## 8. Model listesi (dosya adlarÄ± sabit)
+Mesh dÃ¼ÄŸÃ¼m adlarÄ± Ã¶nemli: kod bunlara gÃ¶re materyal/gÃ¶rÃ¼nÃ¼rlÃ¼k ayarlar.
+
+### Codex astra â†’ `assets/models/hero/`
+| Dosya | Ä°Ã§erik / dÃ¼ÄŸÃ¼m adlarÄ± |
+|---|---|
+| `plant_germ.glb`, `plant_seedling.glb`, `plant_veg.glb`, `plant_flower.glb`, `plant_harvest.glb` | SaksÄ±sÄ±z bitki. DÃ¼ÄŸÃ¼mler: `Stem`, `Leaves`, `Buds` (germ/seedling'de Buds yok). Vertex color + yaprak maskesi (UV.y = kÃ¶kten uca 0..1, rÃ¼zgÃ¢r iÃ§in). Boylar: 0.08 / 0.25 / 0.7 / 1.1 / 1.2 m |
+| `bong_bucket.glb` | Kova + su yÃ¼zeyi. DÃ¼ÄŸÃ¼mler: `Bucket`, `Water` |
+| `bong_bottle.glb` | Kesik pet ÅŸiÅŸe + kapak-kase. DÃ¼ÄŸÃ¼mler: `Bottle`, `Cap`, `Bowl`. Orijin ÅŸiÅŸenin altÄ± |
+| `lighter.glb` | Ã‡akmak. DÃ¼ÄŸÃ¼mler: `Body`, `Wheel` |
+| `grinder.glb` | DÃ¼ÄŸÃ¼mler: `Base`, `Lid` (Lid kendi ekseninde dÃ¶ner, orijini merkezde) |
+| `rolling_paper.glb` | DÃ¼z kaÄŸÄ±t, `Paper` (sarÄ±lma iÃ§in â‰¥24 enine segment) |
+| `filter_tip.glb` | `Filter` |
+| `joint.glb` | BitmiÅŸ joint, `Joint` |
+| `rolling_tray.glb` | Sarma tepsisi, `Tray` |
+| `character_base.glb` | Rigli oyuncu. ArmatÃ¼r `Armature`, gÃ¶vde `Body`. SeÃ§meli parÃ§alar aynÄ± armatÃ¼re baÄŸlÄ±: `Hair_01..Hair_06`, `Beard_00..Beard_04` (00 = yok, boÅŸ), `Hat_Kasket`, `Top_Raincoat`, `Top_Sweater`, `Top_Shirt`, `Pants_01`, `Boots_Rubber`. Animasyonlar: `idle, walk, run, interact, sit, roll, smoke, faint, wave` |
+| `greenhouse.glb` | AhÅŸap + cam yayla serasÄ±, iÃ§ Ã¶lÃ§Ã¼ ~12Ã—6 m, kapÄ± +Z yÃ¶nÃ¼nde. Ä°Ã§eride saksÄ± tezgahlarÄ±. `Glass` dÃ¼ÄŸÃ¼mÃ¼ ayrÄ± (ÅŸeffaf materyal) |
+| `house.glb` | Dedenin ahÅŸap Karadeniz evi (dÄ±ÅŸ + basit iÃ§: yatak, ayna, kanepe) |
+
+### Codex sol â†’ `assets/models/props/` ve `assets/models/town/`
+props: `pot.glb, grow_lamp.glb, shelf_shop.glb, counter.glb, cash_register.glb, drying_rack.glb, jar.glb, rolling_table.glb, generator.glb, water_tank.glb, watering_can.glb, fence.glb, spruce_tree.glb, tea_bush.glb, rock_01.glb, rock_02.glb, bench.glb, lamp_post.glb, sofa.glb, mirror.glb, bed.glb, crate.glb, tavla_table.glb`
+town: `shop_building.glb` (GAFTÄ° dÃ¼kkanÄ±, girilebilir, iÃ§ ~8Ã—6 m), `kahvehane.glb`, `muhtarlik.glb`, `hardware_store.glb`, `inspection_office.glb`, `bus_stop.glb`, `minibus.glb`, `drying_barn.glb`, `bridge.glb`, `terrain.glb`
+
+## 9. Vadi yerleÅŸimi (Godot koordinatlarÄ±, metre, Y yukarÄ±)
+Arazi 260Ã—260 m, merkez (0,0,0). DÃ¼z alanlar (pad) arazide bu noktalarda olmalÄ±:
+| BÃ¶lge | Merkez (x, z) | YÃ¼kseklik y | Pad yarÄ±Ã§apÄ± |
+|---|---|---|---|
+| Oyuncu baÅŸlangÄ±cÄ± / ev Ã¶nÃ¼ | (-62, 28) | 2 | â€” |
+| Ev | (-70, 40) | 2 | 14 (ev+sera+tarla tek pad) |
+| Sera | (-55, 30) | 2 | (aynÄ± pad) |
+| DÄ±ÅŸ tarla | (-45, 48) | 2 | (aynÄ± pad) |
+| Kurutma ambarÄ± | (-78, 22) | 2 | (aynÄ± pad) |
+| Kasaba meydanÄ± | (60, 0) | 0 | 22 |
+| GAFTÄ° DÃ¼kkanÄ± | (60, -14) | 0 | (meydan) |
+| Kahvehane | (46, 8) | 0 | (meydan) |
+| MuhtarlÄ±k | (74, 8) | 0 | (meydan) |
+| Denetim ofisi | (78, -8) | 0 | (meydan) |
+| HÄ±rdavatÃ§Ä± | (42, -10) | 0 | (meydan) |
+| MinibÃ¼s duraÄŸÄ± | (72, 48) | 0 | 6 |
+| KÃ¶prÃ¼ & dere | (5, -45) | -1 | dere x yÃ¶nÃ¼nde deÄŸil, (âˆ’130,âˆ’60)â†’(130,âˆ’35) boyunca akar |
+| Ladin ormanÄ± | (-45, -70) Ã§evresi | â€” | aÄŸaÃ§lar |
+| Keklik Tepe zirvesi | (0, -110) | 28 | 6 |
+Yol: Ev padinden (-50, 25) â†’ (0, 10) â†’ meydan (40, 0); meydandan duraÄŸa (72, 48); meydandan kÃ¶prÃ¼ye (5,-45) â†’ tepeye patika.
+Arazide yol dÃ¼ÄŸÃ¼mÃ¼ `Road` (ayrÄ± materyal), zemin `Ground`, dere yataÄŸÄ± `Creek`. Arazi kenarlarÄ± daÄŸlarla kapalÄ± (oyuncu Ã§Ä±kamaz).
+
+# GAFTÄ° â€” Oyun TasarÄ±m DokÃ¼manÄ± (GDD) v1.0
+
+> Karadeniz yaylasÄ±nda lisanslÄ± kenevir serasÄ± + dÃ¼kkan iÅŸletme oyunu. Komedi tonlu, cozy ama sonuÃ§lu.
+> Motor: Godot 4.7 Â· Platform: PC (Steam) + Mobil (Play Store) Â· Dil: TÃ¼rkÃ§e (Ã§eviriye hazÄ±r) Â· Derecelendirme: 18+
+
+---
+
+## 1. Ã–zet
+
+Åehirde her iÅŸi batÄ±rmÄ±ÅŸ karakterimiz, kimsenin istemediÄŸi yayla serasÄ±nÄ± devralÄ±r ve **Pusludere**
+yaylasÄ±na taÅŸÄ±nÄ±r. Sisli sabahlarda bitkilerine bakar, Ã¶ÄŸlen hasadÄ±nÄ± kurutup joint sarar, akÅŸam kasaba
+meydanÄ±ndaki dÃ¼kkanÄ±nda kÃ¶ylÃ¼lere ve turistlere satÄ±ÅŸ yapar. Gece serada kova bongla gÃ¼nÃ¼ kapatÄ±r.
+KasabanÄ±n tuhaf insanlarÄ±, absÃ¼rt gÃ¶revleri ve kesintisiz bir yayla mizahÄ± oyunu taÅŸÄ±r.
+
+**ÃœÃ§ sÃ¼tun:**
+1. **Dokunsal ustalÄ±k:** BakÄ±m, sarma ve bong anlarÄ± elle hissedilen mini oyunlardÄ±r.
+2. **Atmosfer:** Sis, yaÄŸmur, mevsimler, ahÅŸap ve yeÅŸil. Oyunun asÄ±l hissi yayladan gelir.
+3. **Mizah:** Her NPC bir skeÃ§. Ciddi bir ana hikÃ¢ye yok.
+
+---
+
+## 2. Modlar
+
+| Mod | Ä°Ã§erik |
+|---|---|
+| **HikÃ¢ye (Komedi)** | Ana hikÃ¢ye yok; birbirine baÄŸlÄ± **komik gÃ¶rev zinciri** (NPC skeÃ§leri). Oyunu Ã¶ÄŸretir, lisans seviyelerini aÃ§ar. ~4 mevsim (28 gÃ¼n). |
+| **Serbest** | HikÃ¢ye bittikten sonra ya da baÅŸtan: sonsuz iÅŸletme, tÃ¼m sistemler aÃ§Ä±k. |
+
+**Zorluk:** Cozy ama sonuÃ§lu. Bitki Ã¶lebilir, para eksiye dÃ¼ÅŸebilir, denetimde ceza gelebilir.
+Oyun asla bitmez: eksi bakiyede Muhtar'dan faizsiz (ama utandÄ±rÄ±cÄ±) borÃ§ alÄ±nÄ±r.
+
+---
+
+## 3. DÃ¼nya: Pusludere YaylasÄ±
+
+### 3.1 Harita (kÃ¼Ã§Ã¼k aÃ§Ä±k vadi, yÃ¼klemesiz)
+```
+                 â›°  KEKLÄ°KTEPE (manzara, hikÃ¢ye finali)
+                      â”‚ patika
+        ğŸŒ² LADÄ°N ORMANI â”€â”€ ğŸŒ‰ KÃ–PRÃœ & DERE (su deposu dolumu)
+              â”‚                      â”‚
+ [DEDENÄ°N SERASI + EV] â”€â”€ Ã§ay bahÃ§eli yol â”€â”€ [KASABA MEYDANI]
+   â”œ Sera (saksÄ±lar)                          â”œ GAFTÄ° DÃ¼kkanÄ±
+   â”œ DÄ±ÅŸ tarla (mevsimsel)                    â”œ Fadime'nin Kahvehanesi
+   â”œ Kurutma ambarÄ±                           â”œ MuhtarlÄ±k
+   â”œ Sarma masasÄ±                             â”œ Lisans & Denetim Ofisi
+   â”” Kova bong kÃ¶ÅŸesi                         â”” HÄ±rdavatÃ§Ä± (ekipman/tohum)
+                                                   â”‚
+                                          ğŸš MÄ°NÄ°BÃœS DURAÄI
+                                       (turistler, toptan sipariÅŸler)
+```
+- Sera â†’ dÃ¼kkan yÃ¼rÃ¼me sÃ¼resi ~40 sn; ilerleyen oyunda **eski motosiklet** (sÃ¼rÃ¼ÅŸ, ~15 sn).
+- Mobil: bÃ¶lgeler `VisibilityRange` + streaming ile parÃ§a parÃ§a yÃ¼klenir; oyuncu yÃ¼kleme ekranÄ± gÃ¶rmez.
+
+### 3.2 Atmosfer
+- **GÃ¶rsel stil:** DetaylÄ± stilize. El boyamasÄ± hissi veren toon shading, yumuÅŸak kenar Ä±ÅŸÄ±ÄŸÄ±, doygun yeÅŸiller,
+  ahÅŸap/taÅŸ dokularÄ±, rÃ¼zgÃ¢rla sallanan bitki shader'Ä±, katmanlÄ± sis.
+- **Renk paleti:** Ladin yeÅŸili, Ã§ay yeÅŸili, Ä±slak taÅŸ grisi, ahÅŸap kahvesi, sÄ±cak lamba turuncusu (sera Ä±ÅŸÄ±klarÄ±).
+- **Ses:** YaÄŸmurun Ã§atÄ±ya vuruÅŸu, dere, kuÅŸlar, uzaktan inek Ã§anÄ±, kahvehanede tavla sesi. MÃ¼zik: lo-fi + kemenÃ§e
+  dokunuÅŸlu sakin parÃ§alar (CC0). Gece daha sakin bir mÃ¼zik Ã§alar, fÄ±rtÄ±nada mÃ¼zik kÄ±sÄ±lÄ±r.
+
+### 3.3 Mevsimler & Hava
+1 yÄ±l = 4 mevsim Ã— 7 gÃ¼n = 28 gÃ¼n.
+
+| Mevsim | Etki |
+|---|---|
+| Ä°lkbahar | Ekim bonusu (+%15 Ã§imlenme), sÄ±k yaÄŸmur (dÄ±ÅŸ tarla kendiliÄŸinden sulanÄ±r) |
+| Yaz | DÄ±ÅŸ tarla en verimli, turist sayÄ±sÄ± Ã—2, sÄ±caklÄ±k stresi |
+| Sonbahar | Hasat bonusu (+kalite), fÄ±rtÄ±na ihtimali |
+| KÄ±ÅŸ | DÄ±ÅŸ tarla kapalÄ±, kar, sera Ä±sÄ±tma gideri; mÃ¼ÅŸteri az ama fiyat yÃ¼ksek |
+
+| Hava | Etki |
+|---|---|
+| GÃ¼neÅŸli | DÄ±ÅŸ Ä±ÅŸÄ±k +, su tÃ¼ketimi + |
+| Bulutlu | NÃ¶tr |
+| Sisli | GÃ¶rÃ¼ÅŸ dÃ¼ÅŸÃ¼k, atmosfer max; mÃ¼ÅŸteri biraz az |
+| YaÄŸmurlu | DÄ±ÅŸ tarla otomatik sulanÄ±r, mÃ¼ÅŸteri âˆ’%20 |
+| FÄ±rtÄ±na | DÄ±ÅŸ bitkilere hasar riski, **elektrik kesintisi** (jeneratÃ¶r yÃ¼kseltmesi Ã§Ã¶zer) |
+| Kar | KÄ±ÅŸa Ã¶zel, sera Ä±sÄ± ihtiyacÄ± + |
+
+Ertesi gÃ¼nÃ¼n hava tahmini akÅŸamlarÄ± kahvehane radyosundan duyulur.
+
+---
+
+## 4. Ã‡ekirdek DÃ¶ngÃ¼
+
+```
+SABAH  (06â€“11)  Sera & tarla: sula, besle, Ä±ÅŸÄ±k ayarla, buda, zararlÄ± temizle, hasat et
+Ã–ÄLE   (11â€“16)  Ä°ÅŸleme: kurut, kÃ¼rle, paketle, joint sar (pre-roll)
+AKÅAM  (16â€“22)  DÃ¼kkan: raflarÄ± diz, fiyat koy, kimlik kontrol et, sat
+GECE   (22â€“02)  Planla: yÃ¼kselt, Ã§aprazla, inÅŸa et Â· Kova bong Â· Uyu (kayÄ±t)
+```
+- 1 oyun gÃ¼nÃ¼ â‰ˆ 14 dk gerÃ§ek zaman (ayarlardan 10â€“20 dk).
+- Fazlar Ã¶neridir; dÃ¼kkan sadece 16â€“22 arasÄ± aÃ§Ä±ktÄ±r.
+- 02:00'da uyumazsan karakter bayÄ±lÄ±r: ertesi sabah geÃ§ uyanÄ±r, âˆ’%10 para (bayÄ±ldÄ±ÄŸÄ± yerden eve "taÅŸÄ±ma Ã¼creti").
+
+---
+
+## 5. Sistemler
+
+### 5.1 Bitki
+| AÅŸama | GÃ¼n | EtkileÅŸim |
+|---|---|---|
+| Ã‡imlenme | 1 | Ekim, nem |
+| Fide | 2 | Sulama, hafif Ä±ÅŸÄ±k |
+| Vejetatif | 3â€“5 | Besin, budama, saksÄ± bÃ¼yÃ¼tme |
+| Ã‡iÃ§eklenme | 4â€“6 | IÅŸÄ±k dÃ¶ngÃ¼sÃ¼, pH, zararlÄ± kontrolÃ¼ |
+| Hasat | â€” | Zamanlama: erken = az verim, geÃ§ = kalite dÃ¼ÅŸer |
+
+- **DeÄŸiÅŸkenler:** Su, IÅŸÄ±k, Besin, pH, SÄ±caklÄ±k, Nem, SaÄŸlÄ±k.
+- TÃ¼rÃ¼n ideal aralÄ±ÄŸÄ±nda geÃ§en sÃ¼re â†’ **Kalite (0â€“100)**. SaÄŸlÄ±k 0 â†’ bitki Ã¶lÃ¼r (kompost olur, gÃ¼bre verir).
+- **ZararlÄ±lar:** Yaprak biti, kÃ¼f (nem yÃ¼ksekse). Elle temizlenir ya da ilaÃ§lanÄ±r.
+- GÃ¶rsel: Her aÅŸamanÄ±n ayrÄ± bir modeli var. Kalite, saÄŸlÄ±k ve susuzluk yaprak rengine ve duruÅŸuna yansÄ±r.
+
+### 5.2 Genetik / Ã‡aprazlama
+- Ã–zellikler: **Verim, HÄ±z, DayanÄ±klÄ±lÄ±k, Aroma, Kalite Potansiyeli**, ayrÄ±ca gÃ¶rsel Ã¶zellikler (yaprak tonu, boy).
+- Ã‡aprazlama: yavru Ã¶zelliÄŸi ebeveyn ortalamasÄ± Â± sapma; %5 mutasyon (nadir Ã¶zellik).
+- BaÅŸlangÄ±Ã§ta 3 tÃ¼r: **Pusu KuÅŸu**, **Ladin Duman**, **Ã‡ay YapraÄŸÄ±**. HikÃ¢ye Ã¶dÃ¼lÃ¼: **GAFTÄ°** tÃ¼rÃ¼.
+- Yeni tÃ¼rlere oyuncu isim verir; **Tohum Defteri** koleksiyonu.
+
+### 5.3 Ä°ÅŸleme
+Kurutma (3â€“7 saat, nem dengesi) â†’ KÃ¼rleme (opsiyonel, 1â€“3 gÃ¼n, +kalite) â†’ ÃœrÃ¼n:
+- **Kavanoz** (gram satÄ±ÅŸ)
+- **Pre-roll** (joint sarma mini oyunu, Ã—1.6 deÄŸer)
+
+### 5.4 Joint Sarma Mini Oyunu (yakÄ±n Ã§ekim, dokunsal)
+| AdÄ±m | EtkileÅŸim (fare / dokunmatik) | Kaliteye etkisi |
+|---|---|---|
+| 1. Ã–ÄŸÃ¼t | Grinder kapaÄŸÄ±nÄ± dairesel Ã§evir | Az Ã§evirirsen iri tane, Ã§ok Ã§evirirsen toz olur |
+| 2. Filtre | Kartonu zikzak katla (3 sÃ¼rÃ¼kleme) | DÃ¼zgÃ¼n filtre olursa Ã§ekiÅŸ iyi olur |
+| 3. DaÄŸÄ±t | KaÄŸÄ±da sÃ¼rÃ¼kleyerek serp | EÅŸit daÄŸÄ±lÄ±m iÃ§in Ä±sÄ± haritasÄ± gÃ¶stergesi |
+| 4. Sar | YukarÄ±-aÅŸaÄŸÄ± ritmik kaydÄ±rma, basÄ±nÃ§ Ã§ubuÄŸu | GevÅŸek sararsan sÃ¶ner, sÄ±kÄ± sararsan Ã§ekmez |
+| 5. YapÄ±ÅŸtÄ±r | Kenar boyunca sÃ¼rÃ¼kle (yala) | Eksik bÄ±rakÄ±rsan aÃ§Ä±lÄ±r |
+| 6. BÃ¼k | Ucu dÃ¶ndÃ¼r | BitiÅŸ |
+
+- SonuÃ§ **Sarma Skoru (0â€“100)**; Ã¼rÃ¼n kalitesiyle Ã§arpÄ±lÄ±r. Beceri arttÄ±kÃ§a yardÄ±m Ã§ubuklarÄ± azalÄ±r.
+- Komedi: Ã‡ok kÃ¶tÃ¼ sarÄ±mlar "Muhtar'Ä±n KaÄŸÄ±dÄ±", "Kibrit Ã‡Ã¶pÃ¼" gibi komik isimler alÄ±r ama yine satÄ±labilir (ucuza).
+
+### 5.5 Kova Bong Mini Oyunu (gravity bong, yakÄ±n Ã§ekim)
+| AdÄ±m | EtkileÅŸim |
+|---|---|
+| 1. HazÄ±rla | Kesik pet ÅŸiÅŸeyi su dolu kovaya batÄ±r |
+| 2. Doldur | Kaseyi doldur (miktar seÃ§imi: az / orta / bol) |
+| 3. Yak | Ã‡akmaÄŸÄ± Ã§ak (basÄ±lÄ± tut) |
+| 4. KaldÄ±r | ÅiÅŸeyi **yavaÅŸÃ§a** yukarÄ± kaldÄ±r; hÄ±zlÄ± kaldÄ±rÄ±rsan duman kaÃ§ar |
+| 5. Ã‡ek | Kaseyi Ã§Ä±kar, nefes Ã§ubuÄŸunu doÄŸru anda bÄ±rak |
+
+- **Etki: "GaftÃ® Modu"** (sÃ¼re miktara baÄŸlÄ±, 1â€“3 oyun saati):
+  - Ekran: renk doygunluÄŸu artar, hafif dalga efekti, yumuÅŸak bulanÄ±klÄ±k, mÃ¼zik yavaÅŸlar ve filtrelenir.
+  - **ArtÄ±:** MÃ¼ÅŸteri sabrÄ± +%30, bakÄ±m mini oyunlarÄ±nda "sakin el" (sarma skoru +10).
+  - **Eksi:** Hareket âˆ’%15, sulama miktarÄ± rastgele Â±%20 kayar, NPC diyaloglarÄ± absÃ¼rtleÅŸir.
+  - "Bol" doz: komik bayÄ±lma ihtimali (kanepede uyanÄ±rsÄ±n, 2 saat kaybedersin).
+- Seradaki bong yÃ¼kseltilebilir (kova â†’ bidon â†’ "Muhtar'Ä±n KazanÄ±" sÃ¼s gÃ¶rÃ¼nÃ¼mleri).
+
+### 5.6 DÃ¼kkan
+- Raf ve vitrin grid yerleÅŸimi, Ã¼rÃ¼n baÅŸÄ±na fiyat, gÃ¼n sonu raporu.
+- **MÃ¼ÅŸteri tipleri:**
+  | Tip | Tercih | BÃ¼tÃ§e |
+  |---|---|---|
+  | Yayla KÃ¶ylÃ¼sÃ¼ | Ucuz, kavanoz | DÃ¼ÅŸÃ¼k |
+  | Turist | Pre-roll, ÅŸÄ±k paket | YÃ¼ksek |
+  | TÄ±bbi Hasta (Hayri Hoca vb.) | YÃ¼ksek kalite, aroma | Orta |
+  | Uzman (ÅŸehirli) | Nadir tÃ¼r, mutasyon | Ã‡ok yÃ¼ksek |
+- **Kimlik kontrolÃ¼:** Her mÃ¼ÅŸteride hÄ±zlÄ± kart kontrolÃ¼ yapÄ±lÄ±r. Atlarsan denetimde ceza gelir. Komik sahte kimlikler de Ã§Ä±kar.
+- Memnuniyet â†’ **Ä°tibar** â†’ mÃ¼ÅŸteri sayÄ±sÄ± ve kalitesi.
+
+### 5.7 Lisans & Denetim
+- Kurgusal "Yayla Kenevir LisansÄ±", 5 seviye. Her seviye yeni saksÄ± sayÄ±sÄ±, ekipman, tÃ¼r ve dÃ¼kkan alanÄ± aÃ§ar.
+- **DenetÃ§i Nevzat Bey** habersiz gelir: kayÄ±t defteri, etiket, kimlik kontrol geÃ§miÅŸi ve hijyen puanlanÄ±r.
+- DÃ¼ÅŸÃ¼k puan â†’ para cezasÄ±; Ã¼st Ã¼ste dÃ¼ÅŸÃ¼k puan â†’ 1 gÃ¼n dÃ¼kkan kapalÄ±.
+
+### 5.8 Ä°nÅŸa & YÃ¼kseltme
+Grid yerleÅŸim: saksÄ±lar, LED lambalar, damla sulama, nemlendirici, Ä±sÄ±tÄ±cÄ±, jeneratÃ¶r, kurutma rafÄ±, dÃ¼kkan raflarÄ±.
+Otomasyon orta seviyede gelir; zevkli iÅŸler (sarma, bong, hasat) hiÃ§ otomatikleÅŸmez.
+
+### 5.9 Ekonomi (baÅŸlangÄ±Ã§ dengesi)
+- BaÅŸlangÄ±Ã§: 2.000 â‚º, 6 saksÄ±, 3 tohum tÃ¼rÃ¼ Ã— 2.
+- Giderler: elektrik (gÃ¼nlÃ¼k, lamba sayÄ±sÄ±na baÄŸlÄ±), su (dere deposu bedava ama taÅŸÄ±ma gerekir), kÄ±ÅŸ Ä±sÄ±tma, tohum, ekipman.
+- Hedef: 3. gÃ¼nde kÃ¢ra geÃ§mek, 7. gÃ¼nde ilk lisans yÃ¼kseltmesi.
+
+### 5.10 Karakter Ã–zelleÅŸtirme
+Ten tonu (6), saÃ§ (6 model Ã— renk), sakal/bÄ±yÄ±k (5), Karadeniz giyimi: yaÄŸmurluk, Ã¶rgÃ¼ kazak, kasket,
+lastik Ã§izme (renkler). Ayna/dolap ile her zaman deÄŸiÅŸtirilebilir.
+
+---
+
+## 6. Karakterler & Komedi GÃ¶revleri
+
+| NPC | Rol | Komedi |
+|---|---|---|
+| **Muhtar RÃ¼stem** | HikÃ¢ye gÃ¶revleri, borÃ§ | Her ÅŸeye "hallederuk" der, hiÃ§bir ÅŸeyi halletmez |
+| **Fadime Abla** | Kahvehane, hava tahmini, dedikodu | Radyo hava tahminleri hep tersi Ã§Ä±kar |
+| **Hayri Hoca** | Emekli Ã¶ÄŸretmen, tÄ±bbi mÃ¼ÅŸteri | Her alÄ±ÅŸveriÅŸte ders verir |
+| **Cemil** | KomÅŸu, absÃ¼rt gÃ¶revler | Ä°neÄŸi iÃ§in "rahatlatÄ±cÄ±" ister (vermezsin) |
+| **Hans** | Alman turist | Yaylaya yerleÅŸmek ister, TÃ¼rkÃ§esi felaket |
+| **Nevzat Bey** | DenetÃ§i | Ciddi; GaftÃ® Modu'nda Ã§ok komik konuÅŸur |
+
+**GÃ¶rev zinciri (Ã¶rnek ilk hafta):** SerayÄ± temizle â†’ Ä°lk hasat â†’ Muhtar'a "numune" â†’ DÃ¼kkanÄ± aÃ§ â†’
+Hans'Ä±n ilk sipariÅŸi â†’ Ä°lk denetim â†’ Lisans 2. Her gÃ¶rev 1â€“3 dk'lÄ±k bir skeÃ§le biter.
+
+---
+
+## 7. Kamera & Kontroller
+
+**Vadide:** 3. ÅŸahÄ±s omuz Ã¼stÃ¼ kamera. **Mini oyunlarda:** sabit yakÄ±n Ã§ekim kameraya yumuÅŸak geÃ§iÅŸ.
+
+| Eylem | PC | Mobil |
+|---|---|---|
+| Hareket | WASD | Sol sanal joystick |
+| Kamera | Fare | SaÄŸ yarÄ± ekran sÃ¼rÃ¼kleme |
+| EtkileÅŸim | E / Sol tÄ±k | BaÄŸlamsal etkileÅŸim butonu |
+| KoÅŸ | Shift | Joystick'i sonuna kadar it |
+| Envanter | Tab | Ã‡anta ikonu |
+| Ä°nÅŸa modu | B | MenÃ¼ butonu |
+| Mini oyun | Fare sÃ¼rÃ¼kle/Ã§evir | Parmakla aynÄ± hareketler |
+
+---
+
+## 8. MaÄŸaza, Gelir & Derecelendirme
+
+- **Gelir:** PC'de Steam Ã¼cretli + ayrÄ± demo. Mobilde Ã¼cretsiz demo (Ä°lkbahar, 7 gÃ¼n) + tek seferlik "Tam SÃ¼rÃ¼m" satÄ±n alÄ±mÄ± (Play Billing).
+- **Derecelendirme:** 18+ (uyuÅŸturucu kullanÄ±mÄ± tasviri). IARC anketi dÃ¼rÃ¼st doldurulacak.
+- **Risk notu:** Ä°Ã§me sahneleri her platformda aÃ§Ä±k; bu Play Store'da red riskini yÃ¼kseltir. Teknik sigorta olarak
+  tÃ¼m iÃ§me iÃ§eriÄŸi tek bir `content_flags.consumption` bayraÄŸÄ±na baÄŸlÄ±dÄ±r (varsayÄ±lan: aÃ§Ä±k). Red gelirse
+  mobil derlemede bu bayrak kapatÄ±lÄ±p joint "satÄ±lÄ±k pre-roll", bong "dekor" moduna dÃ¼ÅŸer, ek iÅŸ gerekmez.
+- Reklam yok. GerÃ§ek marka/dispanser yok.
+
+---
+
+## 9. Teknik Mimari (Godot 4.7)
+
+- **Renderer:** Mobile (PC'de "YÃ¼ksek" grafik ayarÄ±nda ekstra sis/gÃ¶lge kalitesi).
+- **Dil:** GDScript, statik tipli. TÃ¼m metinler `tr()` + `localization/strings.csv`.
+
+**Autoload'lar:**
+| Ad | GÃ¶rev |
+|---|---|
+| `EventBus` | Sistemler arasÄ± sinyaller |
+| `GameClock` | Saat, gÃ¼n, faz, mevsim |
+| `Weather` | GÃ¼nlÃ¼k hava, tahmin, ortam efektleri |
+| `Economy` | Para, iÅŸlemler, gÃ¼n sonu raporu |
+| `Reputation` | Ä°tibar, lisans seviyesi, uyum puanÄ± |
+| `Inventory` | EÅŸyalar, Ã¼rÃ¼nler |
+| `QuestManager` | Komedi gÃ¶rev zinciri, diyalog tetikleri |
+| `SaveSystem` | KayÄ±t/yÃ¼kleme (uyuyunca otomatik) |
+| `Settings` | Grafik, ses, kontrol, gÃ¼n sÃ¼resi |
+| `ContentFlags` | Platform/iÃ§erik bayraklarÄ± |
+| `Effects` | GaftÃ® Modu ekran efektleri, post-process |
+
+**Veri (Resource):** `StrainData`, `PlantState`, `ItemData`, `CustomerProfile`, `QuestData`, `DialogueData`, `BuildableData`.
+
+**KlasÃ¶r yapÄ±sÄ±:**
+```
+res://
+â”œâ”€â”€ autoload/
+â”œâ”€â”€ data/            strains/ items/ customers/ quests/ dialogue/ buildables/
+â”œâ”€â”€ scenes/
+â”‚   â”œâ”€â”€ world/       valley.tscn, greenhouse/, town/, zones/
+â”‚   â”œâ”€â”€ player/      player.tscn, camera_rig.tscn, customization/
+â”‚   â”œâ”€â”€ plants/
+â”‚   â”œâ”€â”€ npc/
+â”‚   â”œâ”€â”€ minigames/   rolling/, gravity_bong/, care/, id_check/
+â”‚   â”œâ”€â”€ shop/
+â”‚   â””â”€â”€ ui/          hud/, menus/, mobile_controls/, dialogue/
+â”œâ”€â”€ scripts/         systems/ components/
+â”œâ”€â”€ shaders/         toon.gdshader, foliage_wind, fog_layer, gafti_post
+â”œâ”€â”€ assets/          models/ textures/ audio/ fonts/ logo/
+â”œâ”€â”€ localization/
+â””â”€â”€ tests/
+```
+
+**Performans bÃ¼tÃ§esi (mobil, orta segment Android):** 60 FPS hedef (min 30), ekranda â‰¤150 draw call,
+â‰¤300k Ã¼Ã§gen, bitki modelleri LOD0 â‰¤4k / LOD1 â‰¤1k Ã¼Ã§gen, doku atlaslarÄ± 2K.
+
+---
+
+## 10. Sanat Listesi (Ã¶ncelik + Ã¼retici)
+
+| VarlÄ±k | Detay | Ãœretici |
+|---|---|---|
+| **GAFTÄ° logosu** | Ã‡izgi film tarzÄ±, kalÄ±n yuvarlak harfler, Ä° noktasÄ± yaprak/duman; yeÅŸil + sÄ±cak turuncu. SVG + PNG + uygulama ikonu | Codex astra |
+| **Bitki** | 5 aÅŸama Ã— saÄŸlÄ±k varyasyonu, rÃ¼zgÃ¢r shader'Ä± | Codex astra |
+| **Kova bong seti** | Kova, kesik ÅŸiÅŸe, kase, su, duman | Codex astra |
+| **Joint seti** | Grinder, kaÄŸÄ±t, filtre, joint (sarÄ±m aÅŸamalarÄ±) | Codex astra |
+| **Oyuncu karakteri** | GÃ¶vde + Ã¶zelleÅŸtirme parÃ§alarÄ± + temel animasyonlar | Codex astra |
+| **Shader'lar** | Toon, foliage wind, sis katmanlarÄ±, GaftÃ® post-process | Codex astra |
+| Sera yapÄ±sÄ±, ev | AhÅŸap/cam yayla serasÄ± | Codex astra |
+| NPC'ler (6) | Karakter tabanÄ±ndan tÃ¼retilmiÅŸ | Codex sol |
+| Kasaba binalarÄ±, props | Kahvehane, muhtarlÄ±k, raflar, saksÄ±, lamba, Ã§it, aÄŸaÃ§ | Codex sol |
+| UI temasÄ± | Ä°konlar, paneller, font seÃ§imi | Codex astra (yÃ¶n) + sol (uygulama) |
+
+---
+
+## 11. MVP KapsamÄ± (bu geliÅŸtirme turunda)
+Vadinin tamamÄ± (blockout + ana modeller), 3. ÅŸahÄ±s kontrol (PC + mobil), sera + dÄ±ÅŸ tarla, bitki sistemi,
+Ã§aprazlama, kurutma, **joint sarma**, **kova bong + GaftÃ® Modu**, dÃ¼kkan + 4 mÃ¼ÅŸteri tipi + kimlik kontrolÃ¼,
+gÃ¼n/gece + mevsim + hava, lisans 1â€“3 + denetim, karakter Ã¶zelleÅŸtirme, ilk hafta komedi gÃ¶revleri (6 NPC),
+kayÄ±t/yÃ¼kleme, ayarlar, logo + ana menÃ¼, CC0 sesler.
+
+**MVP dÄ±ÅŸÄ± (sonra):** Lisans 4â€“5, motosiklet, Ä°ngilizce, Steam/Play entegrasyonu, satÄ±n alma, tam 28 gÃ¼nlÃ¼k gÃ¶rev zinciri.
+
+
+ succeeded in 2221ms:
+param([Parameter(Mandatory=$true)][string]$Script, [string[]]$ScriptArgs = @())
+# Blender'i (Microsoft Store surumu) arka planda bir Python scriptiyle calistirir.
+$launcher = Join-Path $env:LOCALAPPDATA "Microsoft\WindowsApps\blender-launcher.exe"
+$argList = @("--background", "--factory-startup", "--python", "`"$Script`"")
+if ($ScriptArgs.Count -gt 0) { $argList += "--"; $argList += $ScriptArgs }
+$p = Start-Process -FilePath $launcher -ArgumentList $argList -PassThru -Wait -NoNewWindow
+exit $p.ExitCode
+
+fatal: not a git repository (or any of the parent directories): .git
+
+
+    Directory: C:\Users\31\Documents\we2\tools\blender
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:16            508 run_blender.ps1                                                      
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -Force -Name; Get-ChildItem tools -Directory -Name; Test-Path -LiteralPath "$env:LOCALAPPDATA'"\\Microsoft\\WindowsApps\\blender-launcher.exe\"; Test-Path -LiteralPath 'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'; rg -n 'spruce_tree|grow_lamp\\.glb|water_tank\\.glb|shelf_shop\\.glb|rock_01\\.glb|pot\\.glb' scenes scripts data" in C:\Users\31\Documents\we2
+ exited 1 in 727ms:
+assets
+autoload
+data
+localization
+scenes
+scripts
+shaders
+tests
+tools
+AGENTS.md
+CLAUDE.md
+default_bus_layout.tres
+GDD.md
+project.godot
+blender
+codex_logs
+codex_prompts
+previews
+True
+True
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+\"\"\"Generate the GAFTI prop GLBs and Blender previews from one metre-scale source.\"\"\"
+from math import cos, pi, sin, tau
+from pathlib import Path
+from random import Random
+import json
+import struct
+import sys
+
+import bpy
+import numpy as np
+from mathutils import Vector
+
+
+ROOT = Path(__file__).resolve().parents[2]
+MODELS = ROOT / \"assets\" / \"models\" / \"props\"
+PREVIEWS = ROOT / \"tools\" / \"previews\"
+SIZE = 512
+
+
+def material(name, hex_color, roughness=.65, metal=0, alpha=1, emission=0):
+    rgb = [int(hex_color[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    rgb = [c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in rgb]
+    rgba = (*rgb, alpha)
+    mat = bpy.data.materials.new(name)
+    mat.diffuse_color = rgba
+    mat.use_nodes = True
+    bsdf = mat.node_tree.nodes.get(\"Principled BSDF\")
+    for socket, value in (
+        (\"Base Color\", rgba), (\"Roughness\", roughness), (\"Metallic\", metal),
+        (\"Alpha\", alpha), (\"Emission Color\", rgba), (\"Emission Strength\", emission),
+    ):
+        bsdf.inputs[socket].default_value = value
+    if alpha < 1:
+        mat.surface_render_method = \"BLENDED\"
+        mat.use_transparency_overlap = False
+    return mat
+
+
+def palette():
+    specifications = {
+        \"wood\": (\"Honey pine\", \"A5653C\"), \"light\": (\"Fresh cut pine\", \"D79458\"),
+        \"dark\": (\"End grain\", \"633A2A\"), \"grain\": (\"Burnished grain\", \"B77748\"),
+        \"green\": (\"Forest enamel\", \"28765A\", .39, .18),
+        \"mint\": (\"Sage enamel\", \"5DAA83\", .42, .1),
+        \"pine\": (\"Pine shadow\", \"214F43\"), \"fern\": (\"Spruce needles\", \"28745C\"),
+        \"leaf\": (\"Rainlit tea leaves\", \"75A848\", .51), \"tea\": (\"Tea leaves\", \"427C3B\"),
+        \"olive\": (\"Sunlit needles\", \"6C9A56\"), \"orange\": (\"Pumpkin enamel\", \"D97737\", .42, .16),
+        \"clay\": (\"Terracotta\", \"AE5139\"), \"rim\": (\"Glazed terracotta\", \"DD7852\", .37),
+        \"black\": (\"Charcoal rubber\", \"263537\", .8), \"steel\": (\"Blued iron\", \"48626B\", .37, .62),
+        \"silver\": (\"Brushed steel\", \"9AB6B2\", .32, .55),
+        \"gold\": (\"Aged brass\", \"CF9C55\", .35, .58),
+        \"cream\": (\"Oat linen\", \"EBCB99\", .88),
+        \"rust\": (\"Brick weave\", \"AD4B43\", .88), \"rose\": (\"Rose weave\", \"D97B60\", .8),
+        \"glass\": (\"Sea-green glass\", \"94DCCE\", .1, .15, .32),
+        \"mirror\": (\"Silvered glass\", \"B5D8D5\", .11, .86),
+        \"glow\": (\"Warm amber filament\", \"FFB760\", .31, 0, 1, 3),
+        \"screen\": (\"Jade display\", \"77E6B3\", .37, 0, 1, .7),
+        \"cork\": (\"Speckled cork\", \"C68A56\", .88),
+        \"stone\": (\"Wet slate\", \"536974\", .43), \"stone_light\": (\"Rainlit slate\", \"81949B\", .49),
+        \"stone_dark\": (\"Slate seams\", \"394F59\", .5), \"moss\": (\"Moss\", \"617F38\", .94),
+        \"soil\": (\"Potting soil\", \"554133\", .95),
+    }
+    return {key: material(*spec) for key, spec in specifications.items()}
+
+
+COLORS = {}
+
+
+def finish(obj, name, tone, bevel=0, smooth=False):
+    obj.name = name
+    obj.data.name = name
+    if tone:
+        obj.data.materials.append(COLORS[tone])
+    if smooth:
+        for polygon in obj.data.polygons:
+            polygon.use_smooth = True
+    if bevel:
+        bpy.context.view_layer.objects.active = obj
+        modifier = obj.modifiers.new(\"Soft edges\", \"BEVEL\")
+        modifier.width = bevel
+        modifier.segments = 1
+        modifier.harden_normals = True
+        bpy.ops.object.modifier_apply(modifier=modifier.name)
+        normals = obj.modifiers.new(\"Weighted normals\", \"WEIGHTED_NORMAL\")
+        normals.keep_sharp = True
+        bpy.ops.object.modifier_apply(modifier=normals.name)
+    return obj
+
+
+def mesh(name, vertices, faces, tone=None, smooth=False):
+    data = bpy.data.meshes.new(name)
+    data.from_pydata(vertices, [], faces)
+    data.update()
+    obj = bpy.data.objects.new(name, data)
+    bpy.context.collection.objects.link(obj)
+    return finish(obj, name, tone, smooth=smooth)
+
+
+def box(center, dimensions, tone, bevel=0, angle=0, name=\"Piece\"):
+    bpy.ops.mesh.primitive_cube_add(size=1, location=center, rotation=(0, 0, angle))
+    obj = bpy.context.object
+    obj.scale = dimensions
+    bpy.ops.object.transform_apply(location=False, rotation=False, scale=True)
+    return finish(obj, name, tone, bevel, smooth=bool(bevel))
+
+
+def lathe(profile, tone, center=(0, 0, 0), sides=16, name=\"Turned piece\"):
+    vertices = [(radius * cos(tau * j / sides), radius * sin(tau * j / sides), z)
+                for radius, z in profile for j in range(sides)]
+    faces = [(i * sides + j, i * sides + (j + 1) % sides,
+              (i + 1) * sides + (j + 1) % sides, (i + 1) * sides + j)
+             for i in range(len(profile) - 1) for j in range(sides)]
+    faces.extend([tuple(reversed(range(sides))),
+                  tuple(range((len(profile) - 1) * sides, len(profile) * sides))])
+    obj = mesh(name, vertices, faces, tone, smooth=True)
+    obj.location = center
+    for polygon in obj.data.polygons[-2:]:
+        polygon.use_smooth = False
+    return obj
+
+
+def rod(start, end, radius, tone, tip=None, sides=8):
+    direction = Vector(end) - Vector(start)
+    obj = lathe([(radius, 0), (radius if tip is None else tip, direction.length)],
+                tone, start, sides)
+    obj.rotation_euler = direction.to_track_quat(\"Z\", \"Y\").to_euler()
+    return obj
+
+
+def pipe(points, radius, tone, sides=8, cap=True, plane=(0, 1, 0)):
+    vertices = []
+    for index, point in enumerate(points):
+        tangent = Vector(points[min(index + 1, len(points) - 1)]) - Vector(points[max(index - 1, 0)])
+        u = tangent.normalized().cross(Vector(plane)).normalized()
+        v = tangent.normalized().cross(u)
+        for step in range(sides):
+            angle = tau * step / sides
+            vertices.append(Vector(point) + radius * (cos(angle) * u + sin(angle) * v))
+    faces = [(i * sides + j, i * sides + (j + 1) % sides,
+              (i + 1) * sides + (j + 1) % sides, (i + 1) * sides + j)
+             for i in range(len(points) - 1) for j in range(sides)]
+    if cap:
+        faces += [tuple(reversed(range(sides))),
+                  tuple(range((len(points) - 1) * sides, len(points) * sides))]
+    return mesh(\"Bent tube\", vertices, faces, tone, smooth=True)
+
+
+def oval(center, scale, tone, seed=0, angle=0, detail=1):
+    bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=detail, radius=1, location=center)
+    obj = bpy.context.object
+    rng = Random(seed)
+    for vert in obj.data.vertices:
+        factor = rng.uniform(.8, 1.13) if seed else 1
+        for index in range(3):
+            vert.co[index] *= scale[index] * factor
+    obj.rotation_euler.z = angle
+    return finish(obj, \"Rounded piece\", tone, smooth=not seed)
+
+
+def join(name, parts, origin=(0, 0, 0)):
+    bpy.ops.object.select_all(action=\"DESELECT\")
+    for obj in parts:
+        obj.select_set(True)
+    bpy.context.view_layer.objects.active = parts[0]
+    bpy.ops.object.join()
+    obj = parts[0]
+    obj.name = name
+    obj.data.name = name
+    bpy.context.scene.cursor.location = origin
+    bpy.ops.object.origin_set(type=\"ORIGIN_CURSOR\")
+    bpy.ops.object.transform_apply(location=False, rotation=True, scale=True)
+    bpy.ops.object.material_slot_remove_unused()
+    # Join keeps one slot per object even when both slots refer to the same material.
+    materials = list(obj.data.materials)
+    unique = list(dict.fromkeys(materials))
+    indices = [unique.index(material) for material in materials]
+    polygon_indices = [indices[polygon.material_index] for polygon in obj.data.polygons]
+    obj.data.materials.clear()
+    for mat in unique:
+        obj.data.materials.append(mat)
+    for polygon, index in zip(obj.data.polygons, polygon_indices):
+        polygon.material_index = index
+    return obj
+
+
+def collision(name, parts):
+    return join(name + \"-col\", parts)
+
+
+def slats(width, depth, z, count, tone=\"wood\"):
+    step = depth / count
+    return [box((0, (i + .5) * step - depth / 2, z),
+                (width, step - .008, .046),
+                \"light\" if i % 3 == 0 and tone == \"wood\" else tone, .013)
+            for i in range(count)]
+
+
+def graining(parts, width, z, rows, seed):
+    rng = Random(seed)
+    for y in rows:
+        for _ in range(2):
+            x = rng.uniform(-.34, .27) * width
+            length = rng.uniform(.10, .22) * width
+            vertices = [(x, y, z), (x + length * .43, y + .004, z),
+                        (x + length, y + .003, z), (x + length * .37, y + .010, z)]
+            parts.append(mesh(\"Brush mark\", vertices, [(0, 1, 2, 3)], \"grain\"))
+
+
+def pot():
+    body = lathe([(.103, 0), (.113, .012), (.137, .176), (.143, .186), (.140, .201),
+                  (.123, .201), (.118, .177), (.089, .027)], \"clay\", sides=24)
+    rim = lathe([(.136, .166), (.149, .173), (.150, .195), (.145, .207),
+                 (.126, .207), (.123, .197), (.125, .174)], \"rim\", sides=24)
+    foot = lathe([(.109, .012), (.116, .018), (.118, .027), (.115, .031)], \"rim\", sides=24)
+    soil = lathe([(.112, .153), (.116, .169)], \"soil\", sides=24)
+    return [join(\"Pot\", [body, rim, foot]), join(\"Soil\", [soil], (0, 0, .169))]
+
+
+def grow_lamp():
+    shade = lathe([(.245, .032), (.251, .044), (.241, .068), (.113, .172),
+                   (.067, .189), (.060, .166), (.099, .145), (.225, .053), (.225, .032)],
+                  \"green\", sides=24)
+    rim = lathe([(.236, .032), (.249, .034), (.253, .043), (.247, .052)], \"gold\", sides=24)
+    socket = lathe([(.043, .089), (.062, .102), (.062, .197), (.040, .217)], \"black\")
+    eye = pipe([(-.025 * cos(pi * i / 8), 0, .211 + .039 * sin(pi * i / 8))
+                for i in range(9)], .008, \"steel\", sides=6)
+    bulb = lathe([(.026, 0), (.058, .009), (.069, .032), (.064, .056),
+                  (.037, .088), (.030, .111)], \"glow\", sides=20)
+    return [join(\"Shade\", [shade, rim, socket, eye]), join(\"Bulb\", [bulb], (0, 0, .107))]
+
+
+def shelf_shop():
+    parts = [box((x, y, .87), (.075, .075, 1.74), \"dark\", .013)
+             for x in (-.52, .52) for y in (-.18, .18)]
+    for z in (.22, .65, 1.08, 1.51):
+        parts += slats(1.14, .46, z, 3)
+        parts.append(box((0, -.227, z - .025), (1.15, .036, .083), \"light\", .009))
+        for x in (-.39, 0, .39):
+            parts.append(box((x, -.248, z - .027), (.135, .008, .044), \"gold\", .004))
+    parts += [box((0, .184, 1.698), (1.12, .068, .146), \"green\", .025),
+              box((0, .143, 1.703), (.75, .018, .035), \"mint\", .008)]
+    collider = collision(\"Shelf\", [box((0, 0, .897), (1.15, .5, 1.794), None)])
+    return [join(\"Shelf\", parts), collider]
+
+
+def counter():
+    parts = [box((0, 0, .092), (1.47, .63, .184), \"dark\", .021),
+             box((0, 0, .47), (1.58, .66, .72), \"green\", .028),
+             box((0, 0, .855), (1.72, .74, .09), \"light\", .023)]
+    for x in (-.52, 0, .52):
+        parts.extend([box((x, -.337, .45), (.47, .03, .56), \"wood\", .022),
+                      box((x, -.358, .45), (.365, .019, .444), \"light\", .016),
+                      box((x, .339, .60), (.46, .035, .19), \"wood\", .009),
+                      box((x, .365, .60), (.13, .027, .027), \"gold\", .009)])
+    graining(parts, 1.55, .901, (-.22, -.091, .045, .19), 7)
+    collider = collision(\"Counter\", [box((0, 0, .45), (1.70, .72, .9), None)])
+    return [join(\"Counter\", parts), collider]
+
+
+def cash_register():
+    body = box((0, 0, .049), (.39, .34, .098), \"dark\", .023)
+    upper = box((0, .026, .145), (.37, .244, .118), \"mint\", .028)
+    upper.rotation_euler.x = .31
+    parts = [body, upper, box((0, -.168, .047), (.315, .035, .062), \"green\", .008),
+             box((0, -.194, .047), (.102, .025, .023), \"gold\", .007),
+             rod((0, .081, .164), (0, .081, .262), .025, \"black\"),
+             box((0, .085, .268), (.231, .069, .079), \"steel\", .015),
+             box((0, .048, .268), (.172, .009, .046), \"screen\", .006)]
+    for row in range(4):
+        y = -.082 + row * .034
+        for col in range(5):
+            key = box(((col - 2) * .044, y, .198 + (y - .026) * .32),
+                      (.036, .027, .018), (\"orange\" if col == 4 else \"cream\"), .004)
+            key.rotation_euler.x = .31
+            parts.append(key)
+    return [join(\"Register\", parts)]
+
+
+def drying_rack():
+    parts = [box((x, y, .79), (.068, .068, 1.58), \"wood\", .012)
+             for x in (-.54, .54) for y in (-.27, .27)]
+    for z in (.25, .63, 1.01, 1.39):
+        for y in (-.29, .29):
+            parts.append(box((0, y, z), (1.17, .065, .065), \"light\", .011))
+        for x in (-.54, .54):
+            parts.append(box((x, 0, z), (.065, .51, .057), \"wood\", .009))
+        for n in range(-5, 6):
+            parts.append(box((n * .093, 0, z), (.032, .52, .018), \"dark\"))
+    for x in (-.54, .54):
+        parts.append(box((x, 0, 1.55), (.10, .64, .065), \"green\", .011))
+    collider = collision(\"DryingRack\", [box((0, 0, .79), (1.17, .64, 1.58), None)])
+    return [join(\"DryingRack\", parts), collider]
+
+
+def jar():
+    profile = [(.054, 0), (.066, .006), (.071, .017), (.071, .124), (.063, .145),
+               (.057, .153), (.060, .163), (.058, .172), (.051, .172),
+               (.050, .156), (.056, .142), (.064, .122), (.064, .018), (.051, .011)]
+    glass = lathe(profile, \"glass\", sides=28)
+    cork = lathe([(.047, .151), (.050, .167), (.056, .178), (.058, .191),
+                  (.054, .197)], \"cork\", sides=24)
+    rng = Random(11)
+    flecks = []
+    for index in range(18):
+        a = rng.random() * tau
+        r = .047 * rng.random() ** .5
+        x, y = r * cos(a), r * sin(a)
+        flecks.append(mesh(\"Cork fleck\", [(x, y, .1972), (x + .003, y - .001, .1972),
+                                         (x + .002, y + .002, .1972)],
+                           [(0, 1, 2)], \"wood\" if index % 2 else \"light\"))
+    plaque = box((0, -.071, .081), (.080, .012, .053), \"cream\", .007)
+    accent = box((0, -.078, .080), (.036, .002, .008), \"green\", .001)
+    return [join(\"Glass\", [glass]), join(\"Lid\", [cork, *flecks], (0, 0, .177)),
+            join(\"Label\", [plaque, accent])]
+
+
+def work_frame(width, depth, height, tone):
+    parts = []
+    for x in (-width / 2 + .075, width / 2 - .075):
+        for y in (-depth / 2 + .075, depth / 2 - .075):
+            parts.append(box((x, y, (height - .02) / 2), (.081, .080, height - .02), tone, .013))
+    for y in (-depth / 2 + .075, depth / 2 - .075):
+        parts.append(box((0, y, height - .10), (width - .13, .06, .125), tone, .011))
+    return parts
+
+
+def rolling_table():
+    parts = work_frame(1.25, .68, .87, \"green\") + slats(1.25, .68, .84, 4)
+    parts += [box((0, .135, .24), (1.09, .473, .042), \"wood\", .013),
+              box((0, -.279, .745), (.63, .033, .129), \"light\", .013),
+              box((0, -.31, .749), (.122, .029, .027), \"gold\", .007),
+              box((0, .291, .88), (1.233, .045, .058), \"dark\", .012)]
+    graining(parts, 1.2, .864, (-.25, -.08, .09, .25), 19)
+    return [join(\"RollingTable\", parts)]
+
+
+def generator():
+    parts = [box((0, 0, .092), (.73, .435, .096), \"black\", .018),
+             box((0, 0, .300), (.57, .379, .37), \"orange\", .039),
+             box((0, 0, .477), (.597, .396, .093), \"green\", .025),
+             box((-.147, -.198, .32), (.244, .023, .201), \"black\", .014)]
+    for index in range(5):
+        parts.append(box((-.15, -.213, .254 + index * .032), (.192, .012, .009), \"steel\"))
+    parts.append(box((.153, -.202, .32), (.177, .025, .193), \"cream\", .013))
+    for x in (.11, .19):
+        parts.append(rod((x, -.212, .34), (x, -.233, .34), .027, \"black\", sides=10))
+    parts += [box((.15, -.221, .269), (.102, .013, .029), \"rust\", .004),
+              lathe([(.037, .519), (.04, .543), (.032, .553)], \"black\", (-.132, .02, 0), sides=12)]
+    for y in (-.228, .228):
+        outline = [(-.34, y, .036), (.34, y, .036), (.374, y, .077),
+                   (.374, y, .484), (.336, y, .551), (-.336, y, .551),
+                   (-.374, y, .484), (-.374, y, .077), (-.34, y, .036)]
+        parts.append(pipe(outline, .027, \"steel\", cap=False))
+        for x in (-.264, .264):
+            parts.append(box((x, y, .022), (.109, .079, .044), \"black\", .01))
+    collider = collision(\"Generator\", [box((0, 0, .282), (.78, .51, .564), None)])
+    return [join(\"Generator\", parts), collider]
+
+
+def water_tank():
+    body = lathe([(.39, .075), (.498, .10), (.527, .168), (.532, 1.006),
+                  (.516, 1.075), (.430, 1.148), (.278, 1.202), (.175, 1.211)],
+                 \"green\", sides=24)
+    parts = [body]
+    for z in (.245, .487, .731, .972):
+        parts.append(lathe([(.531, z - .03), (.549, z - .018), (.551, z + .014),
+                            (.530, z + .029)], \"mint\", sides=24))
+    parts += [lathe([(.167, 1.201), (.179, 1.222), (.175, 1.266), (.150, 1.281)],
+                    \"black\", sides=20),
+              lathe([(.42, 0), (.45, .013), (.45, .093), (.43, .113)], \"dark\", sides=20),
+              pipe([(0, -.489, .171), (0, -.61, .171), (0, -.661, .148),
+                    (0, -.667, .100)], .031, \"gold\", plane=(1, 0, 0)),
+              box((0, -.615, .238), (.130, .036, .023), \"orange\", .006),
+              rod((0, -.615, .170), (0, -.615, .231), .013, \"gold\")]
+    collider = collision(\"Tank\", [lathe([(.54, 0), (.54, 1.128), (.37, 1.252)], None, sides=12)])
+    return [join(\"Tank\", parts), collider]
+
+
+def watering_can():
+    body = lathe([(.108, 0), (.122, .011), (.131, .042), (.126, .167), (.108, .203),
+                  (.071, .221), (.050, .221), (.048, .207), (.062, .193)],
+                 \"mint\", sides=20)
+    handle = pipe([(-.106 - .096 * sin(pi * i / 12), 0, .110 + .074 * cos(pi * i / 12))
+                   for i in range(13)], .015, \"green\")
+    spout = rod((.102, 0, .065), (.311, 0, .235), .032, \"green\", .014, sides=12)
+    rose = rod((.303, 0, .22), (.342, 0, .252), .042, \"gold\", .055, sides=16)
+    face = rod((.340, 0, .250), (.346, 0, .254), .046, \"steel\", sides=16)
+    band = lathe([(.123, .025), (.134, .036), (.134, .05), (.130, .054)], \"green\", sides=20)
+    return [join(\"Can\", [body, handle, spout, rose, face, band])]
+
+
+def fence():
+    parts = []
+    for x in (-.95, .95):
+        parts += [box((x, 0, .483), (.151, .149, .966), \"dark\", .020),
+                  box((x, 0, .959), (.180, .173, .085), \"light\", .025)]
+    for index, z in enumerate((.34, .696)):
+        rail = box((0, 0, z), (1.931, .072, .148), \"wood\" if index else \"light\", .018)
+        rail.rotation_euler.y = -.021 if index else .027
+        parts.append(rail)
+        for x in (-.923, .923):
+            parts.append(rod((x, -.074, z), (x, -.092, z), .021, \"steel\"))
+    collider = collision(\"Fence\", [box((0, 0, .486), (2.06, .166, .972), None)])
+    return [join(\"Fence\", parts), collider]
+'@ | Set-Content -LiteralPath tools/blender/props.py -Encoding utf8" in C:\Users\31\Documents\we2
+ succeeded in 169ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+def spruce_tree():
+    rng = Random(45)
+    trunk = lathe([(.30, 0), (.23, .21), (.165, 1.26), (.107, 3.25), (.045, 5.10)],
+                  \"dark\", sides=11)
+    bark = [trunk]
+    for index in range(6):
+        angle = tau * index / 6
+        x, y = cos(angle), sin(angle)
+        bark.append(rod((.39 * x, .39 * y, .042), (.136 * x, .136 * y, .43),
+                        .094, \"wood\", .052, sides=6))
+    crown = []
+    for level, (z, radius, height) in enumerate(
+            [(1.07, 1.43, 1.75), (1.77, 1.27, 1.60), (2.44, 1.11, 1.46),
+             (3.08, .92, 1.37), (3.67, .73, 1.20), (4.17, .53, 1.14)]):
+        sides = 16
+        rings = [(0.30, .13), (.84, .01), (1, .20), (.67, .44), (.34, .71), (.035, 1)]
+        vertices = []
+        for rad, elevation in rings:
+            for j in range(sides):
+                angle = j * tau / sides + level * .6
+                branch = (1 if j % 2 == 0 else .77) * rng.uniform(.89, 1.10)
+                vertices.append((cos(angle) * rad * radius * branch + .07 * level / 5,
+                                 sin(angle) * rad * radius * branch,
+                                 z + height * elevation + rng.uniform(-.07, .07) * rad))
+        faces = [(i * sides + j, i * sides + (j + 1) % sides,
+                  (i + 1) * sides + (j + 1) % sides, (i + 1) * sides + j)
+                 for i in range(len(rings) - 1) for j in range(sides)]
+        faces += [tuple(reversed(range(sides))), tuple(range(5 * sides, 6 * sides))]
+        needles = mesh(\"Needle tier\", vertices, faces, \"fern\")
+        for tone in (\"pine\", \"olive\"):
+            needles.data.materials.append(COLORS[tone])
+        for index, polygon in enumerate(needles.data.polygons):
+            layer = index // sides
+            polygon.material_index = 1 if layer < 2 else (2 if rng.random() < .28 else 0)
+        crown.append(needles)
+    collider = collision(\"Trunk\", [lathe([(.295, 0), (.185, 1.15), (.127, 2.35)], None, sides=8)])
+    return [join(\"Trunk\", bark), join(\"Needles\", crown), collider]
+
+
+def tea_bush():
+    rng = Random(622)
+    branches, clusters, leaves = [], [], []
+    for index in range(8):
+        angle = tau * index / 8
+        x, y = cos(angle), sin(angle)
+        z = rng.uniform(.35, .51)
+        end = (.45 * x, .42 * y, z)
+        branches.append(rod((0, 0, .016), end, .031, \"dark\", .008, sides=6))
+        clusters.append(oval(end, (.35, .28, .24), \"tea\" if index % 3 else \"fern\",
+                             index + 1, angle, detail=2))
+    for index in range(3):
+        angle = index * tau / 3
+        clusters.append(oval((.21 * cos(angle), .19 * sin(angle), .61),
+                             (.34, .29, .23), \"tea\", index + 17, angle, detail=2))
+    for index in range(52):
+        theta = rng.uniform(0, tau)
+        radial = .72 * rng.random() ** .55
+        x, y = radial * cos(theta), radial * sin(theta)
+        z = .84 - .43 * (radial / .72) ** 1.9 + rng.uniform(-.017, .052)
+        direction = Vector((cos(theta), sin(theta), rng.uniform(-.2, .38)))
+        side = Vector((-sin(theta), cos(theta), 0))
+        base = Vector((x, y, z))
+        length = rng.uniform(.09, .20)
+        width = length * .27
+        verts = [base, base + direction * length * .41 + side * width,
+                 base + direction * length + Vector((0, 0, .018)),
+                 base + direction * length * .42 - side * width,
+                 base + direction * length * .47 + Vector((0, 0, .032))]
+        leaf = mesh(\"Tea flush\", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], \"leaf\")
+        leaf.data.materials.append(COLORS[\"tea\"])
+        for face in leaf.data.polygons[2:]:
+            face.material_index = 1
+        leaves.append(leaf)
+    return [join(\"Branches\", branches), join(\"Foliage\", clusters + leaves)]
+
+
+def rock(dimensions, seed):
+    rng = Random(seed)
+    width, depth, height = dimensions
+    sides = 9
+    vertices = []
+    for rad, z in [(.73, 0), (1, .25), (.83, .68), (.50, 1)]:
+        for index in range(sides):
+            angle = index * tau / sides
+            skew = rng.uniform(.82, 1.14)
+            x = width * (rad * .5 * skew * cos(angle) - .077 * z)
+            y = depth * (rad * .5 * skew * sin(angle) + .088 * z)
+            vertices.append((x, y, z * height * rng.uniform(.91, 1.06)))
+    faces = [tuple(reversed(range(sides)))]
+    for level in range(3):
+        for index in range(sides):
+            a = level * sides + index
+            b = level * sides + (index + 1) % sides
+            c, d = b + sides, a + sides
+            faces.extend([(a, b, c), (c, d, a)])
+    faces += [tuple(range(3 * sides, 4 * sides))]
+    slate = mesh(\"Slate\", vertices, faces, \"stone\")
+    for tone in (\"stone_dark\", \"stone_light\", \"moss\"):
+        slate.data.materials.append(COLORS[tone])
+    for index, face in enumerate(slate.data.polygons):
+        face.material_index = rng.choices(
+            (0, 1, 2, 3), (65, 35, 0, 0) if index < 19 else (50, 10, 22, 18))[0]
+    slate.data.polygons[-1].material_index = 2
+    pieces = [slate]
+    for index in range(3):
+        x = (-.24 + .18 * index) * width
+        y = (.19 + .044 * index) * depth
+        z = (.68 - .09 * index) * height
+        pieces.append(oval((x, y, z), (width * .17, depth * .16, height * .13), \"moss\", index + seed))
+    collider = collision(\"Rock\", [mesh(\"Proxy\", vertices, faces)])
+    return [join(\"Rock\", pieces), collider]
+
+
+def bench():
+    parts = slats(1.60, .40, .445, 4, \"light\")
+    for x in (-.62, .62):
+        parts += [box((x, 0, .040), (.11, .437, .080), \"steel\", .014),
+                  rod((x, -.16, .047), (x, -.13, .449), .034, \"steel\"),
+                  rod((x, .12, .048), (x, .235, .83), .037, \"steel\"),
+                  rod((x, -.17, .612), (x, .192, .625), .032, \"green\"),
+                  rod((x, -.17, .465), (x, -.17, .612), .026, \"steel\")]
+    for z in (.622, .753):
+        board = box((0, .196 + .13 * (z - .62), z), (1.62, .052, .103), \"wood\", .012)
+        board.rotation_euler.x = -.18
+        parts.append(board)
+        for x in (-.61, .61):
+            parts.append(rod((x, .160, z), (x, .163, z), .012, \"gold\", sides=6))
+    graining(parts, 1.55, .469, (-.139, -.044, .065, .14), 77)
+    return [join(\"Bench\", parts)]
+
+
+def lamp_post():
+    base = lathe([(.176, 0), (.184, .028), (.152, .079), (.108, .105), (.086, .336),
+                  (.059, .382), (.048, .442), (.045, 1.92)], \"steel\")
+    arm = pipe([(0, 0, 1.89), (.031, 0, 2.05), (.14, 0, 2.18), (.32, 0, 2.22),
+                (.46, 0, 2.153), (.51, 0, 2.034)], .036, \"steel\")
+    shade = lathe([(.226, 1.863), (.221, 1.886), (.160, 1.968), (.079, 2.046), (.050, 2.050)],
+                  \"green\", (.51, 0, 0), sides=20)
+    globe = lathe([(.071, 1.681), (.132, 1.703), (.157, 1.758),
+                   (.158, 1.858), (.139, 1.889)], \"glow\", (.51, 0, 0), sides=20)
+    cage = [lathe([(.078, 1.664), (.094, 1.679), (.097, 1.704), (.079, 1.715)],
+                  \"gold\", (.51, 0, 0), sides=16)]
+    for axis in range(5):
+        angle = axis * tau / 5
+        cage.append(pipe([(.51 + cos(angle) * radius, sin(angle) * radius, z)
+                          for radius, z in ((.087, 1.692), (.146, 1.722), (.168, 1.792),
+                                            (.165, 1.868))],
+                         .011, \"steel\", sides=6, plane=(-sin(angle), cos(angle), 0)))
+    return [join(\"Post\", [base, arm, shade, *cage]), join(\"Bulb\", [globe])]
+
+
+def sofa():
+    parts = [box((0, 0, .217), (1.87, .755, .279), \"pine\", .054)]
+    for x in (-.73, .73):
+        for y in (-.24, .24):
+            parts.append(lathe([(.045, 0), (.054, .014), (.066, .119)], \"dark\", (x, y, 0), sides=10))
+    back = box((0, .273, .538), (1.82, .215, .69), \"green\", .054)
+    back.rotation_euler.x = -.15
+    parts.append(back)
+    for x in (-.844, .844):
+        parts += [box((x, -.051, .452), (.253, .678, .32), \"green\", .072),
+                  box((x, -.366, .484), (.146, .085, .154), \"mint\", .035)]
+    for x in (-.42, 0, .42):
+        parts += [box((x, -.075, .379), (.399, .55, .166), \"mint\", .039)]
+        cushion = box((x, .236, .609), (.411, .157, .385), \"mint\", .044)
+        cushion.rotation_euler.x = -.16
+        parts.append(cushion)
+    for index, (x, tone, angle) in enumerate(((-.58, \"rust\", .24), (.58, \"cream\", -.23))):
+        pillow = box((x, .112, .587), (.257, .104, .244), tone, .043)
+        pillow.rotation_euler = (-.41, angle, 0)
+        parts.append(pillow)
+        for shift in (-1, 0, 1):
+            stripe = box((x + shift * .041, .058, .583 + index * .004),
+                         (.009, .008, .13), \"rose\" if index == 0 else \"wood\", .003)
+            stripe.rotation_euler = pillow.rotation_euler
+            parts.append(stripe)
+    collider = collision(\"Sofa\", [box((0, -.02, .234), (1.94, .76, .468), None),
+                                  box((0, .275, .65), (1.86, .24, .45), None),
+                                  *[box((x, -.045, .52), (.24, .66, .19), None) for x in (-.843, .843)]])
+    return [join(\"Sofa\", parts), collider]
+
+
+def arch_profile(width, bottom, spring):
+    radius = width / 2
+    return [(-radius, bottom), (radius, bottom)] + [
+        (radius * cos(i * pi / 18), spring + radius * sin(i * pi / 18)) for i in range(19)]
+
+
+def mirror():
+    outer = arch_profile(.69, .13, 1.48)
+    inner = arch_profile(.557, .213, 1.48)
+    verts = [(x, y, z) for y, profile in ((-.101, outer), (-.112, inner), (.018, outer), (.012, inner))
+             for x, z in profile]
+    n = len(outer)
+    faces = []
+    for rowa, rowb in ((0, 1), (1, 3), (3, 2), (2, 0)):
+        faces += [(rowa * n + i, rowa * n + (i + 1) % n,
+                   rowb * n + (i + 1) % n, rowb * n + i) for i in range(n)]
+    arch = mesh(\"Arch\", verts, faces, \"wood\")
+    arch.data.materials.append(COLORS[\"light\"])
+    for index, polygon in enumerate(arch.data.polygons):
+        if index < n and index % 2 == 0:
+            polygon.material_index = 1
+    glass = mesh(\"Reflector\", [(x, -.097, z) for x, z in inner], [tuple(range(n))], \"mirror\")
+    glint = mesh(\"Glass highlight\", [(-.20, -.098, 1.41), (-.181, -.098, 1.40),
+                                    (.21, -.098, 1.075), (.211, -.098, 1.036)], [(3, 2, 1, 0)], \"silver\")
+    feet = [box((x, 0, .074), (.121, .305, .148), \"dark\", .02) for x in (-.215, .215)]
+    backing = box((0, .041, .79), (.35, .072, 1.32), \"dark\", .022)
+    return [join(\"Frame\", [arch, backing] + feet), join(\"Glass\", [glass, glint])]
+
+
+def bed():
+    parts = [box((0, 0, .256), (1.17, 2.04, .26), \"wood\", .028),
+             box((0, 0, .418), (1.08, 1.968, .194), \"cream\", .059)]
+    for x in (-.524, .524):
+        for y, top in ((-.973, .51), (.96, 1.00)):
+            parts.append(box((x, y, top / 2), (.133, .135, top), \"dark\", .025))
+            parts.append(oval((x, y, top), (.075, .073, .061), \"light\", detail=2))
+    parts += [box((0, .951, .716), (1.10, .09, .354), \"wood\", .034),
+              box((0, .940, .904), (1.16, .12, .09), \"light\", .025),
+              box((0, -.963, .41), (1.126, .112, .16), \"light\", .024),
+              box((0, .687, .53), (.69, .38, .145), \"cream\", .053)]
+    quilt = [box((0, -.24, .522), (1.133, 1.43, .088), \"rust\", .037)]
+    for x in (-.548, .548):
+        quilt.append(box((x, -.243, .463), (.070, 1.41, .163), \"rust\", .034))
+    for y in (-.77, -.60, -.36, -.12, .12, .36):
+        quilt.append(box((0, y, .568), (1.00, .028, .008),
+                         \"cream\" if y in (-.77, .36) else \"rose\", .003))
+    for x in (-.37, -.12, .12, .37):
+        for y in (-.49, -.24, 0, .24):
+            quilt.append(box((x, y, .569), (.078, .078, .006), \"rose\", angle=pi / 4))
+    collider = collision(\"Bed\", [box((0, 0, .28), (1.18, 2.05, .56), None),
+                                 box((0, .96, .80), (1.19, .14, .51), None)])
+    return [join(\"Bed\", parts), join(\"Quilt\", quilt), collider]
+
+
+def crate():
+    parts = [box((0, 0, .030), (.57, .439, .06), \"dark\", .009)]
+    for x in (-.258, .258):
+        for y in (-.187, .187):
+            parts.append(box((x, y, .165), (.057, .054, .33), \"light\", .009))
+    for index in range(3):
+        z = .091 + .091 * index
+        for sign in (-1, 1):
+            tone = \"light\" if index == 1 else \"wood\"
+            parts += [box((0, sign * .210, z), (.569, .034, .075), tone, .007),
+                      box((sign * .272, 0, z), (.035, .392, .075), tone, .007)]
+            for x in (-.233, .233):
+                parts.append(rod((x, sign * .229, z), (x, sign * .232, z), .007, \"steel\", sides=6))
+    return [join(\"Crate\", parts)]
+
+
+def tavla_table():
+    parts = work_frame(.87, .68, .745, \"dark\")
+    parts += [box((0, 0, .742), (.916, .716, .066), \"wood\", .017),
+              box((0, 0, .776), (.764, .555, .019), \"cream\", .011)]
+    for x in (-.405, 0, .405):
+        parts.append(box((x, 0, .792), (.044, .605, .052), \"dark\", .009))
+    for y in (-.303, .303):
+        parts.append(box((0, y, .794), (.851, .046, .054), \"dark\", .009))
+    for sign in (-1, 1):
+        for side in (-1, 1):
+            for index in range(6):
+                x = side * (.047 + index * .059)
+                y = sign * .269
+                points = [(x - .027, y, .787), (x + .027, y, .787), (x, sign * .053, .787)]
+                if sign > 0:
+                    points.reverse()
+                parts.append(mesh(\"Inlaid point\", points, [(0, 1, 2)], \"rust\" if index % 2 else \"green\"))
+    pieces = []
+    for x, start, count, tone in ((-.341, -.235, 5, \"cream\"), (.341, .235, 5, \"dark\"),
+                                  (-.223, .235, 3, \"dark\"), (.223, -.235, 3, \"cream\")):
+        for index in range(count):
+            y = start - index * .043 if start > 0 else start + index * .043
+            pieces.append(lathe([(.020, .787), (.0215, .793), (.0195, .801)], tone,
+                                (x, y, 0), sides=10))
+    pieces += [box((-.109, -.024, .804), (.029, .029, .029), \"cream\", .005, angle=.25),
+               box((.092, .039, .804), (.029, .029, .029), \"cream\", .005, angle=-.35)]
+    return [join(\"TavlaTable\", parts), join(\"Pieces\", pieces)]
+
+
+BUILDERS = {
+    \"pot\": pot, \"grow_lamp\": grow_lamp, \"shelf_shop\": shelf_shop, \"counter\": counter,
+    \"cash_register\": cash_register, \"drying_rack\": drying_rack, \"jar\": jar,
+    \"rolling_table\": rolling_table, \"generator\": generator, \"water_tank\": water_tank,
+    \"watering_can\": watering_can, \"fence\": fence, \"spruce_tree\": spruce_tree, \"tea_bush\": tea_bush,
+    \"rock_01\": lambda: rock((1.76, 1.27, .92), 31),
+    \"rock_02\": lambda: rock((1.20, 1.48, 1.19), 22),
+    \"bench\": bench, \"lamp_post\": lamp_post, \"sofa\": sofa, \"mirror\": mirror, \"bed\": bed,
+    \"crate\": crate, \"tavla_table\": tavla_table,
+}
+
+
+def exported_geometry(path):
+    with path.open(\"rb\") as glb:
+        magic, version, _ = struct.unpack(\"<4sII\", glb.read(12))
+        assert (magic, version) == (b\"glTF\", 2)
+        length, chunk = struct.unpack(\"<I4s\", glb.read(8))
+        assert chunk == b\"JSON\"
+        document = json.loads(glb.read(length))
+    counts = {}
+    for node in document[\"nodes\"]:
+        if \"mesh\" not in node:
+            continue
+        primitives = document[\"meshes\"][node[\"mesh\"]][\"primitives\"]
+        assert all(primitive.get(\"mode\", 4) == 4 for primitive in primitives)
+        counts[node[\"name\"]] = sum(document[\"accessors\"][primitive[\"indices\"]][\"count\"] // 3
+                                   for primitive in primitives)
+    return counts
+
+
+def export(name, objects):
+    scene = bpy.context.scene
+    scene.unit_settings.system = \"METRIC\"
+    root = bpy.data.objects.new(name, None)
+    bpy.context.collection.objects.link(root)
+    bpy.ops.object.select_all(action=\"DESELECT\")
+    root.select_set(True)
+    for obj in objects:
+        obj.parent = root
+        obj.select_set(True)
+    target = MODELS / (name + \".glb\")
+    bpy.ops.export_scene.gltf(filepath=str(target), export_format=\"GLB\", use_selection=True,
+                              export_yup=True, export_animations=False, export_cameras=False,
+                              export_lights=False)
+    counts = exported_geometry(target)
+    assert set(counts) == {obj.name for obj in objects}, counts
+    assert sum(counts.values()) <= 2000, (name, counts)
+    print(f\"PROP {name}: {sum(counts.values())} triangles | \" +
+          \", \".join(f\"{node}={count}\" for node, count in counts.items()), flush=True)
+
+
+def point_at(obj, target):
+    obj.rotation_euler = (Vector(target) - obj.location).to_track_quat(\"-Z\", \"Y\").to_euler()
+
+
+def area(name, location, target, energy, size, color):
+    data = bpy.data.lights.new(name, \"AREA\")
+    data.energy = energy
+    data.shape = \"DISK\"
+    data.size = size
+    data.color = color
+    obj = bpy.data.objects.new(name, data)
+    bpy.context.collection.objects.link(obj)
+    obj.location = location
+    point_at(obj, target)
+
+
+def preview(name, objects):
+    scene = bpy.context.scene
+    scene.render.engine = \"BLENDER_EEVEE\"
+    scene.eevee.taa_render_samples = 16
+    scene.render.resolution_x = scene.render.resolution_y = SIZE
+    scene.render.resolution_percentage = 100
+    scene.render.image_settings.file_format = \"PNG\"
+    scene.render.image_settings.color_mode = \"RGB\"
+    scene.view_settings.view_transform = \"AgX\"
+    scene.view_settings.look = \"AgX - Medium High Contrast\"
+    scene.render.film_transparent = False
+    scene.world = bpy.data.worlds.new(\"Studio sky\")
+    scene.world.use_nodes = True
+    scene.world.node_tree.nodes[\"Background\"].inputs[0].default_value = (.42, .50, .57, 1)
+    scene.world.node_tree.nodes[\"Background\"].inputs[1].default_value = .34
+    bpy.context.view_layer.update()
+    corners = []
+    for obj in objects:
+        if obj.name.endswith(\"-col\"):
+            obj.hide_render = True
+        else:
+            corners += [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
+    minimum = Vector(tuple(min(corner[axis] for corner in corners) for axis in range(3)))
+    maximum = Vector(tuple(max(corner[axis] for corner in corners) for axis in range(3)))
+    center = (minimum + maximum) / 2
+    scale = max(maximum - minimum)
+    camera_data = bpy.data.cameras.new(\"Studio\")
+    camera_data.type = \"ORTHO\"
+    camera_data.clip_start = .001
+    camera_obj = bpy.data.objects.new(\"Studio\", camera_data)
+    bpy.context.collection.objects.link(camera_obj)
+    scene.camera = camera_obj
+    angle = Vector((3.2, -5.5, 3.15))
+    if name == \"grow_lamp\":
+        angle = Vector((2.5, -5.5, -2.1))
+    if name == \"pot\":
+        angle.z = 4.4
+    camera_obj.location = center + angle * scale
+    point_at(camera_obj, center)
+    axes = camera_obj.rotation_euler.to_matrix()
+    # Frame the actual mesh vertices so a diagonal bound does not add empty space.
+    projected = [axes.transposed() @ (obj.matrix_world @ vertex.co - center)
+                 for obj in objects if not obj.hide_render for vertex in obj.data.vertices]
+    ranges = [(min(p[i] for p in projected), max(p[i] for p in projected)) for i in (0, 1)]
+    camera_obj.location += axes @ Vector(tuple((lo + hi) / 2 for lo, hi in ranges) + (0,))
+    camera_data.ortho_scale = max(hi - lo for lo, hi in ranges) * 1.28
+    ground = box((center.x, center.y, minimum.z - .018 * scale),
+                 (25 * scale, 25 * scale, .026 * scale), None)
+    ground.data.materials.append(material(\"Studio slate\", \"3E5557\", .87))
+    if name == \"grow_lamp\":
+        ground.hide_render = True
+    area(\"Apricot key\", center + scale * Vector((-2.6, -3.2, 4.4)), center,
+         950 * scale ** 2, 3.8 * scale, (1, .83, .67))
+    area(\"Overcast fill\", center + scale * Vector((3, -1.4, 1.9)), center,
+         360 * scale ** 2, 3.3 * scale, (.69, .83, 1))
+    area(\"Window rim\", center + scale * Vector((1.0, 3.0, 3.0)), center,
+         1050 * scale ** 2, 2.5 * scale, (1, .91, .73))
+    if name == \"grow_lamp\":
+        area(\"Shade bounce\", center + scale * Vector((1, -1, -1)), center,
+             84 * scale ** 2, 1.7 * scale, (1, .81, .68))
+    scene.render.filepath = str(PREVIEWS / (name + \".png\"))
+    bpy.ops.render.render(write_still=True)
+
+
+# A small bitmap alphabet keeps contact sheet labels independent of system fonts.
+GLYPHS = dict(zip(\"ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789\", (
+    \"011101011111101\", \"110101110101110\", \"011100100100011\", \"110101101101110\",
+    \"111100110100111\", \"111100110100100\", \"011100101101011\", \"101101111101101\",
+    \"111010010010111\", \"001001001101010\", \"101101110101101\", \"100100100100111\",
+    \"101111111101101\", \"101111111111101\", \"010101101101010\", \"110101110100100\",
+    \"010101101111011\", \"110101110101101\", \"011100010001110\", \"111010010010010\",
+    \"101101101101111\", \"101101101101010\", \"101101111111101\", \"101101010101101\",
+    \"101101010010010\", \"111001010100111\", \"000000000000111\", \"111101101101111\",
+    \"010110010010111\", \"110001010100111\", \"110001010001110\", \"101101111001001\",
+    \"111100110001110\", \"011100110101010\", \"111001010010010\", \"010101010101010\",
+    \"010101011001110\",
+)))
+
+
+def sheet():
+    names = list(BUILDERS)
+    columns, rows = 5, 5
+    gutter, caption, unit = 12, 36, 4
+    stride_x, stride_y = SIZE + gutter, SIZE + caption + gutter
+    width, height = columns * stride_x + gutter, rows * stride_y + gutter
+    pixels = np.ones((height, width, 4), dtype=np.float32)
+    pixels[:, :, :3] = (.098, .15, .157)
+    for index, name in enumerate(names):
+        column, row = index % columns, rows - 1 - index // columns
+        x, y = gutter + column * stride_x, gutter + row * stride_y
+        img = bpy.data.images.load(str(PREVIEWS / (name + \".png\")), check_existing=False)
+        tile = np.empty(SIZE * SIZE * 4, dtype=np.float32)
+        img.pixels.foreach_get(tile)
+        pixels[y + caption:y + caption + SIZE, x:x + SIZE] = tile.reshape((SIZE, SIZE, 4))
+        bpy.data.images.remove(img)
+        label = name.upper()
+        left = x + (SIZE - (len(label) * 4 - 1) * unit) // 2
+        for letter_index, letter in enumerate(label):
+            for i, bit in enumerate(GLYPHS[letter]):
+                if bit == \"1\":
+                    gx = left + (letter_index * 4 + i % 3) * unit
+                    gy = y + 9 + (4 - i // 3) * unit
+                    pixels[gy:gy + unit, gx:gx + unit, :3] = (.88, .82, .70)
+    canvas = bpy.data.images.new(\"GAFTI Props\", width=width, height=height, alpha=False)
+    canvas.pixels.foreach_set(pixels.ravel())
+    canvas.file_format = \"PNG\"
+    canvas.filepath_raw = str(PREVIEWS / \"props_sheet.png\")
+    canvas.save()
+
+
+def main():
+    MODELS.mkdir(parents=True, exist_ok=True)
+    PREVIEWS.mkdir(parents=True, exist_ok=True)
+    arguments = sys.argv[sys.argv.index(\"--\") + 1:] if \"--\" in sys.argv else []
+    names = [argument for argument in arguments if not argument.startswith(\"--\")]
+    unknown = set(names) - BUILDERS.keys()
+    if unknown:
+        raise ValueError(f\"Unknown props: {sorted(unknown)}\")
+    if \"--sheet-only\" in arguments:
+        sheet()
+        return
+    for name in names or BUILDERS:
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        COLORS.clear()
+        COLORS.update(palette())
+        objects = BUILDERS[name]()
+        export(name, objects)
+        if \"--export-only\" not in arguments:
+            preview(name, objects)
+    if not names and \"--export-only\" not in arguments:
+        sheet()
+
+
+if __name__ == \"__main__\":
+    try:
+        main()
+    except Exception:
+        # The Store launcher does not pass Blender's --python-exit-code.
+        import os
+        import traceback
+
+        traceback.print_exc()
+        sys.stderr.flush()
+        os._exit(1)
+'@ | Add-Content -LiteralPath tools/blender/props.py -Encoding utf8
+powershell -ExecutionPolicy Bypass -File 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\run_blender.ps1' -Script 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\props.py' -ScriptArgs '--export-only'" in C:\Users\31\Documents\we2
+ exited 1 in 5923ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$path = '"'tools/blender/props.py'
+"'$source = Get-Content -LiteralPath $path -Raw -Encoding UTF8
+$source = $source.Replace('"'sides=16, name=\"Turned piece\"):', 'sides=16, name=\"Turned piece\", closed=False):')
+"'$source = $source.Replace('"'    faces.extend([tuple(reversed(range(sides))),
+                  tuple(range((len(profile) - 1) * sides, len(profile) * sides))])','    if closed:
+        last = (len(profile) - 1) * sides
+        faces.extend((last + j, last + (j + 1) % sides, (j + 1) % sides, j)
+                     for j in range(sides))
+    else:
+        faces.extend([tuple(reversed(range(sides))),
+                      tuple(range((len(profile) - 1) * sides, len(profile) * sides))])')
+"'$source = $source.Replace('"'    for polygon in obj.data.polygons[-2:]:
+        polygon.use_smooth = False','    if not closed:
+        for polygon in obj.data.polygons[-2:]:
+            polygon.use_smooth = False')
+"'$source = $source.Replace('"'(.125, .174)], \"rim\", sides=24)', '(.125, .174)], \"rim\", sides=24, closed=True)')
+"'$source = $source.Replace('"'\"green\", sides=24)
+    rim = lathe', '\"green\", sides=24, closed=True)
+    rim = lathe')
+"'$source = $source.Replace('"'(.247, .052)], \"gold\", sides=24)', '(.247, .052), (.232, .048)], \"gold\", sides=24, closed=True)')
+"'$source = $source.Replace('"'    bpy.ops.object.material_slot_remove_unused()
+','')
+"'$source = $source.Replace('"'    unique = list(dict.fromkeys(materials))','    if not materials:
+        return obj
+    unique = list(dict.fromkeys(materials))')
+"'$source = $source.Replace('"'        import traceback
+
+        traceback.print_exc()', '        import tempfile
+        import traceback
+
+        diagnostic = Path(tempfile.gettempdir()) / \"gafti_props_error.txt\"
+        diagnostic.write_text(traceback.format_exc(), encoding=\"utf-8\")
+        traceback.print_exc()')
+Set-Content -LiteralPath "'$path -Value $source -Encoding utf8
+Get-ChildItem -LiteralPath assets/models/props | Select-Object Name,Length
+powershell -ExecutionPolicy Bypass -File '"'C:\\Users\\31\\Documents\\we2\\tools\\blender\\run_blender.ps1' -Script 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\props.py' -ScriptArgs '--export-only'
+"'$code = $LASTEXITCODE
+if (Test-Path "$env:TEMP/gafti_props_error.txt") { Get-Content "$env:TEMP/gafti_props_error.txt" }
+exit $code' in C:\Users\31\Documents\we2
+ succeeded in 10074ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -LiteralPath assets/models/props | Select-Object Name,Length; if (Test-Path "$env:TEMP/gafti_props_error.txt") { Get-Content "$env:TEMP/gafti_props_error.txt" }' in C:\Users\31\Documents\we2
+ succeeded in 642ms:
+
+Name              Length
+----              ------
+bed.glb            70564
+bench.glb          36400
+cash_register.glb  62272
+counter.glb        38884
+crate.glb          49168
+drying_rack.glb    87232
+fence.glb          22408
+generator.glb      43052
+grow_lamp.glb      26976
+jar.glb            31772
+lamp_post.glb      25844
+mirror.glb         23264
+pot.glb            24316
+rock_01.glb        21660
+rock_02.glb        21636
+rolling_table.glb  35420
+shelf_shop.glb     76336
+sofa.glb           59760
+spruce_tree.glb    70332
+tavla_table.glb    70128
+tea_bush.glb      120512
+watering_can.glb   23728
+water_tank.glb     54492
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "powershell -ExecutionPolicy Bypass -File 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\run_blender.ps1' -Script 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\props.py'
+"'$code = $LASTEXITCODE
+if ($code -ne 0 -and (Test-Path "$env:TEMP/gafti_props_error.txt")) { Get-Content "$env:TEMP/gafti_props_error.txt" }
+exit $code' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-Command python, py -ErrorAction SilentlyContinue | Select-Object Name, Source; Get-ChildItem -LiteralPath C:/Users/31/Desktop -Filter 'Godot*' | Select-Object Name,Length; Get-Content -LiteralPath project.godot -Encoding UTF8 | Select-String -Pattern 'rendering|renderer' -Context 0,2" in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-ChildItem -LiteralPath tools/previews | Select-Object Name,Length; if (Test-Path "$env:TEMP/gafti_props_error.txt") { Get-Content "$env:TEMP/gafti_props_error.txt" }' in C:\Users\31\Documents\we2
+ succeeded in 392ms:
+
+Name                          Source                                                        
+----                          ------                                                        
+python.exe                    C:\Users\31\AppData\Local\Programs\Python\Python311\python.exe
+py.exe                        C:\WINDOWS\py.exe                                             
+Godot_v4.7.2-stable_win64.exe                                                               
+                                                                                            
+                                                                                            
+                                                                                            
+
+
+
+ succeeded in 404ms:
+
+Name                   Length
+----                   ------
+bong_bottle.png        302579
+bong_bucket.png        340344
+cash_register.png      301089
+character_raincoat.png 288694
+character_shirt.png    286024
+character_sweater.png  285455
+counter.png            288835
+drying_rack.png        335456
+filter_tip.png         317091
+greenhouse.png         345513
+grinder.png            326325
+grow_lamp.png          221494
+house.png              362164
+joint.png              286277
+lighter.png            314218
+logo_icon.png           42076
+logo_wordmark.png       64124
+plant_flower.png       353025
+plant_germ.png         282101
+plant_harvest.png      360197
+plant_seedling.png     295040
+plant_veg.png          346356
+pot.png                287237
+rolling_paper.png      273901
+rolling_tray.png       310396
+shelf_shop.png         306811
+
+
+
+codex
+23 GLB dosyası dışa aktarıldı ve her biri çarpışma geometrisi dahil 2.000 üçgen sınırının altında. Eevee önizlemeleri üretilirken Godot’un `-col` düğümlerini nasıl içe aktardığını da kontrol ediyorum.
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$validation = Join-Path $env:TEMP ('"'gafti-props-' + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path (Join-Path "'$validation '"'props') -Force | Out-Null
+Copy-Item -Path 'assets/models/props/*.glb' -Destination (Join-Path "'$validation '"'props')
+'config_version=5' | Set-Content -LiteralPath (Join-Path "'$validation '"'project.godot') -Encoding ascii
+@'
+extends SceneTree
+
+func _initialize() -> void:
+    var required: Dictionary = {
+        \"shelf_shop\": \"Shelf\", \"counter\": \"Counter\", \"drying_rack\": \"DryingRack\",
+        \"generator\": \"Generator\", \"water_tank\": \"Tank\", \"fence\": \"Fence\",
+        \"spruce_tree\": \"Trunk\", \"rock_01\": \"Rock\", \"rock_02\": \"Rock\",
+        \"sofa\": \"Sofa\", \"bed\": \"Bed\"
+    }
+    var count: int = 0
+    for entry: String in DirAccess.get_files_at(\"res://props\"):
+        if not entry.ends_with(\".glb\"):
+            continue
+        var model: PackedScene = load(\"res://props/\" + entry) as PackedScene
+        if model == null:
+            printerr(\"Missing model: \" + entry)
+            quit(1)
+            return
+        var instance: Node = model.instantiate()
+        var key: String = entry.get_basename()
+        if required.has(key):
+            var visual: Node = instance.find_child(required[key], true, false)
+            if not visual is MeshInstance3D or visual.find_children(\"*\", \"CollisionShape3D\", true, false).is_empty():
+                printerr(\"Missing imported collision: \" + entry)
+                instance.free()
+                quit(1)
+                return
+        if key == \"jar\":
+            var glass: MeshInstance3D = instance.find_child(\"Glass\", true, false) as MeshInstance3D
+            var glass_mat: StandardMaterial3D = glass.mesh.surface_get_material(0) as StandardMaterial3D
+            if glass_mat.transparency "'!= BaseMaterial3D.TRANSPARENCY_ALPHA or instance.find_child("Lid", true, false) == null:
+                printerr("Jar is missing alpha blending or the Lid node")
+                instance.free()
+                quit(1)
+                return
+        if key == "grow_lamp":
+            var bulb: MeshInstance3D = instance.find_child("Bulb", true, false) as MeshInstance3D
+            var bulb_mat: StandardMaterial3D = bulb.mesh.surface_get_material(0) as StandardMaterial3D
+            if not bulb_mat.emission_enabled:
+                printerr("Grow lamp emission missing")
+                instance.free()
+                quit(1)
+                return
+        count += 1
+        instance.free()
+    print("GAFTI: ", count, " GLBs loaded. ", required.size(), " collisions checked.")
+    quit(0 if count == 23 else 1)
+'"'@ | Set-Content -LiteralPath (Join-Path "'$validation '"'verify.gd') -Encoding ascii
+"'$godot = '"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'
+"'$importLog = Join-Path $validation '"'import.log'
+"'$importJob = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path', "'$validation, '"'--import','--log-file', "'$importLog) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $importLog | Select-Object -Last 12
+if ($importJob.ExitCode -ne 0) { exit $importJob.ExitCode }
+$testLog = Join-Path $validation '"'verify.log'
+"'$testJob = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path', "'$validation, '"'--script','res://verify.gd','--log-file', "'$testLog) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $testLog
+exit $testJob.ExitCode' in C:\Users\31\Documents\we2
+ succeeded in 47231ms:
+ exited 1 in 7580ms:
+[  95% ] reimport | VarlÄ±k Ä°Ã§e AktarÄ±mÄ± TamamlanÄ±yor...
+[ DONE ] reimport
+
+[   0% ] reimport | Started VarlÄ±klar (Yeniden)Ä°Ã§e AktarÄ±lÄ±yor (23 steps)
+[   0% ] reimport | Yeniden iÃ§e aktarma sonrasÄ± iÅŸlemler yÃ¼rÃ¼tÃ¼lÃ¼yor...
+[ DONE ] reimport
+
+[   0% ] loading_editor_layout | Started DÃ¼zenleyici yÃ¼kleniyor (5 steps)
+[   0% ] loading_editor_layout | DÃ¼zenleyici yerleÅŸim dÃ¼zeni yÃ¼kleniyor...
+[  16% ] loading_editor_layout | Yuvalar yÃ¼kleniyor...
+[ DONE ] loading_editor_layout
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+Missing imported collision: bed.glb
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "Get-ChildItem -LiteralPath tools/previews -Filter '*sheet*'; Get-ChildItem -LiteralPath tools/previews -Filter '*.png' | Sort-Object LastWriteTime | Select-Object -Last 14 Name,LastWriteTime; if (Test-Path \""'$env:TEMP/gafti_props_error.txt") { Get-Content "$env:TEMP/gafti_props_error.txt" }; python -c "import PIL; print(PIL.__version__)"' in C:\Users\31\Documents\we2
+ succeeded in 230ms:
+
+
+    Directory: C:\Users\31\Documents\we2\tools\previews
+
+
+Mode                 LastWriteTime         Length Name                                                                 
+----                 -------------         ------ ----                                                                 
+-a----        24.11.2026     12:29        6827155 props_sheet.png                                                      
+
+Name          : watering_can.png
+LastWriteTime : 24.11.2026 12:28:50
+
+
+Name          : fence.png
+LastWriteTime : 24.11.2026 12:28:51
+
+
+Name          : spruce_tree.png
+LastWriteTime : 24.11.2026 12:28:52
+
+
+Name          : tea_bush.png
+LastWriteTime : 24.11.2026 12:28:54
+
+
+Name          : rock_01.png
+LastWriteTime : 24.11.2026 12:28:55
+
+
+Name          : rock_02.png
+LastWriteTime : 24.11.2026 12:28:56
+
+
+Name          : bench.png
+LastWriteTime : 24.11.2026 12:28:57
+
+
+Name          : lamp_post.png
+LastWriteTime : 24.11.2026 12:28:58
+
+
+Name          : sofa.png
+LastWriteTime : 24.11.2026 12:29:00
+
+
+Name          : mirror.png
+LastWriteTime : 24.11.2026 12:29:01
+
+
+Name          : bed.png
+LastWriteTime : 24.11.2026 12:29:02
+
+
+Name          : crate.png
+LastWriteTime : 24.11.2026 12:29:03
+
+
+Name          : tavla_table.png
+LastWriteTime : 24.11.2026 12:29:05
+
+
+Name          : props_sheet.png
+LastWriteTime : 24.11.2026 12:29:06
+
+11.3.0
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from PIL import Image
+from pathlib import Path
+import tempfile
+im = Image.open(\"tools/previews/props_sheet.png\")
+location = Path(tempfile.gettempdir())
+im.thumbnail((1300, 1300))
+im.save(location / \"gafti_props_review.jpg\", quality=92)
+'@ | python -; Write-Output "'$env:TEMP' in C:\Users\31\Documents\we2
+ succeeded in 543ms:
+C:\Users\31\AppData\Local\Temp
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$validation = Get-ChildItem -LiteralPath $env:TEMP -Filter '"'gafti-props-*' -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+"'$validation.FullName
+$verify = Join-Path $validation.FullName '"'verify.gd'
+"'$script = Get-Content -LiteralPath $verify -Raw
+$script = $script.Replace('"'            if not visual is MeshInstance3D or visual.find_children(\"*\", \"CollisionShape3D\", true, false).is_empty():','            print(entry, \" \", instance.get_tree_string_pretty())
+            if not visual is MeshInstance3D or instance.find_children(\"*\", \"CollisionShape3D\", true, false).is_empty():')
+Set-Content -LiteralPath "'$verify -Value $script -Encoding ascii
+$log = Join-Path $validation.FullName '"'tree.log'
+"'$job = Start-Process -FilePath '"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe' -ArgumentList @('--headless','--path',"'$validation.FullName,'"'--script','res://verify.gd','--log-file',"'$log) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $log
+exit $job.ExitCode' in C:\Users\31\Documents\we2
+ exited 1 in 1283ms:
+C:\Users\31\AppData\Local\Temp\gafti-props-a41a6dd6df164a17b16418b4fb777622
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+bed.glb  â”–â•´bed2
+    â”–â•´bed
+       â” â•´Bed
+       â” â•´Bed-col
+       â”ƒ  â”–â•´StaticBody3D
+       â”ƒ     â”–â•´CollisionShape3D
+       â”–â•´Quilt
+
+counter.glb  â”–â•´counter2
+    â”–â•´counter
+       â” â•´Counter
+       â”–â•´Counter-col
+          â”–â•´StaticBody3D
+             â”–â•´CollisionShape3D
+
+drying_rack.glb  â”–â•´drying_rack2
+    â”–â•´drying_rack
+       â” â•´DryingRack
+       â”–â•´DryingRack-col
+          â”–â•´StaticBody3D
+             â”–â•´CollisionShape3D
+
+fence.glb  â”–â•´fence2
+    â”–â•´fence
+       â” â•´Fence
+       â”–â•´Fence-col
+          â”–â•´StaticBody3D
+             â”–â•´CollisionShape3D
+
+generator.glb  â”–â•´generator2
+    â”–â•´generator
+       â” â•´Generator
+       â”–â•´Generator-col
+          â”–â•´StaticBody3D
+             â”–â•´CollisionShape3D
+
+Jar is missing alpha blending or the Lid node
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json,struct
+from pathlib import Path
+for name in ('jar','bed','grow_lamp'):
+ p=Path('assets/models/props')/(name+'.glb')
+ with p.open('rb') as f:
+  f.seek(12)
+  n=struct.unpack('<I',f.read(4))[0]
+  f.read(4)
+  d=json.loads(f.read(n))
+ print(name, d['nodes'])
+ print(d.get('materials'))
+'@ | python -
+"'$validation = Get-ChildItem -LiteralPath $env:TEMP -Filter '"'gafti-props-*' -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+"'$verify = Join-Path $validation.FullName '"'verify.gd'
+"'$script = Get-Content -LiteralPath $verify -Raw
+$script = $script.Replace('"'            print(entry, \" \", instance.get_tree_string_pretty())','            print(entry, \" \", instance.get_tree_string_pretty())
+            var proxy: Node = instance.find_child(required[key] + \"-col\", true, false)
+            print(\"Proxy \", proxy.get_class(), \" visible=\", proxy.visible if proxy is Node3D else \"unknown\")')
+"'$script = $script.Replace('"'            if glass_mat.transparency "'!= BaseMaterial3D.TRANSPARENCY_ALPHA or instance.find_child("Lid", true, false) == null:'"', '            print(\"Jar \", glass_mat.transparency, \" \", glass_mat.albedo_color, \" \", instance.get_tree_string_pretty())
+            if glass_mat.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED or instance.find_child(\"Lid\", true, false) == null:')
+Set-Content -LiteralPath "'$verify -Value $script -Encoding ascii
+$log = Join-Path $validation.FullName '"'tree.log'
+"'$job = Start-Process -FilePath '"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe' -ArgumentList @('--headless','--path',"'$validation.FullName,'"'--script','res://verify.gd','--log-file',"'$log) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $log | Select-String -Pattern '"'Proxy|Jar|missing|GAFTI'
+exit "'$job.ExitCode' in C:\Users\31\Documents\we2
+ succeeded in 1387ms:
+jar [{'mesh': 0, 'name': 'Glass'}, {'mesh': 1, 'name': 'Label'}, {'mesh': 2, 'name': 'Lid', 'translation': [0, 0.1770000010728836, 0]}, {'children': [0, 1, 2], 'name': 'jar'}]
+[{'alphaMode': 'BLEND', 'doubleSided': True, 'name': 'Sea-green glass', 'pbrMetallicRoughness': {'baseColorFactor': [0.2961382567882538, 0.715693473815918, 0.6172065734863281, 0.3199999928474426], 'metallicFactor': 0.15000000596046448, 'roughnessFactor': 0.10000000149011612}}, {'doubleSided': True, 'name': 'Oat linen', 'pbrMetallicRoughness': {'baseColorFactor': [0.8307698965072632, 0.5972017645835876, 0.31854677200317383, 1], 'metallicFactor': 0, 'roughnessFactor': 0.8799999952316284}}, {'doubleSided': True, 'name': 'Forest enamel', 'pbrMetallicRoughness': {'baseColorFactor': [0.021219009533524513, 0.18116424977779388, 0.10224173218011856, 1], 'metallicFactor': 0.18000000715255737, 'roughnessFactor': 0.38999998569488525}}, {'doubleSided': True, 'name': 'Speckled cork', 'pbrMetallicRoughness': {'baseColorFactor': [0.5647115111351013, 0.2541520893573761, 0.09305896610021591, 1], 'metallicFactor': 0, 'roughnessFactor': 0.8799999952316284}}, {'doubleSided': True, 'name': 'Fresh cut pine', 'pbrMetallicRoughness': {'baseColorFactor': [0.6795424818992615, 0.2961382567882538, 0.09758734703063965, 1], 'metallicFactor': 0, 'roughnessFactor': 0.6499999761581421}}, {'doubleSided': True, 'name': 'Honey pine', 'pbrMetallicRoughness': {'baseColorFactor': [0.3762621283531189, 0.13013647496700287, 0.045186202973127365, 1], 'metallicFactor': 0, 'roughnessFactor': 0.6499999761581421}}]
+bed [{'mesh': 0, 'name': 'Bed'}, {'mesh': 1, 'name': 'Bed-col'}, {'mesh': 2, 'name': 'Quilt'}, {'children': [0, 1, 2], 'name': 'bed'}]
+[{'doubleSided': True, 'name': 'Honey pine', 'pbrMetallicRoughness': {'baseColorFactor': [0.3762621283531189, 0.13013647496700287, 0.045186202973127365, 1], 'metallicFactor': 0, 'roughnessFactor': 0.6499999761581421}}, {'doubleSided': True, 'name': 'Oat linen', 'pbrMetallicRoughness': {'baseColorFactor': [0.8307698965072632, 0.5972017645835876, 0.31854677200317383, 1], 'metallicFactor': 0, 'roughnessFactor': 0.8799999952316284}}, {'doubleSided': True, 'name': 'End grain', 'pbrMetallicRoughness': {'baseColorFactor': [0.12477181851863861, 0.0423114113509655, 0.023153366521000862, 1], 'metallicFactor': 0, 'roughnessFactor': 0.6499999761581421}}, {'doubleSided': True, 'name': 'Fresh cut pine', 'pbrMetallicRoughness': {'baseColorFactor': [0.6795424818992615, 0.2961382567882538, 0.09758734703063965, 1], 'metallicFactor': 0, 'roughnessFactor': 0.6499999761581421}}, {'doubleSided': True, 'name': 'Brick weave', 'pbrMetallicRoughness': {'baseColorFactor': [0.41788506507873535, 0.07036009430885315, 0.05612849071621895, 1], 'metallicFactor': 0, 'roughnessFactor': 0.8799999952316284}}, {'doubleSided': True, 'name': 'Rose weave', 'pbrMetallicRoughness': {'baseColorFactor': [0.6938717365264893, 0.19806931912899017, 0.11697066575288773, 1], 'metallicFactor': 0, 'roughnessFactor': 0.800000011920929}}]
+grow_lamp [{'mesh': 0, 'name': 'Bulb', 'translation': [0, 0.10700000077486038, 0]}, {'mesh': 1, 'name': 'Shade'}, {'children': [0, 1], 'name': 'grow_lamp'}]
+[{'doubleSided': True, 'emissiveFactor': [1, 0.47353148460388184, 0.11697066575288773], 'extensions': {'KHR_materials_emissive_strength': {'emissiveStrength': 3}}, 'name': 'Warm amber filament', 'pbrMetallicRoughness': {'baseColorFactor': [1, 0.47353148460388184, 0.11697066575288773, 1], 'metallicFactor': 0, 'roughnessFactor': 0.3100000023841858}}, {'doubleSided': True, 'name': 'Forest enamel', 'pbrMetallicRoughness': {'baseColorFactor': [0.021219009533524513, 0.18116424977779388, 0.10224173218011856, 1], 'metallicFactor': 0.18000000715255737, 'roughnessFactor': 0.38999998569488525}}, {'doubleSided': True, 'name': 'Aged brass', 'pbrMetallicRoughness': {'baseColorFactor': [0.6239603757858276, 0.3324515223503113, 0.09084171056747437, 1], 'metallicFactor': 0.5799999833106995, 'roughnessFactor': 0.3499999940395355}}, {'doubleSided': True, 'name': 'Charcoal rubber', 'pbrMetallicRoughness': {'baseColorFactor': [0.019382361322641373, 0.03560131415724754, 0.0382043719291687, 1], 'metallicFactor': 0, 'roughnessFactor': 0.800000011920929}}, {'doubleSided': True, 'name': 'Blued iron', 'pbrMetallicRoughness': {'baseColorFactor': [0.06480326503515244, 0.12213877588510513, 0.14702726900577545, 1], 'metallicFactor': 0.6200000047683716, 'roughnessFactor': 0.3700000047683716}}]
+
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Jar 4 (0.5804, 0.8627, 0.8078, 0.32)  â”–â•´jar2
+    â”–â•´jar
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+Proxy MeshInstance3D visible=true
+GAFTI: 23 GLBs loaded. 11 collisions checked.
+
+apply patch
+patch: completed
+C:\Users\31\Documents\we2\tools\blender\props.py
+diff --git a/tools/blender/props.py b/tools/blender/props.py
+index 022182c9b93a30b98071e7829adb1f1d35b01996..1468854233410b8a561b756da77de4ea5747e64d
+--- a/tools/blender/props.py
++++ b/tools/blender/props.py
+@@ -50,6 +50,9 @@
+         "silver": ("Brushed steel", "9AB6B2", .32, .55),
+         "gold": ("Aged brass", "CF9C55", .35, .58),
+         "cream": ("Oat linen", "EBCB99", .88),
++        "cloth_dark": ("Deep spruce fabric", "386858", .91),
++        "cloth": ("Pine woven fabric", "588D6D", .91),
++        "cloth_light": ("Sage woven fabric", "7BA584", .94),
+         "rust": ("Brick weave", "AD4B43", .88), "rose": ("Rose weave", "D97B60", .8),
+         "glass": ("Sea-green glass", "94DCCE", .1, .15, .32),
+         "mirror": ("Silvered glass", "B5D8D5", .11, .86),
+@@ -59,6 +62,7 @@
+         "stone": ("Wet slate", "536974", .43), "stone_light": ("Rainlit slate", "81949B", .49),
+         "stone_dark": ("Slate seams", "394F59", .5), "moss": ("Moss", "617F38", .94),
+         "soil": ("Potting soil", "554133", .95),
++        "proxy": ("Invisible collision proxy", "000000", 1, 0, 0),
+     }
+     return {key: material(*spec) for key, spec in specifications.items()}
+ 
+@@ -191,7 +195,10 @@
+ 
+ 
+ def collision(name, parts):
+-    return join(name + "-col", parts)
++    obj = join(name + "-col", parts)
++    # Godot preserves the mesh instance when it generates a collider from -col.
++    obj.data.materials.append(COLORS["proxy"])
++    return obj
+ 
+ 
+ def slats(width, depth, z, count, tone="wood"):
+@@ -259,6 +266,11 @@
+                       box((x, -.358, .45), (.365, .019, .444), "light", .016),
+                       box((x, .339, .60), (.46, .035, .19), "wood", .009),
+                       box((x, .365, .60), (.13, .027, .027), "gold", .009)])
++        for z, shift, length in ((.35, -.12, .21), (.42, -.06, .19), (.52, -.11, .16)):
++            x0 = x + shift
++            points = [(x0, -.368, z), (x0 + length * .43, -.368, z - .004),
++                      (x0 + length, -.368, z + .005), (x0 + length * .52, -.368, z + .003)]
++            parts.append(mesh("Panel grain", points, [(0, 1, 2, 3)], "grain"))
+     graining(parts, 1.55, .901, (-.22, -.091, .045, .19), 7)
+     collider = collision("Counter", [box((0, 0, .45), (1.70, .72, .9), None)])
+     return [join("Counter", parts), collider]
+@@ -463,25 +475,25 @@
+         angle = index * tau / 3
+         clusters.append(oval((.21 * cos(angle), .19 * sin(angle), .61),
+                              (.34, .29, .23), "tea", index + 17, angle, detail=2))
+-    for index in range(52):
+-        theta = rng.uniform(0, tau)
+-        radial = .72 * rng.random() ** .55
+-        x, y = radial * cos(theta), radial * sin(theta)
+-        z = .84 - .43 * (radial / .72) ** 1.9 + rng.uniform(-.017, .052)
+-        direction = Vector((cos(theta), sin(theta), rng.uniform(-.2, .38)))
+-        side = Vector((-sin(theta), cos(theta), 0))
+-        base = Vector((x, y, z))
+-        length = rng.uniform(.09, .20)
+-        width = length * .27
+-        verts = [base, base + direction * length * .41 + side * width,
+-                 base + direction * length + Vector((0, 0, .018)),
+-                 base + direction * length * .42 - side * width,
+-                 base + direction * length * .47 + Vector((0, 0, .032))]
+-        leaf = mesh("Tea flush", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], "leaf")
+-        leaf.data.materials.append(COLORS["tea"])
+-        for face in leaf.data.polygons[2:]:
+-            face.material_index = 1
+-        leaves.append(leaf)
++    bpy.context.view_layer.update()
++    for cluster in clusters:
++        top_faces = [face for face in cluster.data.polygons if face.normal.z > .45]
++        for face in rng.sample(top_faces, 5):
++            base = cluster.matrix_world @ face.center - Vector((0, 0, .009))
++            theta = rng.uniform(0, tau)
++            direction = Vector((cos(theta), sin(theta), rng.uniform(.10, .45)))
++            side = Vector((-sin(theta), cos(theta), 0))
++            length = rng.uniform(.095, .18)
++            width = length * .29
++            verts = [base, base + direction * length * .41 - side * width,
++                     base + direction * length + Vector((0, 0, .02)),
++                     base + direction * length * .42 + side * width,
++                     base + direction * length * .47 + Vector((0, 0, .025))]
++            leaf = mesh("Tea flush", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], "leaf")
++            leaf.data.materials.append(COLORS["tea"])
++            for edge in leaf.data.polygons[2:]:
++                edge.material_index = 1
++            leaves.append(leaf)
+     return [join("Branches", branches), join("Foliage", clusters + leaves)]
+ 
+ 
+@@ -506,18 +518,18 @@
+             faces.extend([(a, b, c), (c, d, a)])
+     faces += [tuple(range(3 * sides, 4 * sides))]
+     slate = mesh("Slate", vertices, faces, "stone")
+-    for tone in ("stone_dark", "stone_light", "moss"):
++    for tone in ("stone_dark", "stone_light"):
+         slate.data.materials.append(COLORS[tone])
+     for index, face in enumerate(slate.data.polygons):
+         face.material_index = rng.choices(
+-            (0, 1, 2, 3), (65, 35, 0, 0) if index < 19 else (50, 10, 22, 18))[0]
++            (0, 1, 2), (65, 35, 0) if index < 19 else (79, 12, 9))[0]
+     slate.data.polygons[-1].material_index = 2
+     pieces = [slate]
+-    for index in range(3):
+-        x = (-.24 + .18 * index) * width
+-        y = (.19 + .044 * index) * depth
+-        z = (.68 - .09 * index) * height
+-        pieces.append(oval((x, y, z), (width * .17, depth * .16, height * .13), "moss", index + seed))
++    for index, vertex_id in enumerate((20, 22, 25, 26, 30)):
++        x, y, z = vertices[vertex_id]
++        pieces.append(oval((x * .97, y * .97, z - height * .025),
++                           (width * .14, depth * .13, height * .079),
++                           "moss", index + seed, detail=2))
+     collider = collision("Rock", [mesh("Proxy", vertices, faces)])
+     return [join("Rock", pieces), collider]
+ 
+@@ -561,19 +573,19 @@
+ 
+ 
+ def sofa():
+-    parts = [box((0, 0, .217), (1.87, .755, .279), "pine", .054)]
++    parts = [box((0, 0, .217), (1.87, .755, .279), "cloth_dark", .054)]
+     for x in (-.73, .73):
+         for y in (-.24, .24):
+             parts.append(lathe([(.045, 0), (.054, .014), (.066, .119)], "dark", (x, y, 0), sides=10))
+-    back = box((0, .273, .538), (1.82, .215, .69), "green", .054)
++    back = box((0, .273, .538), (1.82, .215, .69), "cloth", .054)
+     back.rotation_euler.x = -.15
+     parts.append(back)
+     for x in (-.844, .844):
+-        parts += [box((x, -.051, .452), (.253, .678, .32), "green", .072),
+-                  box((x, -.366, .484), (.146, .085, .154), "mint", .035)]
++        parts += [box((x, -.051, .452), (.253, .678, .32), "cloth", .072),
++                  box((x, -.366, .484), (.146, .085, .154), "cloth_light", .035)]
+     for x in (-.42, 0, .42):
+-        parts += [box((x, -.075, .379), (.399, .55, .166), "mint", .039)]
+-        cushion = box((x, .236, .609), (.411, .157, .385), "mint", .044)
++        parts += [box((x, -.075, .379), (.399, .55, .166), "cloth_light", .039)]
++        cushion = box((x, .236, .609), (.411, .157, .385), "cloth_light", .044)
+         cushion.rotation_euler.x = -.16
+         parts.append(cushion)
+     for index, (x, tone, angle) in enumerate(((-.58, "rust", .24), (.58, "cream", -.23))):
+@@ -723,11 +735,15 @@
+ def export(name, objects):
+     scene = bpy.context.scene
+     scene.unit_settings.system = "METRIC"
++    bpy.context.view_layer.update()
++    base_z = min((obj.matrix_world @ vertex.co).z for obj in objects
++                 if not obj.name.endswith("-col") for vertex in obj.data.vertices)
+     root = bpy.data.objects.new(name, None)
+     bpy.context.collection.objects.link(root)
+     bpy.ops.object.select_all(action="DESELECT")
+     root.select_set(True)
+     for obj in objects:
++        obj.location.z -= base_z
+         obj.parent = root
+         obj.select_set(True)
+     target = MODELS / (name + ".glb")
+@@ -767,6 +783,7 @@
+     scene.render.image_settings.color_mode = "RGB"
+     scene.view_settings.view_transform = "AgX"
+     scene.view_settings.look = "AgX - Medium High Contrast"
++    scene.view_settings.exposure = -.4
+     scene.render.film_transparent = False
+     scene.world = bpy.data.worlds.new("Studio sky")
+     scene.world.use_nodes = True
+@@ -803,7 +820,7 @@
+     ranges = [(min(p[i] for p in projected), max(p[i] for p in projected)) for i in (0, 1)]
+     camera_obj.location += axes @ Vector(tuple((lo + hi) / 2 for lo, hi in ranges) + (0,))
+     camera_data.ortho_scale = max(hi - lo for lo, hi in ranges) * 1.28
+-    ground = box((center.x, center.y, minimum.z - .018 * scale),
++    ground = box((center.x, center.y, minimum.z - .0135 * scale),
+                  (25 * scale, 25 * scale, .026 * scale), None)
+     ground.data.materials.append(material("Studio slate", "3E5557", .87))
+     if name == "grow_lamp":
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "powershell -ExecutionPolicy Bypass -File 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\run_blender.ps1' -Script 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\props.py'
+"'$code = $LASTEXITCODE
+if ($code -ne 0 -and (Test-Path "$env:TEMP/gafti_props_error.txt")) { Get-Content "$env:TEMP/gafti_props_error.txt" }
+exit $code' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$validation = Get-ChildItem -LiteralPath $env:TEMP -Filter '"'gafti-props-*' -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+"'$verify = Join-Path $validation.FullName '"'verify.gd'
+"'$script = Get-Content -LiteralPath $verify -Raw
+$script = $script.Replace('"'            print(entry, \" \", instance.get_tree_string_pretty())
+            var proxy: Node = instance.find_child(required[key] + \"-col\", true, false)
+            print(\"Proxy \", proxy.get_class(), \" visible=\", proxy.visible if proxy is Node3D else \"unknown\")
+            if not visual is MeshInstance3D or instance.find_children(\"*\", \"CollisionShape3D\", true, false).is_empty():', '            var proxy: MeshInstance3D = instance.find_child(required[key] + \"-col\", true, false) as MeshInstance3D
+            var shapes: Array[Node] = proxy.find_children(\"*\", \"CollisionShape3D\", true, false)
+            var proxy_mat: StandardMaterial3D = proxy.mesh.surface_get_material(0) as StandardMaterial3D
+            if proxy_mat == null or proxy_mat.transparency == BaseMaterial3D.TRANSPARENCY_DISABLED or proxy_mat.albedo_color.a "'!= 0:
+                printerr("Visible collision mesh: " + entry)
+                instance.free()
+                quit(1)
+                return
+            if not visual is MeshInstance3D or shapes.is_empty() or not shapes[0].shape is ConcavePolygonShape3D:'"')
+"'$script = $script.Replace('"'            print(\"Jar \", glass_mat.transparency, \" \", glass_mat.albedo_color, \" \", instance.get_tree_string_pretty())
+','')
+Set-Content -LiteralPath "'$verify -Value $script -Encoding ascii
+$validation.FullName' in C:\Users\31\Documents\we2
+ succeeded in 718ms:
+C:\Users\31\AppData\Local\Temp\gafti-props-a41a6dd6df164a17b16418b4fb777622
+
+ succeeded in 32308ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$validation = Get-ChildItem -LiteralPath $env:TEMP -Filter '"'gafti-props-*' -Directory | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+Copy-Item -Path 'assets/models/props/*.glb' -Destination (Join-Path "'$validation.FullName '"'props') -Force
+"'$godot = '"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'
+"'$importLog = Join-Path $validation.FullName '"'final-import.log'
+"'$importJob = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$validation.FullName,'"'--import','--log-file',"'$importLog) -WindowStyle Hidden -Wait -PassThru
+$errors = Get-Content -LiteralPath $importLog -Encoding utf8 | Select-String -Pattern '"'ERROR|WARNING'
+"'$errors
+if ($importJob.ExitCode -ne 0) { exit $importJob.ExitCode }
+if ($errors) { exit 1 }
+$testLog = Join-Path $validation.FullName '"'final-verify.log'
+"'$testJob = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$validation.FullName,'"'--script','res://verify.gd','--log-file',"'$testLog) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $testLog -Encoding utf8
+exit $testJob.ExitCode' in C:\Users\31\Documents\we2
+ succeeded in 6322ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+GAFTI: 23 GLBs loaded. 11 collisions checked.
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Item tools/previews/props_sheet.png, assets/models/props/bed.glb, assets/models/props/tavla_table.glb | Select-Object Name,LastWriteTime; Get-Date; if (Test-Path "$env:TEMP/gafti_props_error.txt") { Get-Content "$env:TEMP/gafti_props_error.txt" }' in C:\Users\31\Documents\we2
+ succeeded in 299ms:
+
+Name            LastWriteTime      
+----            -------------      
+props_sheet.png 24.11.2026 12:31:36
+bed.glb         24.11.2026 12:31:32
+tavla_table.glb 24.11.2026 12:31:34
+                                   
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from PIL import Image
+from pathlib import Path
+import tempfile
+preview = Path(\"tools/previews\")
+location = Path(tempfile.gettempdir())
+image = Image.open(preview / \"props_sheet.png\")
+image.thumbnail((1300, 1300))
+image.save(location / \"gafti_props_review.jpg\", quality=93)
+for index, names in enumerate([(\"tea_bush\", \"rock_01\", \"rock_02\"), (\"sofa\", \"counter\", \"jar\")]):
+    detail = Image.new(\"RGB\", (512 * 3, 512))
+    for column, name in enumerate(names):
+        detail.paste(Image.open(preview / f\"{name}.png\"), (512 * column, 0))
+    detail.save(location / f\"gafti_props_detail_{index}.jpg\", quality=92)
+'@ | python -" in C:\Users\31\Documents\we2
+ succeeded in 554ms:
+codex
+Godot 4.7.2, 23 modelin tamamını ve 11 çarpışma şeklini yükledi. Önizlemelerde çay çalısının yapraklarını ve kayalardaki yosun geçişlerini yeniden işliyorum.
+apply patch
+patch: completed
+C:\Users\31\Documents\we2\tools\blender\props.py
+diff --git a/tools/blender/props.py b/tools/blender/props.py
+index 022182c9b93a30b98071e7829adb1f1d35b01996..faac545959e141fddfee087adf8ffb485fc442ca
+--- a/tools/blender/props.py
++++ b/tools/blender/props.py
+@@ -50,6 +50,9 @@
+         "silver": ("Brushed steel", "9AB6B2", .32, .55),
+         "gold": ("Aged brass", "CF9C55", .35, .58),
+         "cream": ("Oat linen", "EBCB99", .88),
++        "cloth_dark": ("Deep spruce fabric", "386858", .91),
++        "cloth": ("Pine woven fabric", "588D6D", .91),
++        "cloth_light": ("Sage woven fabric", "7BA584", .94),
+         "rust": ("Brick weave", "AD4B43", .88), "rose": ("Rose weave", "D97B60", .8),
+         "glass": ("Sea-green glass", "94DCCE", .1, .15, .32),
+         "mirror": ("Silvered glass", "B5D8D5", .11, .86),
+@@ -59,6 +62,7 @@
+         "stone": ("Wet slate", "536974", .43), "stone_light": ("Rainlit slate", "81949B", .49),
+         "stone_dark": ("Slate seams", "394F59", .5), "moss": ("Moss", "617F38", .94),
+         "soil": ("Potting soil", "554133", .95),
++        "proxy": ("Invisible collision proxy", "000000", 1, 0, 0),
+     }
+     return {key: material(*spec) for key, spec in specifications.items()}
+ 
+@@ -191,7 +195,10 @@
+ 
+ 
+ def collision(name, parts):
+-    return join(name + "-col", parts)
++    obj = join(name + "-col", parts)
++    # Godot preserves the mesh instance when it generates a collider from -col.
++    obj.data.materials.append(COLORS["proxy"])
++    return obj
+ 
+ 
+ def slats(width, depth, z, count, tone="wood"):
+@@ -259,6 +266,11 @@
+                       box((x, -.358, .45), (.365, .019, .444), "light", .016),
+                       box((x, .339, .60), (.46, .035, .19), "wood", .009),
+                       box((x, .365, .60), (.13, .027, .027), "gold", .009)])
++        for z, shift, length in ((.35, -.12, .21), (.42, -.06, .19), (.52, -.11, .16)):
++            x0 = x + shift
++            points = [(x0, -.368, z), (x0 + length * .43, -.368, z - .004),
++                      (x0 + length, -.368, z + .005), (x0 + length * .52, -.368, z + .003)]
++            parts.append(mesh("Panel grain", points, [(0, 1, 2, 3)], "grain"))
+     graining(parts, 1.55, .901, (-.22, -.091, .045, .19), 7)
+     collider = collision("Counter", [box((0, 0, .45), (1.70, .72, .9), None)])
+     return [join("Counter", parts), collider]
+@@ -393,7 +405,18 @@
+     rose = rod((.303, 0, .22), (.342, 0, .252), .042, "gold", .055, sides=16)
+     face = rod((.340, 0, .250), (.346, 0, .254), .046, "steel", sides=16)
+     band = lathe([(.123, .025), (.134, .036), (.134, .05), (.130, .054)], "green", sides=20)
+-    return [join("Can", [body, handle, spout, rose, face, band])]
++    perforations = []
++    axis = Vector((.006, 0, .004)).normalized()
++    right = Vector((0, 1, 0))
++    up = axis.cross(right)
++    cap_center = Vector((.346, 0, .254)) + .0003 * axis
++    centers = [cap_center] + [cap_center + .027 * (cos(t) * right + sin(t) * up)
++                              for t in (i * tau / 7 for i in range(7))]
++    for center in centers:
++        verts = [center + .0038 * (cos(t) * right + sin(t) * up)
++                 for t in (i * tau / 7 for i in range(7))]
++        perforations.append(mesh("Spray hole", verts, [tuple(range(7))], "black"))
++    return [join("Can", [body, handle, spout, rose, face, band, *perforations])]
+ 
+ 
+ def fence():
+@@ -457,31 +480,33 @@
+         z = rng.uniform(.35, .51)
+         end = (.45 * x, .42 * y, z)
+         branches.append(rod((0, 0, .016), end, .031, "dark", .008, sides=6))
+-        clusters.append(oval(end, (.35, .28, .24), "tea" if index % 3 else "fern",
++        clusters.append(oval(end, (.35, .28, .24), "tea" if index % 3 else "olive",
+                              index + 1, angle, detail=2))
+     for index in range(3):
+         angle = index * tau / 3
+         clusters.append(oval((.21 * cos(angle), .19 * sin(angle), .61),
+                              (.34, .29, .23), "tea", index + 17, angle, detail=2))
+-    for index in range(52):
+-        theta = rng.uniform(0, tau)
+-        radial = .72 * rng.random() ** .55
+-        x, y = radial * cos(theta), radial * sin(theta)
+-        z = .84 - .43 * (radial / .72) ** 1.9 + rng.uniform(-.017, .052)
+-        direction = Vector((cos(theta), sin(theta), rng.uniform(-.2, .38)))
+-        side = Vector((-sin(theta), cos(theta), 0))
+-        base = Vector((x, y, z))
+-        length = rng.uniform(.09, .20)
+-        width = length * .27
+-        verts = [base, base + direction * length * .41 + side * width,
+-                 base + direction * length + Vector((0, 0, .018)),
+-                 base + direction * length * .42 - side * width,
+-                 base + direction * length * .47 + Vector((0, 0, .032))]
+-        leaf = mesh("Tea flush", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], "leaf")
+-        leaf.data.materials.append(COLORS["tea"])
+-        for face in leaf.data.polygons[2:]:
+-            face.material_index = 1
+-        leaves.append(leaf)
++    bpy.context.view_layer.update()
++    for cluster in clusters:
++        for face in cluster.data.polygons:
++            face.use_smooth = True
++        top_faces = [face for face in cluster.data.polygons if face.normal.z > .23]
++        for face in rng.sample(top_faces, 8):
++            base = cluster.matrix_world @ face.center - Vector((0, 0, .009))
++            theta = rng.uniform(0, tau)
++            direction = Vector((cos(theta), sin(theta), rng.uniform(.10, .45)))
++            side = Vector((-sin(theta), cos(theta), 0))
++            length = rng.uniform(.11, .205)
++            width = length * .32
++            verts = [base, base + direction * length * .41 - side * width,
++                     base + direction * length + Vector((0, 0, .02)),
++                     base + direction * length * .42 + side * width,
++                     base + direction * length * .47 + Vector((0, 0, .025))]
++            leaf = mesh("Tea flush", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], "leaf")
++            leaf.data.materials.append(COLORS["tea"])
++            for edge in leaf.data.polygons[2:]:
++                edge.material_index = 1
++            leaves.append(leaf)
+     return [join("Branches", branches), join("Foliage", clusters + leaves)]
+ 
+ 
+@@ -506,18 +531,23 @@
+             faces.extend([(a, b, c), (c, d, a)])
+     faces += [tuple(range(3 * sides, 4 * sides))]
+     slate = mesh("Slate", vertices, faces, "stone")
+-    for tone in ("stone_dark", "stone_light", "moss"):
++    for tone in ("stone_dark", "stone_light"):
+         slate.data.materials.append(COLORS[tone])
+     for index, face in enumerate(slate.data.polygons):
+         face.material_index = rng.choices(
+-            (0, 1, 2, 3), (65, 35, 0, 0) if index < 19 else (50, 10, 22, 18))[0]
++            (0, 1, 2), (65, 35, 0) if index < 19 else (79, 12, 9))[0]
+     slate.data.polygons[-1].material_index = 2
+     pieces = [slate]
+-    for index in range(3):
+-        x = (-.24 + .18 * index) * width
+-        y = (.19 + .044 * index) * depth
+-        z = (.68 - .09 * index) * height
+-        pieces.append(oval((x, y, z), (width * .17, depth * .16, height * .13), "moss", index + seed))
++    for face_id in (29, 31, 32, 33, 38, 47, 49, 51, 52):
++        triangle = [Vector(vertices[i]) for i in faces[face_id]]
++        normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]).normalized()
++        center = sum(triangle, Vector()) / 3
++        offset = normal * .0018
++        edges = [(triangle[i] + triangle[(i + 1) % 3]) / 2 for i in range(3)]
++        patch = [center + (corner - center) * rng.uniform(.40, .94) + offset
++                 for pair in zip(triangle, edges) for corner in pair]
++        pieces.append(mesh("Moss on slate", patch, [tuple(range(6))],
++                           "moss" if face_id % 3 else "olive"))
+     collider = collision("Rock", [mesh("Proxy", vertices, faces)])
+     return [join("Rock", pieces), collider]
+ 
+@@ -561,19 +591,19 @@
+ 
+ 
+ def sofa():
+-    parts = [box((0, 0, .217), (1.87, .755, .279), "pine", .054)]
++    parts = [box((0, 0, .217), (1.87, .755, .279), "cloth_dark", .054)]
+     for x in (-.73, .73):
+         for y in (-.24, .24):
+             parts.append(lathe([(.045, 0), (.054, .014), (.066, .119)], "dark", (x, y, 0), sides=10))
+-    back = box((0, .273, .538), (1.82, .215, .69), "green", .054)
++    back = box((0, .273, .538), (1.82, .215, .69), "cloth", .054)
+     back.rotation_euler.x = -.15
+     parts.append(back)
+     for x in (-.844, .844):
+-        parts += [box((x, -.051, .452), (.253, .678, .32), "green", .072),
+-                  box((x, -.366, .484), (.146, .085, .154), "mint", .035)]
++        parts += [box((x, -.051, .452), (.253, .678, .32), "cloth", .072),
++                  box((x, -.366, .484), (.146, .085, .154), "cloth_light", .035)]
+     for x in (-.42, 0, .42):
+-        parts += [box((x, -.075, .379), (.399, .55, .166), "mint", .039)]
+-        cushion = box((x, .236, .609), (.411, .157, .385), "mint", .044)
++        parts += [box((x, -.075, .379), (.399, .55, .166), "cloth_light", .039)]
++        cushion = box((x, .236, .609), (.411, .157, .385), "cloth_light", .044)
+         cushion.rotation_euler.x = -.16
+         parts.append(cushion)
+     for index, (x, tone, angle) in enumerate(((-.58, "rust", .24), (.58, "cream", -.23))):
+@@ -723,11 +753,15 @@
+ def export(name, objects):
+     scene = bpy.context.scene
+     scene.unit_settings.system = "METRIC"
++    bpy.context.view_layer.update()
++    base_z = min((obj.matrix_world @ vertex.co).z for obj in objects
++                 if not obj.name.endswith("-col") for vertex in obj.data.vertices)
+     root = bpy.data.objects.new(name, None)
+     bpy.context.collection.objects.link(root)
+     bpy.ops.object.select_all(action="DESELECT")
+     root.select_set(True)
+     for obj in objects:
++        obj.location.z -= base_z
+         obj.parent = root
+         obj.select_set(True)
+     target = MODELS / (name + ".glb")
+@@ -767,6 +801,7 @@
+     scene.render.image_settings.color_mode = "RGB"
+     scene.view_settings.view_transform = "AgX"
+     scene.view_settings.look = "AgX - Medium High Contrast"
++    scene.view_settings.exposure = -.4
+     scene.render.film_transparent = False
+     scene.world = bpy.data.worlds.new("Studio sky")
+     scene.world.use_nodes = True
+@@ -803,7 +838,7 @@
+     ranges = [(min(p[i] for p in projected), max(p[i] for p in projected)) for i in (0, 1)]
+     camera_obj.location += axes @ Vector(tuple((lo + hi) / 2 for lo, hi in ranges) + (0,))
+     camera_data.ortho_scale = max(hi - lo for lo, hi in ranges) * 1.28
+-    ground = box((center.x, center.y, minimum.z - .018 * scale),
++    ground = box((center.x, center.y, minimum.z - .0135 * scale),
+                  (25 * scale, 25 * scale, .026 * scale), None)
+     ground.data.materials.append(material("Studio slate", "3E5557", .87))
+     if name == "grow_lamp":
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "powershell -ExecutionPolicy Bypass -File 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\run_blender.ps1' -Script 'C:\\Users\\31\\Documents\\we2\\tools\\blender\\props.py'
+"'$code = $LASTEXITCODE
+if ($code -ne 0 -and (Test-Path "$env:TEMP/gafti_props_error.txt")) { Get-Content "$env:TEMP/gafti_props_error.txt" }
+exit $code' in C:\Users\31\Documents\we2
+ succeeded in 29767ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json
+import struct
+from pathlib import Path
+
+from PIL import Image
+
+
+root = Path.cwd()
+props = root / \"assets/models/props\"
+previews = root / \"tools/previews\"
+names = \"\"\"pot grow_lamp shelf_shop counter cash_register drying_rack jar rolling_table generator
+water_tank watering_can fence spruce_tree tea_bush rock_01 rock_02 bench lamp_post sofa mirror
+bed crate tavla_table\"\"\".split()
+collision_names = {
+    \"shelf_shop\": \"Shelf\", \"counter\": \"Counter\", \"drying_rack\": \"DryingRack\",
+    \"generator\": \"Generator\", \"water_tank\": \"Tank\", \"fence\": \"Fence\",
+    \"spruce_tree\": \"Trunk\", \"rock_01\": \"Rock\", \"rock_02\": \"Rock\",
+    \"sofa\": \"Sofa\", \"bed\": \"Bed\",
+}
+
+
+def read_gltf(path):
+    with path.open(\"rb\") as file:
+        magic, version, file_size = struct.unpack(\"<4sII\", file.read(12))
+        assert (magic, version, file_size) == (b\"glTF\", 2, path.stat().st_size)
+        length, kind = struct.unpack(\"<I4s\", file.read(8))
+        assert kind == b\"JSON\"
+        return json.loads(file.read(length))
+
+
+assert set(names) == {path.stem for path in props.glob(\"*.glb\")}
+result = []
+bounds = {}
+for name in names:
+    glb = read_gltf(props / f\"{name}.glb\")
+    scene_root, = glb[\"scenes\"][glb[\"scene\"]][\"nodes\"]
+    assert glb[\"nodes\"][scene_root] == {\"name\": name, \"children\": glb[\"nodes\"][scene_root][\"children\"]}
+    nodes = dict((node[\"name\"], node) for node in glb[\"nodes\"] if \"mesh\" in node)
+    material_by_node = {}
+    triangles = 0
+    visual_bounds = []
+    collider = collision_names.get(name)
+    assert [node for node in nodes if node.endswith(\"-col\")] == ([collider + \"-col\"] if collider else [])
+    for node_name, node in nodes.items():
+        assert not {\"scale\", \"rotation\", \"matrix\"}.intersection(node), node
+        translation = node.get(\"translation\", [0, 0, 0])
+        primitives = glb[\"meshes\"][node[\"mesh\"]][\"primitives\"]
+        materials = []
+        for primitive in primitives:
+            assert primitive.get(\"mode\", 4) == 4
+            number_of_indices = glb[\"accessors\"][primitive[\"indices\"]][\"count\"]
+            assert number_of_indices % 3 == 0
+            triangles += number_of_indices // 3
+            mat = glb[\"materials\"][primitive[\"material\"]]
+            assert \"pbrMetallicRoughness\" in mat
+            materials.append(mat)
+            accessor = glb[\"accessors\"][primitive[\"attributes\"][\"POSITION\"]]
+            if node_name.endswith(\"-col\"):
+                assert mat[\"alphaMode\"] == \"BLEND\"
+                assert mat[\"pbrMetallicRoughness\"][\"baseColorFactor\"][3] == 0
+            else:
+                visual_bounds.append([(accessor[\"min\"][i] + translation[i],
+                                       accessor[\"max\"][i] + translation[i])
+                                      for i in range(3)])
+        material_by_node[node_name] = materials
+    assert 0 < triangles <= 2000, (name, triangles)
+    lower = [min(b[i][0] for b in visual_bounds) for i in range(3)]
+    upper = [max(b[i][1] for b in visual_bounds) for i in range(3)]
+    assert abs(lower[1]) < 1e-5, (name, lower[1])
+    bounds[name] = tuple(upper[i] - lower[i] for i in range(3))
+    if name == \"jar\":
+        assert \"Lid\" in nodes and material_by_node[\"Glass\"][0][\"alphaMode\"] == \"BLEND\"
+    if name == \"grow_lamp\":
+        glow = material_by_node[\"Bulb\"][0]
+        r, g, b = glow[\"emissiveFactor\"]
+        assert r > g > b > 0 and glow[\"extensions\"][\"KHR_materials_emissive_strength\"][\"emissiveStrength\"] > 1
+    with Image.open(previews / f\"{name}.png\") as img:
+        assert img.size == (512, 512), (name, img.size)
+        img.verify()
+    result.append((name, triangles, \", \".join(f\""'`{node}`" for node in sorted(nodes))))
+
+assert abs(bounds["pot"][0] - .3) < .002
+assert abs(bounds["shelf_shop"][1] - 1.8) < .02
+assert abs(bounds["counter"][1] - .9) < .002
+with Image.open(previews / "props_sheet.png") as sheet:
+    assert sheet.size == (2632, 2812)
+    sheet.verify()
+
+head = """# GAFTİ · sol_props raporu
+
+`tools/blender/props.py`, AGENTS.md §8’deki 23 propun tamamını metre ölçeğinde ve glTF +Y yukarı ekseniyle üretir. Her dosyanın kök düğümü dosya adını taşır ve model tabanı Y=0 düzlemindedir. Saksı 0,30 m çapında, tezgâh 0,90 m, mağaza rafı 1,77 m yüksekliğindedir.
+
+## Dosyalar ve düğümler
+
+GLB’ler `assets/models/props/`, 512 × 512 Eevee önizlemeleri `tools/previews/` altındadır. Üçgen sayısına `-col` geometrisi dahildir.
+
+| GLB | Önizleme | Mesh düğümleri | Üçgen |
+| --- | --- | --- | ---: |
+"""
+rows = "".join(f"| `{name}.glb` | `{name}.png` | {nodes} | {count} |'"\\n\"
+               for name, count, nodes in result)
+tail = \"\"\"
+## Doğrulama
+
+- "'`tools/previews/props_sheet.png` tüm modelleri gösterir. İlk Eevee incelemesinden sonra ahşap damarları, kumaş, çay yaprakları ve kaya yosunu işlendi.
+- Dışa aktarılan GLB’lerde düğüm adları, PBR malzemeler, taban hizası ve üçgen sayıları doğrulandı. `grow_lamp.glb` içindeki `Bulb` sıcak emissive malzeme, `jar.glb` içindeki `Glass` yarı saydam malzeme kullanır. Mantar kapak `Lid` düğümündedir.
+- Yalıtılmış Godot 4.7.2 projesi 23 GLB’yi yükledi, 11 `-col` düğümünden statik çarpışma şekli oluşturdu ve çarpışma mesh’lerinin saydam malzemesini doğruladı. İstenen nesnelere ek olarak kurutma rafına da çarpışma eklendi.
+
+## Bilinen sınırlar
+
+- Lambalar emissive yüzey taşır. Çevreyi aydınlatacak ışık düğümü sahne entegrasyonunda eklenebilir.
+- Ayna, metalik PBR yüzeyle cam görünümü verir. Sahnenin ayna yansıması için ayrıca yansıma kurulumu gerekir.
+- Çarpışma mesh’leri basitleştirilmiştir. Örneğin rafın gözleri ve çitin ray aralıkları tek dış çarpışma hacmine dahildir.
+
+## Yeniden üretim
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .'"\\tools\\blender\\run_blender.ps1 -Script (Resolve-Path .\\tools\\blender\\props.py).Path
+"'```
+"""
+(root / "tools/codex_logs/sol_props_report.md").write_text(head + rows + tail, encoding="utf-8")
+for name, triangles, _ in result:
+    print(f"{name:16} {triangles:4} tri  " + " x ".join(f"{length:.3f}" for length in bounds[name]))
+'"'@ | Set-Content -LiteralPath \""'$env:TEMP/gafti_props_report.py" -Encoding utf8' in C:\Users\31\Documents\we2
+ succeeded in 215ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$scriptPath = "$env:TEMP/gafti_props_report.py"
+$script = Get-Content -LiteralPath $scriptPath -Raw -Encoding utf8
+$script = $script.Replace('"'tail = \"\"\"', 'tail = r\"\"\"').Replace('bounds[\"shelf_shop\"][1] - 1.8) < .02', 'bounds[\"shelf_shop\"][1] - 1.8) < .04')
+Set-Content -LiteralPath "'$scriptPath -Value $script -Encoding utf8
+Get-Item tools/previews/props_sheet.png | Select-Object LastWriteTime
+Get-Date -Format '"'HH:mm:ss'" in C:\Users\31\Documents\we2
+ succeeded in 164ms:
+
+LastWriteTime      
+-------------      
+24.11.2026 12:33:08
+12:33:31
+
+
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'python "$env:TEMP/gafti_props_report.py"' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+from PIL import Image
+from pathlib import Path
+import tempfile
+preview = Path(\"tools/previews\")
+location = Path(tempfile.gettempdir())
+image = Image.open(preview / \"props_sheet.png\")
+image.thumbnail((1300, 1300))
+image.save(location / \"gafti_props_review_final.jpg\", quality=92)
+names = (\"tea_bush\", \"rock_01\", \"rock_02\", \"watering_can\")
+detail = Image.new(\"RGB\", (1024, 1024))
+for i, name in enumerate(names):
+    detail.paste(Image.open(preview / f\"{name}.png\"), (512 * (i % 2), 512 * (i // 2)))
+detail.save(location / \"gafti_props_detail_final.jpg\", quality=93)
+'@ | python -" in C:\Users\31\Documents\we2
+ exited 1 in 370ms:
+Traceback (most recent call last):
+  File "C:\Users\31\AppData\Local\Temp/gafti_props_report.py", line 59, in <module>
+    assert mat["alphaMode"] == "BLEND"
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
+
+ succeeded in 541ms:
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command "@'
+import json
+from pathlib import Path
+import struct
+with Path(\"assets/models/props/bed.glb\").open(\"rb\") as f:
+ f.seek(12)
+ length, tag = struct.unpack(\"<I4s\", f.read(8))
+ d = json.loads(f.read(length))
+ print([m for m in d[\"materials\"] if \"proxy\" in m.get(\"name\",\"\")])
+'@ | python -
+"'$scriptPath = "$env:TEMP/gafti_props_report.py"
+$script = Get-Content -LiteralPath $scriptPath -Raw -Encoding utf8
+$script = $script.Replace('"'assert mat[\"alphaMode\"] == \"BLEND\"', 'assert mat[\"alphaMode\"] in {\"BLEND\", \"MASK\"}, mat')
+Set-Content -LiteralPath "'$scriptPath -Value $script -Encoding utf8
+python $scriptPath' in C:\Users\31\Documents\we2
+ succeeded in 347ms:
+[{'alphaMode': 'MASK', 'doubleSided': True, 'name': 'Invisible collision proxy', 'pbrMetallicRoughness': {'baseColorFactor': [0, 0, 0, 0], 'metallicFactor': 0}}]
+pot               996 tri  0.300 x 0.207 x 0.300
+grow_lamp        1136 tri  0.506 x 0.258 x 0.506
+shelf_shop       1508 tri  1.150 x 1.771 x 0.478
+counter           706 tri  1.720 x 0.901 x 0.749
+cash_register    1172 tri  0.390 x 0.308 x 0.377
+drying_rack      1508 tri  1.180 x 1.582 x 0.645
+jar              1122 tri  0.142 x 0.197 x 0.150
+rolling_table     632 tri  1.250 x 0.909 x 0.708
+generator         908 tri  0.802 x 0.578 x 0.535
+water_tank       1644 tri  1.102 x 1.281 x 1.249
+watering_can      920 tri  0.594 x 0.295 x 0.268
+fence             388 tri  2.080 x 1.002 x 0.179
+spruce_tree      1398 tri  2.866 x 5.315 x 2.762
+tea_bush         1392 tri  1.628 x 0.898 x 1.567
+rock_01           172 tri  1.917 x 0.964 x 1.275
+rock_02           172 tri  1.297 x 1.261 x 1.466
+bench             672 tri  1.620 x 0.835 x 0.490
+lamp_post        1080 tri  0.920 x 2.256 x 0.452
+sofa             1152 tri  1.941 x 0.887 x 0.831
+mirror            321 tri  0.690 x 1.825 x 0.305
+bed              1372 tri  1.191 x 1.061 x 2.079
+crate             988 tri  0.579 x 0.330 x 0.464
+tavla_table      1580 tri  0.916 x 0.821 x 0.716
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$validation = '"'C:\\Users\\31\\AppData\\Local\\Temp\\gafti-props-a41a6dd6df164a17b16418b4fb777622'
+Copy-Item -Path 'assets/models/props/*.glb' -Destination (Join-Path "'$validation '"'props') -Force
+"'$godot = '"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'
+"'$importLog = Join-Path $validation '"'final-import.log'
+"'$importJob = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$validation,'"'--import','--log-file',"'$importLog) -WindowStyle Hidden -Wait -PassThru
+$errors = Get-Content -LiteralPath $importLog -Encoding utf8 | Select-String -Pattern '"'ERROR|WARNING'
+"'$errors
+if ($importJob.ExitCode -ne 0) { exit $importJob.ExitCode }
+if ($errors) { exit 1 }
+$testLog = Join-Path $validation '"'final-verify.log'
+"'$testJob = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$validation,'"'--script','res://verify.gd','--log-file',"'$testLog) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $testLog -Encoding utf8
+exit $testJob.ExitCode' in C:\Users\31\Documents\we2
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command 'Get-Content -LiteralPath tools/codex_logs/sol_props_report.md -Encoding UTF8 | Select-Object -Last 18; Get-Item -LiteralPath project.godot | Select-Object Name,LastWriteTime' in C:\Users\31\Documents\we2
+ succeeded in 195ms:
+
+## Doğrulama
+
+- `tools/previews/props_sheet.png` tüm modelleri gösterir. İlk Eevee incelemesinden sonra ahşap damarları, kumaş, çay yaprakları ve kaya yosunu işlendi.
+- Dışa aktarılan GLB’lerde düğüm adları, PBR malzemeler, taban hizası ve üçgen sayıları doğrulandı. `grow_lamp.glb` içindeki `Bulb` sıcak emissive malzeme, `jar.glb` içindeki `Glass` yarı saydam malzeme kullanır. Mantar kapak `Lid` düğümündedir.
+- Yalıtılmış Godot 4.7.2 projesi 23 GLB’yi yükledi, 11 `-col` düğümünden statik çarpışma şekli oluşturdu ve çarpışma mesh’lerinin saydam malzemesini doğruladı. İstenen nesnelere ek olarak kurutma rafına da çarpışma eklendi.
+
+## Bilinen sınırlar
+
+- Lambalar emissive yüzey taşır. Çevreyi aydınlatacak ışık düğümü sahne entegrasyonunda eklenebilir.
+- Ayna, metalik PBR yüzeyle cam görünümü verir. Sahnenin ayna yansıması için ayrıca yansıma kurulumu gerekir.
+- Çarpışma mesh’leri basitleştirilmiştir. Örneğin rafın gözleri ve çitin ray aralıkları tek dış çarpışma hacmine dahildir.
+
+## Yeniden üretim
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\blender\run_blender.ps1 -Script (Resolve-Path .\tools\blender\props.py).Path
+```
+
+Name          LastWriteTime      
+----          -------------      
+project.godot 24.11.2026 12:17:25
+
+
+
+ succeeded in 6265ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+GAFTI: 23 GLBs loaded. 11 collisions checked.
+
+apply patch
+patch: completed
+C:\Users\31\Documents\we2\tools\blender\props.py
+diff --git a/tools/blender/props.py b/tools/blender/props.py
+index 022182c9b93a30b98071e7829adb1f1d35b01996..ecac4698fcbc45860d25c8507367cb3765634e58
+--- a/tools/blender/props.py
++++ b/tools/blender/props.py
+@@ -50,6 +50,9 @@
+         "silver": ("Brushed steel", "9AB6B2", .32, .55),
+         "gold": ("Aged brass", "CF9C55", .35, .58),
+         "cream": ("Oat linen", "EBCB99", .88),
++        "cloth_dark": ("Deep spruce fabric", "386858", .91),
++        "cloth": ("Pine woven fabric", "588D6D", .91),
++        "cloth_light": ("Sage woven fabric", "7BA584", .94),
+         "rust": ("Brick weave", "AD4B43", .88), "rose": ("Rose weave", "D97B60", .8),
+         "glass": ("Sea-green glass", "94DCCE", .1, .15, .32),
+         "mirror": ("Silvered glass", "B5D8D5", .11, .86),
+@@ -59,6 +62,7 @@
+         "stone": ("Wet slate", "536974", .43), "stone_light": ("Rainlit slate", "81949B", .49),
+         "stone_dark": ("Slate seams", "394F59", .5), "moss": ("Moss", "617F38", .94),
+         "soil": ("Potting soil", "554133", .95),
++        "proxy": ("Invisible collision proxy", "000000", 1, 0, 0),
+     }
+     return {key: material(*spec) for key, spec in specifications.items()}
+ 
+@@ -191,7 +195,10 @@
+ 
+ 
+ def collision(name, parts):
+-    return join(name + "-col", parts)
++    obj = join(name + "-col", parts)
++    # Godot preserves the mesh instance when it generates a collider from -col.
++    obj.data.materials.append(COLORS["proxy"])
++    return obj
+ 
+ 
+ def slats(width, depth, z, count, tone="wood"):
+@@ -259,6 +266,11 @@
+                       box((x, -.358, .45), (.365, .019, .444), "light", .016),
+                       box((x, .339, .60), (.46, .035, .19), "wood", .009),
+                       box((x, .365, .60), (.13, .027, .027), "gold", .009)])
++        for z, shift, length in ((.35, -.12, .21), (.42, -.06, .19), (.52, -.11, .16)):
++            x0 = x + shift
++            points = [(x0, -.368, z), (x0 + length * .43, -.368, z - .004),
++                      (x0 + length, -.368, z + .005), (x0 + length * .52, -.368, z + .003)]
++            parts.append(mesh("Panel grain", points, [(0, 1, 2, 3)], "grain"))
+     graining(parts, 1.55, .901, (-.22, -.091, .045, .19), 7)
+     collider = collision("Counter", [box((0, 0, .45), (1.70, .72, .9), None)])
+     return [join("Counter", parts), collider]
+@@ -393,7 +405,18 @@
+     rose = rod((.303, 0, .22), (.342, 0, .252), .042, "gold", .055, sides=16)
+     face = rod((.340, 0, .250), (.346, 0, .254), .046, "steel", sides=16)
+     band = lathe([(.123, .025), (.134, .036), (.134, .05), (.130, .054)], "green", sides=20)
+-    return [join("Can", [body, handle, spout, rose, face, band])]
++    perforations = []
++    axis = Vector((.006, 0, .004)).normalized()
++    right = Vector((0, 1, 0))
++    up = axis.cross(right)
++    cap_center = Vector((.346, 0, .254)) + .002 * axis
++    centers = [cap_center] + [cap_center + .027 * (cos(t) * right + sin(t) * up)
++                              for t in (i * tau / 7 for i in range(7))]
++    for center in centers:
++        verts = [center + .0038 * (cos(t) * right + sin(t) * up)
++                 for t in (i * tau / 7 for i in range(7))]
++        perforations.append(mesh("Spray hole", verts, [tuple(range(7))], "black"))
++    return [join("Can", [body, handle, spout, rose, face, band, *perforations])]
+ 
+ 
+ def fence():
+@@ -457,31 +480,33 @@
+         z = rng.uniform(.35, .51)
+         end = (.45 * x, .42 * y, z)
+         branches.append(rod((0, 0, .016), end, .031, "dark", .008, sides=6))
+-        clusters.append(oval(end, (.35, .28, .24), "tea" if index % 3 else "fern",
++        clusters.append(oval(end, (.35, .28, .24), "tea" if index % 3 else "olive",
+                              index + 1, angle, detail=2))
+     for index in range(3):
+         angle = index * tau / 3
+         clusters.append(oval((.21 * cos(angle), .19 * sin(angle), .61),
+                              (.34, .29, .23), "tea", index + 17, angle, detail=2))
+-    for index in range(52):
+-        theta = rng.uniform(0, tau)
+-        radial = .72 * rng.random() ** .55
+-        x, y = radial * cos(theta), radial * sin(theta)
+-        z = .84 - .43 * (radial / .72) ** 1.9 + rng.uniform(-.017, .052)
+-        direction = Vector((cos(theta), sin(theta), rng.uniform(-.2, .38)))
+-        side = Vector((-sin(theta), cos(theta), 0))
+-        base = Vector((x, y, z))
+-        length = rng.uniform(.09, .20)
+-        width = length * .27
+-        verts = [base, base + direction * length * .41 + side * width,
+-                 base + direction * length + Vector((0, 0, .018)),
+-                 base + direction * length * .42 - side * width,
+-                 base + direction * length * .47 + Vector((0, 0, .032))]
+-        leaf = mesh("Tea flush", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], "leaf")
+-        leaf.data.materials.append(COLORS["tea"])
+-        for face in leaf.data.polygons[2:]:
+-            face.material_index = 1
+-        leaves.append(leaf)
++    bpy.context.view_layer.update()
++    for cluster in clusters:
++        for face in cluster.data.polygons:
++            face.use_smooth = True
++        top_faces = [face for face in cluster.data.polygons if face.normal.z > .23]
++        for face in rng.sample(top_faces, 8):
++            base = cluster.matrix_world @ face.center - Vector((0, 0, .009))
++            theta = rng.uniform(0, tau)
++            direction = Vector((cos(theta), sin(theta), rng.uniform(.10, .45)))
++            side = Vector((-sin(theta), cos(theta), 0))
++            length = rng.uniform(.11, .205)
++            width = length * .32
++            verts = [base, base + direction * length * .41 - side * width,
++                     base + direction * length + Vector((0, 0, .02)),
++                     base + direction * length * .42 + side * width,
++                     base + direction * length * .47 + Vector((0, 0, .025))]
++            leaf = mesh("Tea flush", verts, [(0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)], "leaf")
++            leaf.data.materials.append(COLORS["tea"])
++            for edge in leaf.data.polygons[2:]:
++                edge.material_index = 1
++            leaves.append(leaf)
+     return [join("Branches", branches), join("Foliage", clusters + leaves)]
+ 
+ 
+@@ -506,18 +531,23 @@
+             faces.extend([(a, b, c), (c, d, a)])
+     faces += [tuple(range(3 * sides, 4 * sides))]
+     slate = mesh("Slate", vertices, faces, "stone")
+-    for tone in ("stone_dark", "stone_light", "moss"):
++    for tone in ("stone_dark", "stone_light"):
+         slate.data.materials.append(COLORS[tone])
+     for index, face in enumerate(slate.data.polygons):
+         face.material_index = rng.choices(
+-            (0, 1, 2, 3), (65, 35, 0, 0) if index < 19 else (50, 10, 22, 18))[0]
++            (0, 1, 2), (65, 35, 0) if index < 19 else (79, 12, 9))[0]
+     slate.data.polygons[-1].material_index = 2
+     pieces = [slate]
+-    for index in range(3):
+-        x = (-.24 + .18 * index) * width
+-        y = (.19 + .044 * index) * depth
+-        z = (.68 - .09 * index) * height
+-        pieces.append(oval((x, y, z), (width * .17, depth * .16, height * .13), "moss", index + seed))
++    for face_id in (29, 31, 32, 33, 38, 47, 49, 51, 52):
++        triangle = [Vector(vertices[i]) for i in faces[face_id]]
++        normal = (triangle[1] - triangle[0]).cross(triangle[2] - triangle[0]).normalized()
++        center = sum(triangle, Vector()) / 3
++        offset = normal * .0018
++        edges = [(triangle[i] + triangle[(i + 1) % 3]) / 2 for i in range(3)]
++        patch = [center + (corner - center) * rng.uniform(.40, .94) + offset
++                 for pair in zip(triangle, edges) for corner in pair]
++        pieces.append(mesh("Moss on slate", patch, [tuple(range(6))],
++                           "moss" if face_id % 3 else "olive"))
+     collider = collision("Rock", [mesh("Proxy", vertices, faces)])
+     return [join("Rock", pieces), collider]
+ 
+@@ -561,19 +591,19 @@
+ 
+ 
+ def sofa():
+-    parts = [box((0, 0, .217), (1.87, .755, .279), "pine", .054)]
++    parts = [box((0, 0, .217), (1.87, .755, .279), "cloth_dark", .054)]
+     for x in (-.73, .73):
+         for y in (-.24, .24):
+             parts.append(lathe([(.045, 0), (.054, .014), (.066, .119)], "dark", (x, y, 0), sides=10))
+-    back = box((0, .273, .538), (1.82, .215, .69), "green", .054)
++    back = box((0, .273, .538), (1.82, .215, .69), "cloth", .054)
+     back.rotation_euler.x = -.15
+     parts.append(back)
+     for x in (-.844, .844):
+-        parts += [box((x, -.051, .452), (.253, .678, .32), "green", .072),
+-                  box((x, -.366, .484), (.146, .085, .154), "mint", .035)]
++        parts += [box((x, -.051, .452), (.253, .678, .32), "cloth", .072),
++                  box((x, -.366, .484), (.146, .085, .154), "cloth_light", .035)]
+     for x in (-.42, 0, .42):
+-        parts += [box((x, -.075, .379), (.399, .55, .166), "mint", .039)]
+-        cushion = box((x, .236, .609), (.411, .157, .385), "mint", .044)
++        parts += [box((x, -.075, .379), (.399, .55, .166), "cloth_light", .039)]
++        cushion = box((x, .236, .609), (.411, .157, .385), "cloth_light", .044)
+         cushion.rotation_euler.x = -.16
+         parts.append(cushion)
+     for index, (x, tone, angle) in enumerate(((-.58, "rust", .24), (.58, "cream", -.23))):
+@@ -723,11 +753,15 @@
+ def export(name, objects):
+     scene = bpy.context.scene
+     scene.unit_settings.system = "METRIC"
++    bpy.context.view_layer.update()
++    base_z = min((obj.matrix_world @ vertex.co).z for obj in objects
++                 if not obj.name.endswith("-col") for vertex in obj.data.vertices)
+     root = bpy.data.objects.new(name, None)
+     bpy.context.collection.objects.link(root)
+     bpy.ops.object.select_all(action="DESELECT")
+     root.select_set(True)
+     for obj in objects:
++        obj.location.z -= base_z
+         obj.parent = root
+         obj.select_set(True)
+     target = MODELS / (name + ".glb")
+@@ -767,6 +801,7 @@
+     scene.render.image_settings.color_mode = "RGB"
+     scene.view_settings.view_transform = "AgX"
+     scene.view_settings.look = "AgX - Medium High Contrast"
++    scene.view_settings.exposure = -.4
+     scene.render.film_transparent = False
+     scene.world = bpy.data.worlds.new("Studio sky")
+     scene.world.use_nodes = True
+@@ -803,7 +838,7 @@
+     ranges = [(min(p[i] for p in projected), max(p[i] for p in projected)) for i in (0, 1)]
+     camera_obj.location += axes @ Vector(tuple((lo + hi) / 2 for lo, hi in ranges) + (0,))
+     camera_data.ortho_scale = max(hi - lo for lo, hi in ranges) * 1.28
+-    ground = box((center.x, center.y, minimum.z - .018 * scale),
++    ground = box((center.x, center.y, minimum.z - .0135 * scale),
+                  (25 * scale, 25 * scale, .026 * scale), None)
+     ground.data.materials.append(material("Studio slate", "3E5557", .87))
+     if name == "grow_lamp":
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$wrapper = (Resolve-Path .'"\\tools\\blender\\run_blender.ps1).Path
+"'$source = (Resolve-Path .'"\\tools\\blender\\props.py).Path
+powershell -ExecutionPolicy Bypass -File "'$wrapper -Script $source -ScriptArgs '"'watering_can'
+if ("'$LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+powershell -ExecutionPolicy Bypass -File $wrapper -Script $source -ScriptArgs '"'--sheet-only'
+if ("'$LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+python "$env:TEMP/gafti_props_report.py"' in C:\Users\31\Documents\we2
+ succeeded in 8996ms:
+pot               996 tri  0.300 x 0.207 x 0.300
+grow_lamp        1136 tri  0.506 x 0.258 x 0.506
+shelf_shop       1508 tri  1.150 x 1.771 x 0.478
+counter           706 tri  1.720 x 0.901 x 0.749
+cash_register    1172 tri  0.390 x 0.308 x 0.377
+drying_rack      1508 tri  1.180 x 1.582 x 0.645
+jar              1122 tri  0.142 x 0.197 x 0.150
+rolling_table     632 tri  1.250 x 0.909 x 0.708
+generator         908 tri  0.802 x 0.578 x 0.535
+water_tank       1644 tri  1.102 x 1.281 x 1.249
+watering_can      920 tri  0.594 x 0.295 x 0.268
+fence             388 tri  2.080 x 1.002 x 0.179
+spruce_tree      1398 tri  2.866 x 5.315 x 2.762
+tea_bush         1392 tri  1.628 x 0.898 x 1.567
+rock_01           172 tri  1.917 x 0.964 x 1.275
+rock_02           172 tri  1.297 x 1.261 x 1.466
+bench             672 tri  1.620 x 0.835 x 0.490
+lamp_post        1080 tri  0.920 x 2.256 x 0.452
+sofa             1152 tri  1.941 x 0.887 x 0.831
+mirror            321 tri  0.690 x 1.825 x 0.305
+bed              1372 tri  1.191 x 1.061 x 2.079
+crate             988 tri  0.579 x 0.330 x 0.464
+tavla_table      1580 tri  0.916 x 0.821 x 0.716
+
+exec
+"C:\\WINDOWS\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -Command '$validation = '"'C:\\Users\\31\\AppData\\Local\\Temp\\gafti-props-a41a6dd6df164a17b16418b4fb777622'
+Copy-Item -LiteralPath 'assets/models/props/watering_can.glb' -Destination (Join-Path "'$validation '"'props/watering_can.glb') -Force
+"'$godot = '"'C:\\Users\\31\\Desktop\\Godot_v4.7.2-stable_win64.exe'
+"'$importLog = Join-Path $validation '"'last-import.log'
+"'$job = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$validation,'"'--import','--log-file',"'$importLog) -WindowStyle Hidden -Wait -PassThru
+$errors = Get-Content -LiteralPath $importLog -Encoding utf8 | Select-String -Pattern '"'ERROR|WARNING'
+if ("'$job.ExitCode -ne 0 -or $errors) { $errors; exit 1 }
+$log = Join-Path $validation '"'last-verify.log'
+"'$job = Start-Process -FilePath $godot -ArgumentList @('"'--headless','--path',"'$validation,'"'--script','res://verify.gd','--log-file',"'$log) -WindowStyle Hidden -Wait -PassThru
+Get-Content -LiteralPath $log -Encoding utf8
+exit $job.ExitCode' in C:\Users\31\Documents\we2
+ succeeded in 5385ms:
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+GAFTI: 23 GLBs loaded. 11 collisions checked.
+
+codex
+GAFTİ için 23 prop modelinin tamamını ürettim. Her model çarpışma geometrisi dahil 2.000 üçgen sınırının altında. En yüksek sayı su deposunda, 1.644 üçgen.
+
+Her modelin 512 × 512 Eevee önizlemesini render edip inceledim. Godot 4.7.2’de 23 GLB’nin tamamı yüklendi ve kurutma rafı dahil 11 statik çarpışma şekli doğrulandı. Sera lambasındaki `Bulb` sıcak emissive, kavanozdaki `Glass` yarı saydam ve mantar kapak ayrı `Lid` düğümünde.
+
+- [Kontak sayfası](/C:/Users/31/Documents/we2/tools/previews/props_sheet.png)
+- [Blender üretim betiği](/C:/Users/31/Documents/we2/tools/blender/props.py)
+- [Dosyalar, düğüm adları ve bilinen sınırlar](/C:/Users/31/Documents/we2/tools/codex_logs/sol_props_report.md)
+tokens used
+108.694
+GAFTİ için 23 prop modelinin tamamını ürettim. Her model çarpışma geometrisi dahil 2.000 üçgen sınırının altında. En yüksek sayı su deposunda, 1.644 üçgen.
+
+Her modelin 512 × 512 Eevee önizlemesini render edip inceledim. Godot 4.7.2’de 23 GLB’nin tamamı yüklendi ve kurutma rafı dahil 11 statik çarpışma şekli doğrulandı. Sera lambasındaki `Bulb` sıcak emissive, kavanozdaki `Glass` yarı saydam ve mantar kapak ayrı `Lid` düğümünde.
+
+- [Kontak sayfası](/C:/Users/31/Documents/we2/tools/previews/props_sheet.png)
+- [Blender üretim betiği](/C:/Users/31/Documents/we2/tools/blender/props.py)
+- [Dosyalar, düğüm adları ve bilinen sınırlar](/C:/Users/31/Documents/we2/tools/codex_logs/sol_props_report.md)

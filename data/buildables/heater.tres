@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/buildable_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"heater"
+name_key = "BUILD_HEATER"
+description_key = "BUILD_HEATER_DESC"
+price = 300
+scene_path = ""
+model_path = "res://assets/models/props/heater.glb"
+size = Vector3(0.4, 0.7, 0.3)
+color = Color(0.8, 0.3, 0.2, 1)
+footprint = 0.3
+effect = &"heat"
+effect_radius = 3.0
+power_cost_per_day = 25
+min_license = 2

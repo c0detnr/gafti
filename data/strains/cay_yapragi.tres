@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="StrainData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/strain_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"cay_yapragi"
+name_key = "STRAIN_CAY_YAPRAGI"
+description_key = "STRAIN_CAY_YAPRAGI_DESC"
+yield_trait = 40.0
+speed = 80.0
+hardiness = 40.0
+aroma = 60.0
+quality_potential = 55.0
+leaf_tint = Color(0.5, 0.75, 0.3, 1)
+height_scale = 0.85
+ideal_temp_min = 20.0
+ideal_temp_max = 29.0
+ideal_humidity_min = 0.35
+ideal_humidity_max = 0.65
+light_need = 0.5
+seed_price = 45
+price_multiplier = 0.9
+rare_traits = Array[StringName]([])

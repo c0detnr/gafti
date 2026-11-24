@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="BuildableData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/systems/buildable_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"drip_irrigation"
+name_key = "BUILD_DRIP_IRRIGATION"
+description_key = "BUILD_DRIP_IRRIGATION_DESC"
+price = 180
+scene_path = ""
+model_path = "res://assets/models/props/drip_irrigation.glb"
+size = Vector3(0.3, 0.5, 0.3)
+color = Color(0.2, 0.4, 0.7, 1)
+footprint = 0.2
+effect = &"water"
+effect_radius = 1.5
+power_cost_per_day = 0
+min_license = 1

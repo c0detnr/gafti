@@ -1,0 +1,5 @@
+GAFTİ’nin [yazı logosu](C:/Users/31/Documents/we2/assets/logo/gafti_logo.svg), [uygulama ikonu](C:/Users/31/Documents/we2/assets/logo/icon.svg) ve [Godot teması](C:/Users/31/Documents/we2/assets/ui/gafti_theme.tres) hazır. Logo 1024 px genişliğinde, ikon 512 ve 192 px boyutlarında PNG olarak da kaydedildi.
+
+Logoyu açık ve koyu zeminde, ikonu 24 px’e kadar inen boyutlarda inceledim. Logonun koyu zemindeki dış konturunu belirginleştirdim. [Logo önizlemesi](C:/Users/31/Documents/we2/tools/previews/logo_wordmark.png) · [İkon önizlemesi](C:/Users/31/Documents/we2/tools/previews/logo_icon.png)
+
+Tema, Godot 4.7.2’de bağımsız bir test projesinde yüklendi. Boş düğmenin asgari yüksekliği **56 px** olarak ölçüldü. Başlıklardaki Baloo 2 ve gövde metnindeki Nunito için Türkçe karakter desteği doğrulandı. Ana menü ve fiziksel cihaz görünümü bu testin kapsamı dışındaydı. [Renk paleti](C:/Users/31/Documents/we2/assets/logo/README.md) · [Teslim raporu](C:/Users/31/Documents/we2/tools/codex_logs/astra_logo_report.md)

@@ -1,0 +1,130 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud/hud.tscn" id="2"]
+[ext_resource type="Script" path="res://tests/test_interactable.gd" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/stations/bed_station.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/stations/mirror_station.tscn" id="5"]
+
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.62, 0.72, 0.74, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.7, 0.75, 0.78, 1)
+fog_enabled = true
+fog_light_color = Color(0.7, 0.76, 0.76, 1)
+fog_density = 0.012
+
+[sub_resource type="BoxShape3D" id="GroundShape"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="BoxMesh" id="GroundMesh"]
+size = Vector3(80, 1, 80)
+
+[sub_resource type="StandardMaterial3D" id="GroundMat"]
+albedo_color = Color(0.32, 0.5, 0.27, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape"]
+size = Vector3(2, 2, 2)
+
+[sub_resource type="BoxMesh" id="BoxMesh"]
+size = Vector3(2, 2, 2)
+
+[sub_resource type="StandardMaterial3D" id="BoxMat"]
+albedo_color = Color(0.55, 0.4, 0.26, 1)
+
+[sub_resource type="BoxShape3D" id="RampShape"]
+size = Vector3(4, 0.4, 10)
+
+[sub_resource type="BoxMesh" id="RampMesh"]
+size = Vector3(4, 0.4, 10)
+
+[sub_resource type="BoxShape3D" id="TestAreaShape"]
+size = Vector3(2, 2, 2)
+
+[node name="TestPlayer" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.3536, 0.3536, 0, 0.7071, 0.7071, -0.5, -0.6124, 0.6124, 0, 10, 0)
+shadow_enabled = true
+
+[node name="Ground" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground"]
+shape = SubResource("GroundShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ground"]
+mesh = SubResource("GroundMesh")
+surface_material_override/0 = SubResource("GroundMat")
+
+[node name="Box1" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, -4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box1"]
+shape = SubResource("BoxShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Box1"]
+mesh = SubResource("BoxMesh")
+surface_material_override/0 = SubResource("BoxMat")
+
+[node name="Box2" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5, 1, -7)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box2"]
+shape = SubResource("BoxShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Box2"]
+mesh = SubResource("BoxMesh")
+surface_material_override/0 = SubResource("BoxMat")
+
+[node name="Box3" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.5, -10)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Box3"]
+shape = SubResource("BoxShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Box3"]
+mesh = SubResource("BoxMesh")
+surface_material_override/0 = SubResource("BoxMat")
+
+[node name="Ramp" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.9397, 0.342, 0, -0.342, 0.9397, -10, 1.5, 4)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ramp"]
+shape = SubResource("RampShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ramp"]
+mesh = SubResource("RampMesh")
+surface_material_override/0 = SubResource("BoxMat")
+
+[node name="TestInteractable" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -4)
+script = ExtResource("3")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="TestInteractable"]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, 0, 0.5, 0)
+mesh = SubResource("BoxMesh")
+
+[node name="Area3D" type="Area3D" parent="TestInteractable"]
+collision_layer = 8
+collision_mask = 0
+monitoring = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestInteractable/Area3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("TestAreaShape")
+
+[node name="BedStation" parent="." instance=ExtResource("4")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 4)
+
+[node name="MirrorStation" parent="." instance=ExtResource("5")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 6)
+
+[node name="Player" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+
+[node name="HUD" parent="." instance=ExtResource("2")]
